@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Section board</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./ui.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.col{width:244px;flex:none;align-self:flex-start;gap:4px}
+.tc{background:var(--background);border-radius:10px;box-shadow:0 1px 2px oklch(0 0 0 / 5%),0 0 0 1px oklch(0 0 0 / 6%);padding:10px 12px;display:flex;flex-direction:column;gap:8px;text-decoration:none;color:var(--foreground)}
+.tc.drag{transform:rotate(-2deg);box-shadow:0 18px 36px -10px oklch(0 0 0 / 30%),0 0 0 1px oklch(0 0 0 / 10%)}
+.drop{height:72px;border-radius:10px;border:1.5px dashed oklch(0.705 0.015 286.067)}
+</style>
+</helmet>
+<div class="app ui">
+  <aside class="sb" aria-label="Primary">
+    <div class="sb-head"><span class="logo"><span class="ic ic-layers"></span></span><div><div style="font-weight:600;line-height:18px">Workspace</div><div class="xs muted">Personal</div></div></div>
+    <a class="sb-item" href="Main.dc.html"><span class="ic ic-inbox"></span>My work<span class="badge badge-s" style="margin-left:auto;height:20px;background:#fff">10</span></a>
+    <a class="sb-item" href="Search.dc.html"><span class="ic ic-search"></span>Search<span class="kbd" style="margin-left:auto">⌘K</span></a>
+    <div class="sb-label">Projects</div>
+    <a class="sb-item" href="Project.dc.html"><span class="ic ic-folder"></span>Tracker<span class="ic s ic-chev-d" style="margin-left:auto"></span></a>
+    <div class="sb-sub">
+      <a class="sb-item" href="Project.dc.html">Overview</a>
+      <a class="sb-item" href="Section.dc.html">All tasks</a>
+      <a class="sb-item" href="Section.dc.html">Version 1.0</a>
+      <div class="sb-sub"><a class="sb-item on" href="Board.dc.html">Authentication</a><a class="sb-item" href="Section.dc.html">MCP</a></div>
+      <a class="sb-item" href="Section.dc.html">Backlog ideas</a>
+    </div>
+    <a class="sb-item" href="Project.dc.html"><span class="ic ic-folder"></span>Portfolio site<span class="ic s ic-chev-r" style="margin-left:auto"></span></a>
+    <div class="sb-foot">
+      <a class="sb-item" href="Settings.dc.html"><span class="ic ic-settings"></span>Settings</a>
+      <div class="row-flex" style="padding:8px"><span class="avatar">O</span><div><div class="sm" style="font-weight:500">Owner</div><div class="xs muted">Signed in with GitHub</div></div></div>
+    </div>
+  </aside>
+  <main class="inset">
+    <header class="hdr">
+      <button class="btn btn-g btn-icon btn-sm" aria-label="Toggle sidebar"><span class="ic ic-panel"></span></button>
+      <span class="vsep"></span>
+      <nav class="bc" aria-label="Breadcrumb"><a href="Project.dc.html">Tracker</a><span class="ic s ic-chev-r"></span><a href="Section.dc.html">Version 1.0</a><span class="ic s ic-chev-r"></span><b>Authentication</b></nav>
+      <span class="grow"></span>
+      <a class="btn btn-p" href="NewTask.dc.html"><span class="ic ic-plus"></span>New task</a>
+    </header>
+    <div style="padding:20px 24px 0;display:flex;flex-direction:column;gap:14px">
+      <div class="row-flex"><h1 class="title">Authentication</h1><span class="badge">Active</span><span class="grow"></span><button class="btn btn-o btn-sm"><span class="ic s ic-note"></span>Plan &amp; note</button></div>
+      <div class="row-flex">
+        <div class="tabs" role="tablist"><a class="tab" role="tab" href="Section.dc.html"><span class="ic s ic-list"></span>List</a><a class="tab on" role="tab" href="Board.dc.html"><span class="ic s ic-kanban"></span>Board</a></div>
+        <label class="row-flex sm" style="margin-left:4px"><input type="checkbox">Include subtasks</label>
+        <span class="grow"></span>
+        <button class="btn btn-o btn-sm"><span class="ic s ic-filter"></span>Filters</button>
+      </div>
+    </div>
+    <div style="flex:1;display:flex;gap:12px;padding:16px 24px;overflow:hidden">
+      <section class="grp col">
+        <div class="grp-h"><span class="st bk" aria-hidden="true"></span>Backlog<span class="muted" style="font-weight:400">2</span><span class="grow"></span><button class="btn btn-g btn-sm btn-icon" aria-label="Add to Backlog"><span class="ic s ic-plus"></span></button></div>
+        <a class="tc" href="Task.dc.html"><span class="mono">TRK-57</span><span>Rate-limit failed agent key attempts</span><span class="row-flex"><span class="badge">None</span></span></a>
+        <a class="tc" href="Task.dc.html"><span class="mono">TRK-58</span><span>Sign-out offers to discard local drafts</span><span class="row-flex"><span class="badge">Low</span></span></a>
+      </section>
+      <section class="grp col">
+        <div class="grp-h"><span class="st" aria-hidden="true"></span>Ready<span class="muted" style="font-weight:400">1</span><span class="grow"></span><button class="btn btn-g btn-sm btn-icon" aria-label="Add to Ready"><span class="ic s ic-plus"></span></button></div>
+        <a class="tc" href="Task.dc.html"><span class="mono">TRK-36</span><span>Session cookie hardening</span><span class="row-flex"><span class="badge">Medium</span><span class="mono" style="margin-left:auto">Nov 4</span></span></a>
+        <div class="drop" aria-hidden="true"></div>
+      </section>
+      <section class="grp col">
+        <div class="grp-h"><span class="st ip" aria-hidden="true"></span>In progress<span class="muted" style="font-weight:400">2</span><span class="grow"></span><button class="btn btn-g btn-sm btn-icon" aria-label="Add to In progress"><span class="ic s ic-plus"></span></button></div>
+        <a class="tc" href="Task.dc.html"><span class="row-flex"><span class="mono">TRK-50</span><span class="grow"></span><span class="xs muted">1/3 subtasks</span></span><span>Agent credentials and grants</span><span class="row-flex"><span class="badge">High</span><span class="badge badge-s"><span class="ic s ic-pr"></span>#21</span><span class="mono" style="margin-left:auto">Nov 6</span></span></a>
+        <a class="tc drag" href="Task.dc.html"><span class="row-flex"><span class="mono">TRK-41</span><span class="grow"></span><span class="badge badge-s"><span class="ic s ic-ban"></span>Blocked</span></span><span>Flush note autosave before navigation</span><span class="row-flex"><span class="badge">High</span><span class="mono" style="margin-left:auto;color:var(--foreground)">Overdue</span></span></a>
+      </section>
+      <section class="grp col">
+        <div class="grp-h"><span class="st rv" aria-hidden="true"></span>In review<span class="muted" style="font-weight:400">1</span><span class="grow"></span><button class="btn btn-g btn-sm btn-icon" aria-label="Add to In review"><span class="ic s ic-plus"></span></button></div>
+        <a class="tc" href="Task.dc.html"><span class="mono">TRK-33</span><span>GitHub sign-in with owner provisioning</span><span class="row-flex"><span class="badge badge-s"><span class="ic s ic-pr"></span>#18 merged</span></span></a>
+      </section>
+      <section class="grp col">
+        <div class="grp-h"><span class="st dn" aria-hidden="true"></span>Done<span class="muted" style="font-weight:400">7</span></div>
+        <a class="tc" href="Task.dc.html"><span class="mono">TRK-31</span><span class="muted">Better Auth base config</span></a>
+        <a class="tc" href="Task.dc.html"><span class="mono">TRK-32</span><span class="muted">Owner provisioning script</span></a>
+        <button class="btn btn-g btn-sm" style="justify-content:flex-start">Show 5 more</button>
+      </section>
+    </div>
+    <p class="muted sm" style="margin:0;padding:0 24px 16px">Every card also has Change status, Move to section and Move up/down in its menu.</p>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

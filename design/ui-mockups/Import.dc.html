@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Import GitHub issues</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./ui.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="stage ui">
+  <dc-import name="Project" hint-size="1440px,900px"></dc-import>
+  <div class="overlay" style="padding-top:72px">
+    <div class="dlg" role="dialog" aria-labelledby="im-t" style="width:720px">
+      <div class="dlg-h">
+        <h2 id="im-t" class="h2 row-flex"><span class="ic ic-github"></span>Import issues into Tracker</h2>
+        <p class="muted" style="margin:0">Title and body are copied once. Remote images aren’t fetched.</p>
+      </div>
+      <button class="btn btn-g btn-sm btn-icon dlg-x" aria-label="Close"><span class="ic s ic-x"></span></button>
+      <div class="dlg-c" style="display:flex;flex-direction:column;gap:12px">
+        <div class="row-flex">
+          <button class="btn btn-o" style="width:200px;justify-content:space-between">nsr/tracker<span class="ic s ic-chev-d"></span></button>
+          <label class="input" style="flex:1"><span class="ic s ic-search muted"></span><input aria-label="Filter open issues" placeholder="Filter open issues" style="border:0;outline:0;font:inherit;flex:1;background:transparent"></label>
+        </div>
+        <section class="grp">
+          <div class="grp-h">Open issues<span class="muted" style="font-weight:400">5</span><span class="grow"></span><span class="xs muted" style="font-weight:400">2 selected</span></div>
+          <div class="grp-b">
+            <label class="row"><input type="checkbox" checked><span class="mono">#42</span><span class="t">Search ignores label names</span><span class="xs muted">opened 2 days ago</span></label>
+            <label class="row"><input type="checkbox" checked><span class="mono">#40</span><span class="t">Dark mode contrast on chips</span><span class="xs muted">opened 4 days ago</span></label>
+            <label class="row"><input type="checkbox"><span class="mono">#37</span><span class="t">Export includes archived sections</span><span class="xs muted">opened last week</span></label>
+            <div class="row"><input type="checkbox" disabled aria-label="Issue 31 already imported"><span class="mono">#31</span><span class="t muted">Board drag loses position</span><span class="badge badge-s"><span class="ic s ic-archive"></span>TRK-39, archived</span><button class="btn btn-o btn-sm">Restore</button></div>
+            <div class="row"><input type="checkbox" disabled aria-label="Issue 29 already imported"><span class="mono">#29</span><span class="t muted">Note autosave retries forever</span><span class="badge badge-s">TRK-29</span><button class="btn btn-o btn-sm">Open existing</button></div>
+          </div>
+        </section>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+          <div><span class="label">Section</span><button class="btn btn-o" style="width:100%;justify-content:space-between">Project root<span class="ic s ic-chev-d"></span></button></div>
+          <div><span class="label">Status</span><button class="btn btn-o" style="width:100%;justify-content:space-between"><span class="row-flex"><span class="st bk" aria-hidden="true"></span>Backlog</span><span class="ic s ic-chev-d"></span></button></div>
+        </div>
+      </div>
+      <div class="dlg-f"><button class="btn btn-o">Cancel</button><button class="btn btn-p">Import 2 issues</button></div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

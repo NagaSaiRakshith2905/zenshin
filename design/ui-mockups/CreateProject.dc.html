@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Create project</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./ui.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="stage ui">
+  <dc-import name="Empty" hint-size="1440px,900px"></dc-import>
+  <div class="overlay" style="padding-top:140px">
+    <form class="dlg" role="dialog" aria-labelledby="cp-t" style="width: 540px; border-color: #FFFFFF1A">
+      <div class="dlg-h">
+        <h2 id="cp-t" class="h2">Create project</h2>
+        <p class="muted" style="margin:0">You can add sections and tasks next.</p>
+      </div>
+      <button class="btn btn-g btn-sm btn-icon dlg-x" type="button" aria-label="Close"><span class="ic s ic-x"></span></button>
+      <div class="dlg-c" style="display:flex;flex-direction:column;gap:18px">
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) 140px;gap:12px">
+          <div><label class="label" for="pn">Name</label><input id="pn" class="input" value="Tracker"></div>
+          <div><label class="label" for="pp">Prefix</label><input id="pp" class="input focus" value="TRK" style="font-family:'IBM Plex Mono',monospace"></div>
+        </div>
+        <div class="desc" style="margin-top:-10px">Tasks will be numbered TRK-1, TRK-2… The prefix can’t change after creation. Use 2–10 letters or digits, starting with a letter.</div>
+        <div><label class="label" for="pd">Description <span class="muted" style="font-weight:400">Optional</span></label><textarea id="pd" class="input" rows="3">Personal project dashboard with agent access.</textarea></div>
+      </div>
+      <div class="dlg-f"><button class="btn btn-o" type="button">Cancel</button><button class="btn btn-p" type="submit">Create project</button></div>
+    </form>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

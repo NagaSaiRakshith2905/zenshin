@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mobile My work</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./ui.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.m{width:390px;height:844px;display:flex;flex-direction:column;background:var(--background);overflow:hidden;position:relative;font-size:15px}
+.m .row{min-height:56px;align-items:flex-start;padding:12px}
+.m .st{margin-top:3px;width:16px;height:16px}
+.tb{position:absolute;left:0;right:0;bottom:0;height:84px;padding-bottom:30px;background:oklch(1 0 0 / 80%);backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);border-top:1px solid var(--border);display:flex}
+.tb a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;color:var(--muted-foreground);text-decoration:none}
+.tb a.on{color:var(--foreground);font-weight:600}
+</style>
+</helmet>
+<div class="m ui">
+  <div class="row-flex" style="padding:56px 16px 8px">
+    <h1 class="title grow" style="font-size:28px;line-height:34px">My work</h1>
+    <button class="btn btn-o btn-icon" style="width:44px;height:44px" aria-label="Filters"><span class="ic ic-filter"></span></button>
+  </div>
+  <div style="padding:4px 16px 12px"><div class="tabs" role="tablist" style="width:100%;height:36px"><button class="tab on" role="tab" style="flex:1;justify-content:center">All active</button><button class="tab" role="tab" style="flex:1;justify-content:center">Ready to work</button></div></div>
+  <div style="flex:1;overflow:hidden;padding:0 12px 100px;display:flex;flex-direction:column;gap:10px">
+    <sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+      <section class="{{g.cls}}">
+        <button class="grp-h" style="height:44px" onClick="{{g.toggle}}" aria-expanded="{{g.expanded}}"><span class="ic s chev ic-chev-d"></span>{{g.name}}<span class="muted" style="font-weight:400">{{g.count}}</span></button>
+        <div class="grp-b">
+          <sc-for list="{{g.rows}}" as="r" hint-placeholder-count="2">
+            <a class="row" href="MobileTask.dc.html">
+              <span class="st {{r.st}}" aria-hidden="true"></span>
+              <span class="grow"><span style="display:block">{{r.title}}</span><span class="row-flex xs muted" style="margin-top:4px"><span class="mono">{{r.ref}}</span>{{r.meta}}</span></span>
+            </a>
+          </sc-for>
+        </div>
+      </section>
+    </sc-for>
+  </div>
+  <a class="btn btn-p" href="MobileTask.dc.html" style="position:absolute;right:16px;bottom:100px;height:52px;padding:0 20px;border-radius:26px;box-shadow:0 10px 24px -6px oklch(0 0 0 / 35%)"><span class="ic ic-plus"></span>New task</a>
+  <nav class="tb" aria-label="Primary">
+    <a class="on" href="MobileWork.dc.html"><span class="ic ic-inbox"></span>My work</a>
+    <a href="MobileWork.dc.html"><span class="ic ic-folder"></span>Projects</a>
+    <a href="MobileWork.dc.html"><span class="ic ic-search"></span>Search</a>
+    <a href="MobileWork.dc.html"><span class="ic ic-settings"></span>Settings</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { closed: { review: true } }; }
+  renderVals() {
+    const closed = this.state.closed;
+    const groups = [
+      { id: 'overdue', name: 'Overdue', rows: [
+        { st: 'ip', ref: 'TRK-41', title: 'Flush note autosave before navigation', meta: 'Blocked · Oct 24' },
+        { st: '', ref: 'PF-7', title: 'Write case study for the tracker project', meta: 'Oct 26' } ] },
+      { id: 'progress', name: 'In progress', rows: [
+        { st: 'ip', ref: 'TRK-38', title: 'Revision checks for concurrent note writes', meta: 'Urgent · Oct 30' },
+        { st: 'ip', ref: 'TRK-52', title: 'Scope agent keys to project grants', meta: 'High · Nov 2' } ] },
+      { id: 'review', name: 'In review', rows: [
+        { st: 'rv', ref: 'TRK-33', title: 'GitHub sign-in with owner provisioning', meta: 'PR merged' } ] },
+    ];
+    return {
+      groups: groups.map((g) => ({
+        ...g,
+        count: g.rows.length,
+        cls: closed[g.id] ? 'grp closed' : 'grp',
+        expanded: closed[g.id] ? 'false' : 'true',
+        toggle: () => this.setState({ closed: { ...this.state.closed, [g.id]: !this.state.closed[g.id] } }),
+      })),
+    };
+  }
+}
+</script>
+</body>
+</html>

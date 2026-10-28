@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Section with task detail</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./ui.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="app ui">
+  <aside class="sb" aria-label="Primary">
+    <div class="sb-head"><span class="logo"><span class="ic ic-layers"></span></span><div><div style="font-weight:600;line-height:18px">Workspace</div><div class="xs muted">Personal</div></div></div>
+    <a class="sb-item" href="Main.dc.html"><span class="ic ic-inbox"></span>My work<span class="badge badge-s" style="margin-left:auto;height:20px;background:#fff">10</span></a>
+    <a class="sb-item" href="Search.dc.html"><span class="ic ic-search"></span>Search<span class="kbd" style="margin-left:auto">⌘K</span></a>
+    <div class="sb-label">Projects</div>
+    <a class="sb-item" href="Project.dc.html"><span class="ic ic-folder"></span>Tracker<span class="ic s ic-chev-d" style="margin-left:auto"></span></a>
+    <div class="sb-sub">
+      <a class="sb-item" href="Project.dc.html">Overview</a>
+      <a class="sb-item" href="Section.dc.html">All tasks</a>
+      <a class="sb-item" href="Section.dc.html">Version 1.0</a>
+      <div class="sb-sub"><a class="sb-item on" href="Section.dc.html">Authentication</a><a class="sb-item" href="Section.dc.html">MCP</a></div>
+      <a class="sb-item" href="Section.dc.html">Backlog ideas</a>
+    </div>
+    <a class="sb-item" href="Project.dc.html"><span class="ic ic-folder"></span>Portfolio site<span class="ic s ic-chev-r" style="margin-left:auto"></span></a>
+    <div class="sb-foot">
+      <a class="sb-item" href="Settings.dc.html"><span class="ic ic-settings"></span>Settings</a>
+      <div class="row-flex" style="padding:8px"><span class="avatar">O</span><div><div class="sm" style="font-weight:500">Owner</div><div class="xs muted">Signed in with GitHub</div></div></div>
+    </div>
+  </aside>
+  <main class="inset">
+    <header class="hdr">
+      <button class="btn btn-g btn-icon btn-sm" aria-label="Toggle sidebar"><span class="ic ic-panel"></span></button>
+      <span class="vsep"></span>
+      <nav class="bc" aria-label="Breadcrumb"><a href="Project.dc.html">Tracker</a><span class="ic s ic-chev-r"></span><a href="Section.dc.html">Version 1.0</a><span class="ic s ic-chev-r"></span><b>Authentication</b></nav>
+      <span class="grow"></span>
+      <a class="btn btn-p" href="NewTask.dc.html"><span class="ic ic-plus"></span>New task</a>
+    </header>
+    <div style="flex:1;display:flex;min-height:0">
+      <div style="flex:1;min-width:0;padding:20px 20px;display:flex;flex-direction:column;gap:14px;overflow:hidden">
+        <div class="row-flex"><h1 class="title">Authentication</h1><span class="badge">Active</span><span class="grow"></span><button class="btn btn-o btn-sm"><span class="ic s ic-note"></span>Plan &amp; note</button></div>
+        <div class="row-flex sm muted"><span class="ic s ic-cal"></span>Target Nov 8<span class="vsep"></span><span class="prog"><i style="width:70%"></i></span>7 of 10 done</div>
+        <div class="row-flex">
+          <div class="tabs" role="tablist"><a class="tab on" role="tab" href="Section.dc.html"><span class="ic s ic-list"></span>List</a><a class="tab" role="tab" href="Board.dc.html"><span class="ic s ic-kanban"></span>Board</a></div>
+          <label class="row-flex sm" style="margin-left:4px"><input type="checkbox">Include child sections</label>
+          <span class="grow"></span>
+          <button class="btn btn-o btn-sm btn-icon" aria-label="Filters"><span class="ic s ic-filter"></span></button>
+          <button class="btn btn-o btn-sm"><span class="ic s ic-sort"></span>Manual</button>
+        </div>
+        <sc-for list="{{groups}}" as="g" hint-placeholder-count="4">
+          <section class="{{g.cls}}">
+            <button class="grp-h" onClick="{{g.toggle}}" aria-expanded="{{g.expanded}}"><span class="ic s chev ic-chev-d"></span><span class="st {{g.st}}" aria-hidden="true"></span>{{g.name}}<span class="muted" style="font-weight:400">{{g.count}}</span></button>
+            <div class="grp-b">
+              <sc-for list="{{g.rows}}" as="r" hint-placeholder-count="2">
+                <div class="{{r.cls}}">
+                  <sc-if value="{{r.kids}}" hint-placeholder-val="{{ false }}"><button class="btn btn-g btn-icon" style="width:22px;height:22px;margin:0 -6px 0 -3px;border-radius:6px" onClick="{{r.toggle}}" aria-expanded="{{r.expanded}}" aria-label="{{r.toggleLabel}}"><span class="{{r.chev}}"></span></button></sc-if>
+                  <sc-if value="{{r.spacer}}" hint-placeholder-val="{{ true }}"><span style="width:13px;flex:none" aria-hidden="true"></span></sc-if>
+                  <span class="st {{r.st}}" aria-hidden="true"></span>
+                  <span class="mono" style="width:52px">{{r.ref}}</span>
+                  <a class="{{r.tcls}}" href="Task.dc.html" style="color:inherit;text-decoration:none">{{r.title}}</a>
+                  <span class="mono">{{r.meta}}</span>
+                  <sc-if value="{{r.prio}}" hint-placeholder-val="{{ true }}"><span class="badge">{{r.prio}}</span></sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+        </sc-for>
+      </div>
+      <aside style="width:520px;flex:none;border-left:1px solid var(--border);display:flex;flex-direction:column;position:relative" aria-label="Task detail">
+        <div class="row-flex" style="padding:12px 16px 0 20px">
+          <span class="mono">TRK-50</span><span class="grow"></span>
+          <a class="btn btn-g btn-sm btn-icon" href="Task.dc.html" aria-label="Open full page"><span class="ic s ic-expand"></span></a>
+          <button class="btn btn-g btn-sm btn-icon" aria-label="More actions"><span class="ic s ic-more"></span></button>
+          <button class="btn btn-g btn-sm btn-icon" aria-label="Close panel"><span class="ic s ic-x"></span></button>
+        </div>
+        <div style="padding:8px 20px 0"><h2 class="h2" style="font-size:18px;line-height:26px">Agent credentials and grants</h2>
+          <p class="muted sm" style="margin:4px 0 0">Owner creates project-scoped keys for local MCP clients.</p></div>
+        <div style="padding:16px 20px 0;flex:1;display:flex;flex-direction:column;gap:14px;overflow:hidden">
+          <dl class="props">
+            <dt><span class="ic s ic-activity"></span>Status</dt><dd><button class="btn btn-o btn-sm"><span class="st ip" aria-hidden="true"></span>In progress<span class="ic s ic-chev-d"></span></button></dd>
+            <dt><span class="ic s ic-sort"></span>Priority</dt><dd>High</dd>
+            <dt><span class="ic s ic-cal"></span>Due date</dt><dd>Nov 6</dd>
+            <dt><span class="ic s ic-tag"></span>Labels</dt><dd><span class="badge badge-s">security</span><span class="badge badge-s">mcp</span></dd>
+            <dt><span class="ic s ic-ban"></span>Blocked</dt><dd class="muted">Not blocked</dd>
+          </dl>
+          <button class="btn btn-g btn-sm muted" style="align-self:flex-start;margin:-10px 0 0 -10px"><span class="ic s ic-plus"></span>Add property</button>
+          <div class="sep"></div>
+          <div><div class="row-flex sm" style="font-weight:500;margin-bottom:6px">Note<span class="grow"></span><span class="muted xs" style="font-weight:400">Saved</span></div>
+            <p style="margin:0;font-size:15px;line-height:24px">Presets: read-only, contributor, maintainer. Archive and complete are opt-in. The secret is shown once.</p></div>
+          <section class="grp">
+            <div class="grp-h"><span class="ic s chev ic-chev-d"></span>Subtasks<span class="muted" style="font-weight:400">1 of 3</span><span class="grow"></span><button class="btn btn-g btn-sm btn-icon" aria-label="Add subtask"><span class="ic s ic-plus"></span></button></div>
+            <div class="grp-b">
+              <div class="row"><span class="st ip" aria-hidden="true"></span><span class="mono">TRK-52</span><span class="t">Scope agent keys to project grants</span></div>
+              <div class="row"><span class="st" aria-hidden="true"></span><span class="mono">TRK-53</span><span class="t">Key expiry and revocation</span></div>
+              <div class="row"><span class="st dn" aria-hidden="true"></span><span class="mono">TRK-51</span><span class="t done">Hash secrets at rest</span></div>
+            </div>
+          </section>
+          <section class="grp">
+            <div class="grp-h"><span class="ic s chev ic-chev-d"></span>GitHub</div>
+            <div class="grp-b"><div class="row"><span class="ic s ic-pr"></span><span class="t">#21 Add api_keys table</span><span class="badge badge-s">Open</span><span class="xs muted">Checks 3/4 · 2 min ago</span></div></div>
+          </section>
+        </div>
+        <div class="menu" role="menu" aria-label="Change status" style="top:182px;left:124px">
+          <div class="menu-l">Change status</div>
+          <div class="menu-i" role="menuitem"><span class="st bk" aria-hidden="true"></span>Backlog</div>
+          <div class="menu-i" role="menuitem"><span class="st" aria-hidden="true"></span>Ready</div>
+          <div class="menu-i on" role="menuitem"><span class="st ip" aria-hidden="true"></span>In progress<span class="ic s ic-check" style="margin-left:auto"></span></div>
+          <div class="menu-i" role="menuitem"><span class="st rv" aria-hidden="true"></span>In review</div>
+          <div class="menu-i" role="menuitem"><span class="st dn" aria-hidden="true"></span>Done</div>
+          <div class="menu-sep"></div>
+          <div class="menu-i" role="menuitem"><span class="st cn" aria-hidden="true"></span>Canceled</div>
+        </div>
+      </aside>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { closed: {}, open: { 'TRK-50': true, 'TRK-36': false } }; }
+  renderVals() {
+    const { closed, open } = this.state;
+    const groups = [
+      { id: 'ip', st: 'ip', name: 'In progress', rows: [
+        { st: 'ip', ref: 'TRK-50', title: 'Agent credentials and grants', meta: '1/3', prio: 'High', sel: true },
+        { st: 'ip', ref: 'TRK-52', title: 'Scope agent keys to project grants', prio: 'High', parent: 'TRK-50' },
+        { st: '', ref: 'TRK-53', title: 'Key expiry and revocation', prio: 'Medium', parent: 'TRK-50' },
+        { st: 'dn', ref: 'TRK-51', title: 'Hash secrets at rest', parent: 'TRK-50', done: true } ] },
+      { id: 'rv', st: 'rv', name: 'In review', rows: [
+        { st: 'rv', ref: 'TRK-33', title: 'GitHub sign-in with owner provisioning', meta: 'PR #18' } ] },
+      { id: 'rd', st: '', name: 'Ready', rows: [
+        { st: '', ref: 'TRK-36', title: 'Session cookie hardening', meta: '0/2', prio: 'Medium' },
+        { st: '', ref: 'TRK-45', title: 'Set SameSite=Lax on the session cookie', parent: 'TRK-36' },
+        { st: '', ref: 'TRK-46', title: 'Rotate session on privilege change', parent: 'TRK-36' } ] },
+      { id: 'bk', st: 'bk', name: 'Backlog', rows: [
+        { st: 'bk', ref: 'TRK-57', title: 'Rate-limit failed agent key attempts', prio: 'None' },
+        { st: 'bk', ref: 'TRK-58', title: 'Sign-out offers to discard local drafts', prio: 'Low' } ] },
+    ];
+    return {
+      groups: groups.map((g) => ({
+        ...g,
+        count: g.rows.length,
+        cls: closed[g.id] ? 'grp closed' : 'grp',
+        expanded: closed[g.id] ? 'false' : 'true',
+        rows: g.rows.filter((r) => !r.parent || open[r.parent]).map((r) => {
+          const kids = g.rows.some((c) => c.parent === r.ref);
+          return {
+            meta: '', prio: '', ...r,
+            kids, spacer: !kids,
+            expanded: open[r.ref] ? 'true' : 'false',
+            chev: open[r.ref] ? 'ic s ic-chev-d' : 'ic s ic-chev-r',
+            toggleLabel: (open[r.ref] ? 'Collapse' : 'Expand') + ' subtasks of ' + r.ref,
+            toggle: () => this.setState({ open: { ...this.state.open, [r.ref]: !this.state.open[r.ref] } }),
+            cls: 'row' + (r.parent ? ' sub' : '') + (r.sel ? ' sel' : ''),
+            tcls: r.done ? 't done' : 't',
+          };
+        }),
+        toggle: () => this.setState({ closed: { ...this.state.closed, [g.id]: !this.state.closed[g.id] } }),
+      })),
+    };
+  }
+}
+</script>
+</body>
+</html>

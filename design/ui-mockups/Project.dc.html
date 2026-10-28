@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Project overview</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./ui.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="app ui">
+  <aside class="sb" aria-label="Primary">
+    <div class="sb-head"><span class="logo"><span class="ic ic-layers"></span></span><div><div style="font-weight:600;line-height:18px">Workspace</div><div class="xs muted">Personal</div></div></div>
+    <a class="sb-item" href="Main.dc.html"><span class="ic ic-inbox"></span>My work<span class="badge badge-s" style="margin-left:auto;height:20px;background:#fff">10</span></a>
+    <a class="sb-item" href="Search.dc.html"><span class="ic ic-search"></span>Search<span class="kbd" style="margin-left:auto">⌘K</span></a>
+    <div class="sb-label">Projects</div>
+    <a class="sb-item" href="Project.dc.html"><span class="ic ic-folder"></span>Tracker<span class="ic s ic-chev-d" style="margin-left:auto"></span></a>
+    <div class="sb-sub">
+      <a class="sb-item on" href="Project.dc.html">Overview</a>
+      <a class="sb-item" href="Section.dc.html">All tasks</a>
+      <a class="sb-item" href="Section.dc.html">Version 1.0</a>
+      <div class="sb-sub"><a class="sb-item" href="Section.dc.html">Authentication</a><a class="sb-item" href="Section.dc.html">MCP</a></div>
+      <a class="sb-item" href="Section.dc.html">Backlog ideas</a>
+    </div>
+    <a class="sb-item" href="Project.dc.html"><span class="ic ic-folder"></span>Portfolio site<span class="ic s ic-chev-r" style="margin-left:auto"></span></a>
+    <div class="sb-foot">
+      <a class="sb-item" href="Settings.dc.html"><span class="ic ic-settings"></span>Settings</a>
+      <div class="row-flex" style="padding:8px"><span class="avatar">O</span><div><div class="sm" style="font-weight:500">Owner</div><div class="xs muted">Signed in with GitHub</div></div></div>
+    </div>
+  </aside>
+  <main class="inset">
+    <header class="hdr">
+      <button class="btn btn-g btn-icon btn-sm" aria-label="Toggle sidebar"><span class="ic ic-panel"></span></button>
+      <span class="vsep"></span>
+      <nav class="bc" aria-label="Breadcrumb"><a href="Project.dc.html">Tracker</a><span class="ic s ic-chev-r"></span><b>Overview</b></nav>
+      <span class="grow"></span>
+      <button class="btn btn-o"><span class="ic s ic-layers"></span>New section</button>
+      <a class="btn btn-p" href="NewTask.dc.html"><span class="ic ic-plus"></span>New task</a>
+      <button class="btn btn-g btn-icon" aria-label="More: Edit project, Import issues, Archive"><span class="ic ic-more"></span></button>
+    </header>
+    <div style="flex:1;overflow:hidden;padding:20px 24px;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-content:start">
+      <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+        <div><div class="row-flex"><span class="mono" style="font-size:13px">TRK</span><h1 class="title">Tracker</h1></div>
+          <p class="muted" style="margin:4px 0 0;font-size:15px;line-height:24px">Personal project dashboard with agent access. <a href="Section.dc.html" style="color:var(--foreground)">All tasks</a> · 64 tasks</p></div>
+        <section class="grp">
+          <div class="grp-h"><span class="ic s chev ic-chev-d"></span>Sections<span class="muted" style="font-weight:400">Planned and active</span></div>
+          <div class="grp-b">
+            <a class="row" href="Section.dc.html"><span class="ic s ic-hash"></span><span class="t" style="font-weight:500">Version 1.0</span><span class="badge">Active</span><span class="prog"><i style="width:46%"></i></span><span class="mono" style="width:44px">18/39</span><span class="mono" style="width:56px">Nov 30</span></a>
+            <a class="row sub" href="Section.dc.html"><span class="t">Authentication</span><span class="badge">Active</span><span class="prog"><i style="width:70%"></i></span><span class="mono" style="width:44px">7/10</span><span class="mono" style="width:56px">Nov 8</span></a>
+            <a class="row sub" href="Section.dc.html"><span class="t">MCP <span class="badge badge-s" style="margin-left:6px">1 unresolved parent</span></span><span class="badge">Active</span><span class="prog"><i style="width:30%"></i></span><span class="mono" style="width:44px">4/13</span><span class="mono" style="width:56px">Nov 20</span></a>
+            <a class="row sub" href="Section.dc.html"><span class="t">Files &amp; attachments</span><span class="badge badge-s">Planned</span><span class="prog"><i style="width:0"></i></span><span class="mono" style="width:44px">0/6</span><span class="mono" style="width:56px">—</span></a>
+            <a class="row" href="Section.dc.html"><span class="ic s ic-hash"></span><span class="t" style="font-weight:500">Version 1.1</span><span class="badge badge-s">Planned</span><span class="xs muted" style="width:96px">No tasks</span><span class="mono" style="width:44px"></span><span class="mono" style="width:56px">Jan 15</span></a>
+            <a class="row" href="Section.dc.html"><span class="ic s ic-hash"></span><span class="t" style="font-weight:500">Backlog ideas</span><span class="badge badge-s">Planned</span><span class="prog"><i style="width:0"></i></span><span class="mono" style="width:44px">0/21</span><span class="mono" style="width:56px">—</span></a>
+          </div>
+        </section>
+        <section class="grp">
+          <div class="grp-h"><span class="ic s chev ic-chev-d"></span>Project note<span class="grow"></span><span class="xs muted" style="font-weight:400">Saved</span><button class="btn btn-g btn-sm">History</button></div>
+          <div class="grp-b" style="padding:14px 18px">
+            <h3 style="margin:0 0 4px;font-size:15px;line-height:22px;font-weight:600">Goals</h3>
+            <ul style="margin:0 0 8px;padding-left:20px;font-size:15px;line-height:24px"><li>Plan versions as nested sections</li><li>Let local agents read context and send work to review</li></ul>
+            <p class="muted" style="margin:0;font-size:15px;line-height:24px">Write the next decision here…</p>
+          </div>
+        </section>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <section class="grp">
+          <div class="grp-h"><span class="ic s ic-cal"></span>Upcoming dates</div>
+          <div class="grp-b">
+            <div class="row"><span class="mono">TRK-41</span><span class="t">Flush note autosave…</span><span class="badge badge-p">Overdue</span></div>
+            <div class="row"><span class="mono">TRK-38</span><span class="t">Revision checks…</span><span class="mono">Oct 30</span></div>
+            <div class="row"><span class="ic s ic-hash muted"></span><span class="t">Authentication target</span><span class="mono">Nov 8</span></div>
+          </div>
+        </section>
+        <section class="grp">
+          <div class="grp-h"><span class="ic s ic-github"></span>Repositories<span class="grow"></span><a class="btn btn-g btn-sm" href="Settings.dc.html">Manage</a></div>
+          <div class="grp-b">
+            <div class="row"><span class="t">nsr/tracker</span><span class="xs muted">1 min ago</span></div>
+            <div class="row"><span class="t">nsr/tracker-mcp</span><span class="badge badge-s"><span class="ic s ic-alert"></span>Stale · 2 h</span><button class="btn btn-g btn-sm btn-icon" aria-label="Retry refresh"><span class="ic s ic-refresh"></span></button></div>
+          </div>
+        </section>
+        <section class="grp">
+          <div class="grp-h"><span class="ic s ic-clip"></span>Files<span class="grow"></span><button class="btn btn-g btn-sm"><span class="ic s ic-upload"></span>Upload</button></div>
+          <div class="grp-b"><div class="row"><span class="t">architecture-sketch.png</span><span class="mono">1.2 MB</span></div></div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

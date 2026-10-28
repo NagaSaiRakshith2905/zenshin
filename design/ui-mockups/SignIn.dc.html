@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sign in</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./ui.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="app ui" style="align-items:center;justify-content:center;background:var(--muted)">
+  <div style="width:400px;display:flex;flex-direction:column;gap:20px;align-items:center">
+    <div class="row-flex" style="gap:10px"><span class="logo"><span class="ic ic-layers"></span></span><span style="font-weight:600;font-size:16px">Workspace</span></div>
+    <section class="card" style="width:100%">
+      <div class="card-h" style="flex-direction:column;align-items:flex-start;gap:4px;padding:24px 24px 0">
+        <h1 class="h2" style="font-size:20px;line-height:28px">Sign in</h1>
+        <p class="muted" style="margin:0">Private workspace for the provisioned owner account.</p>
+      </div>
+      <div class="card-c" style="padding:20px 24px 24px;display:flex;flex-direction:column;gap:16px">
+        <a class="btn btn-p" href="Empty.dc.html" style="height:40px;width:100%"><span class="ic ic-github"></span>Continue with GitHub</a>
+        <div class="alert" role="alert"><span class="ic ic-alert" style="margin-top:2px"></span><div><b style="font-weight:600">This GitHub account isn’t the workspace owner.</b><div class="sm muted">Sign in with the provisioned account, or ask the operator to update provisioning.</div></div></div>
+      </div>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

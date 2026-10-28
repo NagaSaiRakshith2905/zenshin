@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>My work</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./ui.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="app ui">
+  <aside class="sb" aria-label="Primary">
+    <div class="sb-head"><span class="logo"><span class="ic ic-layers"></span></span><div><div style="font-weight:600;line-height:18px">Workspace</div><div class="xs muted">Personal</div></div></div>
+    <a class="sb-item on" href="Main.dc.html"><span class="ic ic-inbox"></span>My work<span class="badge badge-s" style="margin-left:auto;height:20px;background:#fff">10</span></a>
+    <a class="sb-item" href="Search.dc.html"><span class="ic ic-search"></span>Search<span class="kbd" style="margin-left:auto">⌘K</span></a>
+    <div class="sb-label">Projects</div>
+    <a class="sb-item" href="Project.dc.html"><span class="ic ic-folder"></span>Tracker<span class="ic s ic-chev-d" style="margin-left:auto"></span></a>
+    <div class="sb-sub">
+      <a class="sb-item" href="Project.dc.html">Overview</a>
+      <a class="sb-item" href="Section.dc.html">All tasks</a>
+      <a class="sb-item" href="Section.dc.html">Version 1.0</a>
+      <div class="sb-sub"><a class="sb-item" href="Section.dc.html">Authentication</a><a class="sb-item" href="Section.dc.html">MCP</a></div>
+      <a class="sb-item" href="Section.dc.html">Backlog ideas</a>
+    </div>
+    <a class="sb-item" href="Project.dc.html"><span class="ic ic-folder"></span>Portfolio site<span class="ic s ic-chev-r" style="margin-left:auto"></span></a>
+    <div class="sb-foot">
+      <a class="sb-item" href="Settings.dc.html"><span class="ic ic-settings"></span>Settings</a>
+      <div class="row-flex" style="padding:8px"><span class="avatar">O</span><div><div class="sm" style="font-weight:500">Owner</div><div class="xs muted">Signed in with GitHub</div></div></div>
+    </div>
+  </aside>
+  <main class="inset">
+    <header class="hdr">
+      <button class="btn btn-g btn-icon btn-sm" aria-label="Toggle sidebar"><span class="ic ic-panel"></span></button>
+      <span class="vsep"></span>
+      <nav class="bc" aria-label="Breadcrumb"><b>My work</b></nav>
+      <span class="grow"></span>
+      <a class="input" style="width:260px;text-decoration:none;color:var(--muted-foreground)" href="Search.dc.html"><span class="ic ic-search"></span>Search tasks<span class="kbd" style="margin-left:auto">⌘K</span></a>
+      <a class="btn btn-p" href="NewTask.dc.html"><span class="ic ic-plus"></span>New task</a>
+    </header>
+    <div style="flex:1;overflow:hidden;padding:20px 24px;display:flex;flex-direction:column;gap:16px">
+      <div class="row-flex">
+        <h1 class="title">My work</h1>
+        <span class="grow"></span>
+        <div class="tabs" role="tablist"><button class="tab on" role="tab">All active</button><button class="tab" role="tab">Ready to work</button></div>
+        <button class="btn btn-o btn-sm"><span class="ic s ic-folder"></span>All projects</button>
+        <button class="btn btn-o btn-sm"><span class="ic s ic-filter"></span>Filters</button>
+        <button class="btn btn-o btn-sm"><span class="ic s ic-sort"></span>Due date</button>
+      </div>
+      <sc-for list="{{groups}}" as="g" hint-placeholder-count="4">
+        <section class="{{g.cls}}">
+          <button class="grp-h" onClick="{{g.toggle}}" aria-expanded="{{g.expanded}}"><span class="ic s chev ic-chev-d"></span>{{g.name}}<span class="muted" style="font-weight:400">{{g.count}}</span></button>
+          <div class="grp-b">
+            <sc-for list="{{g.rows}}" as="r" hint-placeholder-count="2">
+              <a class="row" href="Section.dc.html">
+                <span class="st {{r.st}}" aria-hidden="true"></span>
+                <span class="mono" style="width:52px">{{r.ref}}</span>
+                <span class="t"><sc-if value="{{r.parent}}" hint-placeholder-val="{{ false }}"><span class="muted">{{r.parent}} › </span></sc-if>{{r.title}}</span>
+                <sc-for list="{{r.tags}}" as="b"><span class="badge badge-s"><span class="ic s {{b.ic}}"></span>{{b.l}}</span></sc-for>
+                <span class="{{r.pc}}">{{r.prio}}</span>
+                <span class="mono" style="width:48px;text-align:right">{{r.due}}</span>
+              </a>
+            </sc-for>
+          </div>
+        </section>
+      </sc-for>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { closed: { ready: true } }; }
+  renderVals() {
+    const closed = this.state.closed;
+    const groups = [
+      { id: 'overdue', name: 'Overdue', rows: [
+        { st: 'ip', ref: 'TRK-41', title: 'Flush note autosave before navigation', tags: [{ ic: 'ic-ban', l: 'Blocked by TRK-38' }], prio: 'High', due: 'Oct 24' },
+        { st: '', ref: 'PF-7', title: 'Write case study for the tracker project', tags: [], prio: 'Medium', due: 'Oct 26' } ] },
+      { id: 'progress', name: 'In progress', rows: [
+        { st: 'ip', ref: 'TRK-38', title: 'Revision checks for concurrent note writes', tags: [], prio: 'Urgent', due: 'Oct 30' },
+        { st: 'ip', ref: 'TRK-52', parent: 'TRK-50', title: 'Scope agent keys to project grants', tags: [], prio: 'High', due: 'Nov 2' },
+        { st: 'ip', ref: 'PF-3', title: 'Rebuild header navigation', tags: [], prio: 'Low', due: '—' } ] },
+      { id: 'review', name: 'In review', rows: [
+        { st: 'rv', ref: 'TRK-33', title: 'GitHub sign-in with owner provisioning', tags: [{ ic: 'ic-pr', l: 'PR #18 merged' }], prio: 'High', due: 'Oct 31' } ] },
+      { id: 'ready', name: 'Ready', rows: [
+        { st: '', ref: 'TRK-44', title: 'Presigned R2 upload with finalize step', tags: [], prio: 'Medium', due: 'Nov 6' },
+        { st: '', ref: 'TRK-47', title: 'Board view: include subtasks toggle', tags: [{ ic: 'ic-ban', l: 'Waiting on design review' }], prio: 'Low', due: '—' },
+        { st: '', ref: 'TRK-55', title: 'Export project as JSON archive', tags: [], prio: 'None', due: '—' },
+        { st: '', ref: 'PF-9', title: 'Compress hero images', tags: [], prio: 'Low', due: 'Nov 12' } ] },
+    ];
+    return {
+      groups: groups.map((g) => ({
+        ...g,
+        count: g.rows.length,
+        cls: closed[g.id] ? 'grp closed' : 'grp',
+        expanded: closed[g.id] ? 'false' : 'true',
+        rows: g.rows.map((r) => ({ parent: '', ...r, pc: r.prio === 'Urgent' ? 'badge badge-p' : 'badge' })),
+        toggle: () => this.setState({ closed: { ...this.state.closed, [g.id]: !this.state.closed[g.id] } }),
+      })),
+    };
+  }
+}
+</script>
+</body>
+</html>

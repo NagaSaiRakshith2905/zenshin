@@ -1,0 +1,263 @@
+[
+  {
+    "page": "02 Access and planning",
+    "file": "02-Access-and-planning.svg",
+    "screens": [
+      {
+        "id": "A01",
+        "title": "Owner sign-in",
+        "note": "Controlled provisioning; no public registration."
+      },
+      {
+        "id": "A02",
+        "title": "My work / first visit",
+        "note": "After sign-in; no sample tasks are inserted."
+      },
+      {
+        "id": "A03",
+        "title": "Create project",
+        "note": "Prefix: 2\u201310 uppercase letters/digits; starts with a letter; unique."
+      },
+      {
+        "id": "A04",
+        "title": "Project overview",
+        "note": "Progress excludes canceled / archived leaves; overview owns its own note."
+      },
+      {
+        "id": "A05",
+        "title": "Create section",
+        "note": "Invalid nesting explains the depth limit and leaves the form intact."
+      },
+      {
+        "id": "A06",
+        "title": "Section / direct tasks",
+        "note": "Direct tasks by default; subtree inclusion is explicit and shareable."
+      },
+      {
+        "id": "A07",
+        "title": "Section / plan",
+        "note": "Lifecycle changes are explicit; completing tasks does not complete a section."
+      },
+      {
+        "id": "A08",
+        "title": "Edit project",
+        "note": "Archive is a separate labeled action in the project menu."
+      }
+    ]
+  },
+  {
+    "page": "03 Work and execution",
+    "file": "03-Work-and-execution.svg",
+    "screens": [
+      {
+        "id": "E01",
+        "title": "My work",
+        "note": "Non-overlapping groups: overdue first, then status. Blocked work stays visible."
+      },
+      {
+        "id": "E02",
+        "title": "All tasks / list",
+        "note": "Filters and view selection remain in URL state; sorting does not rewrite ranks."
+      },
+      {
+        "id": "E03",
+        "title": "All tasks / board",
+        "note": "Column order follows workflow. Drag changes status; menu alternative remains available."
+      },
+      {
+        "id": "E04",
+        "title": "Task detail / side panel",
+        "note": "Desktop \u22651440 inline; 1024\u20131439 overlay. Back restores the list state."
+      },
+      {
+        "id": "E05",
+        "title": "Task / full page",
+        "note": "Open full page for long notes and stable deep links. Activity and integrations continue below."
+      },
+      {
+        "id": "E06",
+        "title": "Create task",
+        "note": "Optional properties: due date, labels, description, parent task. C opens outside editors."
+      },
+      {
+        "id": "E07",
+        "title": "Task / links, files and activity",
+        "note": "An integration outage preserves local task content and shows cached freshness."
+      },
+      {
+        "id": "E08",
+        "title": "Move / organize task",
+        "note": "Move carries subtasks; cannot move between projects or add a third task level."
+      }
+    ]
+  },
+  {
+    "page": "04 Search notes and files",
+    "file": "04-Search-notes-and-files.svg",
+    "screens": [
+      {
+        "id": "C01",
+        "title": "Global search",
+        "note": "Title, description, note text, reference and labels; no attachment-content search."
+      },
+      {
+        "id": "C02",
+        "title": "Filters and sort",
+        "note": "Ready to work = Ready with no manual or dependency blocker."
+      },
+      {
+        "id": "C03",
+        "title": "Search / no results",
+        "note": "Empty results retain query and current filter context."
+      },
+      {
+        "id": "C04",
+        "title": "Note history / preview",
+        "note": "Project, section and task notes share the same history pattern."
+      },
+      {
+        "id": "C05",
+        "title": "Attachments / transfer states",
+        "note": "Attachments belong to project / section / task; notes link only ready files."
+      },
+      {
+        "id": "C06",
+        "title": "Note editor / long document",
+        "note": "Formatting stays within the supported structured note schema."
+      }
+    ]
+  },
+  {
+    "page": "05 Settings and integrations",
+    "file": "05-Settings-and-integrations.svg",
+    "screens": [
+      {
+        "id": "S01",
+        "title": "Settings / general",
+        "note": "Light and dark share the same hierarchy; explicit theme override persists."
+      },
+      {
+        "id": "S02",
+        "title": "Project workflow",
+        "note": "Custom labels map to canonical categories used by browser and MCP."
+      },
+      {
+        "id": "S03",
+        "title": "Project labels",
+        "note": "Label names max 40 characters; search includes label names."
+      },
+      {
+        "id": "S04",
+        "title": "Repositories and PR rules",
+        "note": "Read-only GitHub App. Rules never mark Done or regress task status."
+      },
+      {
+        "id": "S05",
+        "title": "Import GitHub issue",
+        "note": "Copies title and body once; provenance and per-project deduplication survive unlinking."
+      },
+      {
+        "id": "S06",
+        "title": "Agent credentials",
+        "note": "Secrets are shown once; revoke cuts access. No OAuth MCP discovery in V1."
+      },
+      {
+        "id": "S07",
+        "title": "Create agent credential",
+        "note": "Next: show secret once with Copy and explicit storage instruction."
+      },
+      {
+        "id": "S08",
+        "title": "Credential / shown once",
+        "note": "Wireframe contains no real secret. Creation must verify explicit grants."
+      },
+      {
+        "id": "S09",
+        "title": "Integration health and exports",
+        "note": "Exports are owner-only. Restore operations require tested operational recovery."
+      }
+    ]
+  },
+  {
+    "page": "06 Recovery and safeguards",
+    "file": "06-Recovery-and-safeguards.svg",
+    "screens": [
+      {
+        "id": "R01",
+        "title": "Complete parent task",
+        "note": "Keep parent open is the cancel choice. Transition remaining nonterminal subtasks atomically."
+      },
+      {
+        "id": "R02",
+        "title": "Reopen completed sections",
+        "note": "No work is added until all affected completed ancestors are explicitly reopened."
+      },
+      {
+        "id": "R03",
+        "title": "Archive work",
+        "note": "Archive is reversible. It leaves statuses, notes and dependency links intact."
+      },
+      {
+        "id": "R05",
+        "title": "Permanently delete archived work",
+        "note": "Remove external dependencies first; owner only. Backup retention can last 30 days."
+      },
+      {
+        "id": "R04",
+        "title": "Archived work / restore",
+        "note": "Archive state is independent from status and section lifecycle."
+      },
+      {
+        "id": "R06",
+        "title": "Note conflict / compare",
+        "note": "Applies to autosave conflicts and recovered drafts; retain attempted edits on failure."
+      },
+      {
+        "id": "R07",
+        "title": "Task controls / dependency validation",
+        "note": "Manual and computed blocking are independent. Canceled / archived prerequisites need resolution."
+      },
+      {
+        "id": "R08",
+        "title": "Sign out / draft recovery",
+        "note": "Never silently replace a newer server note with a recovered draft."
+      }
+    ]
+  },
+  {
+    "page": "07 Mobile",
+    "file": "07-Mobile.svg",
+    "screens": [
+      {
+        "id": "M01",
+        "title": "Mobile / My work",
+        "note": "390 \u00d7 844 viewport shown at actual size."
+      },
+      {
+        "id": "M02",
+        "title": "Mobile / navigation",
+        "note": "390 \u00d7 844 viewport shown at actual size."
+      },
+      {
+        "id": "M03",
+        "title": "Mobile / task detail",
+        "note": "390 \u00d7 844 viewport shown at actual size."
+      },
+      {
+        "id": "M04",
+        "title": "Mobile / create task",
+        "note": "390 \u00d7 844 viewport shown at actual size."
+      },
+      {
+        "id": "M05",
+        "title": "Mobile / section and board",
+        "note": "390 \u00d7 844 viewport shown at actual size."
+      },
+      {
+        "id": "M06",
+        "title": "Mobile / note and files",
+        "note": "390 \u00d7 844 viewport shown at actual size."
+      }
+    ]
+  }
+]

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Settings, agent key created</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./ui.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.set{display:flex;width:900px;height:620px}
+.set-nav{width:212px;flex:none;background:oklch(0.967 0.001 286.375 / 70%);border-right:1px solid var(--border);padding:12px 8px;display:flex;flex-direction:column;gap:1px}
+.set-main{flex:1;min-width:0;display:flex;flex-direction:column}
+</style>
+</helmet>
+<div class="stage ui">
+  <dc-import name="Main" hint-size="1440px,900px"></dc-import>
+  <div class="overlay" style="padding-top:140px">
+    <div class="dlg" role="dialog" aria-labelledby="k-t">
+      <div class="set">
+        <nav class="set-nav" aria-label="Settings sections">
+          <div class="sb-label" style="padding-top:4px">Workspace</div>
+          <a class="sb-item" href="Settings.dc.html"><span class="ic ic-user"></span>Preferences</a>
+          <a class="sb-item on" href="Keys.dc.html"><span class="ic ic-key"></span>Agent credentials</a>
+          <a class="sb-item" href="Delete.dc.html"><span class="ic ic-archive"></span>Archived work</a>
+          <a class="sb-item" href="Settings.dc.html"><span class="ic ic-download"></span>Exports</a>
+          <a class="sb-item" href="Settings.dc.html"><span class="ic ic-activity"></span>Integration health</a>
+          <div class="sb-label">Tracker</div>
+          <a class="sb-item" href="Settings.dc.html"><span class="ic ic-folder"></span>General</a>
+          <a class="sb-item" href="Settings.dc.html"><span class="ic ic-layers"></span>Workflow</a>
+          <a class="sb-item" href="Settings.dc.html"><span class="ic ic-tag"></span>Labels</a>
+          <a class="sb-item" href="Settings.dc.html"><span class="ic ic-github"></span>Repositories &amp; rules</a>
+        </nav>
+        <div class="set-main">
+          <div class="row-flex" style="height:52px;padding:0 12px 0 24px;border-bottom:1px solid var(--border)">
+            <b id="k-t" style="font-weight:500">Agent credentials</b>
+            <span class="grow"></span>
+            <button class="btn btn-p btn-sm"><span class="ic s ic-plus"></span>Create key</button>
+            <button class="btn btn-g btn-sm btn-icon" aria-label="Close settings"><span class="ic s ic-x"></span></button>
+          </div>
+          <div style="flex:1;overflow:hidden;padding:20px 24px;display:flex;flex-direction:column;gap:16px">
+            <div class="alert strong" role="status">
+              <span class="ic ic-key" style="margin-top:2px"></span>
+              <div class="grow" style="display:flex;flex-direction:column;gap:10px">
+                <div><b style="font-weight:600">Key created: desktop-agent</b><div class="sm muted">Copy this secret now. It won’t be shown again.</div></div>
+                <div class="row-flex"><span class="input" style="font-family:'IBM Plex Mono',monospace;font-size:13px;background:var(--muted)">trk_live_•••••••••••••••••••••••••••••</span><button class="btn btn-p btn-sm"><span class="ic s ic-copy"></span>Copy</button></div>
+                <div class="sm muted">Store it in your MCP client config or a password manager. Lost it? Revoke the key and create a new one.</div>
+                <div class="row-flex" style="flex-wrap:wrap;gap:6px"><span class="badge badge-s"><span class="ic s ic-folder"></span>Tracker</span><span class="badge badge-s">Contributor + complete</span><span class="badge badge-s"><span class="ic s ic-cal"></span>Expires Jan 26, 2027</span><span class="grow"></span><button class="btn btn-o btn-sm">I’ve stored it</button></div>
+              </div>
+            </div>
+            <section class="grp">
+              <div class="grp-h">Active keys<span class="muted" style="font-weight:400">2</span></div>
+              <div class="grp-b">
+                <div class="row"><span class="ic ic-key"></span><span class="t">desktop-agent<div class="xs muted">Tracker · Contributor + complete</div></span><span class="xs muted">Never used</span><button class="btn btn-o btn-sm">Revoke</button></div>
+                <div class="row"><span class="ic ic-key"></span><span class="t">laptop-claude<div class="xs muted">Tracker · Contributor</div></span><span class="xs muted">Used 3 min ago</span><button class="btn btn-o btn-sm">Revoke</button></div>
+              </div>
+            </section>
+            <section class="grp closed">
+              <div class="grp-h"><span class="ic s chev ic-chev-d"></span>Expired and revoked<span class="muted" style="font-weight:400">1</span></div>
+              <div class="grp-b"></div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

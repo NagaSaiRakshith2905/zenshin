@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>New task</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./ui.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="stage ui">
+  <dc-import name="Section" hint-size="1440px,900px"></dc-import>
+  <div class="overlay" style="padding-top:120px">
+    <form class="dlg" role="dialog" aria-labelledby="nt-t" style="width:600px">
+      <div class="dlg-h">
+        <nav class="bc sm" aria-label="Location"><span class="ic s ic-folder"></span>Tracker<span class="ic s ic-chev-r"></span>Version 1.0<span class="ic s ic-chev-r"></span><b>Authentication</b></nav>
+        <h2 id="nt-t" class="h2" style="margin-top:6px">New task</h2>
+      </div>
+      <button class="btn btn-g btn-sm btn-icon dlg-x" type="button" aria-label="Close"><span class="ic s ic-x"></span></button>
+      <div class="dlg-c" style="display:flex;flex-direction:column;gap:16px">
+        <div><label class="label" for="tt">Title</label><input id="tt" class="input focus" value="Rate-limit failed agent key attempts"></div>
+        <div><label class="label" for="td">Description <span class="muted" style="font-weight:400">Optional</span></label><textarea id="td" class="input" rows="3">Lock a key for 15 minutes after 10 failed attempts.</textarea></div>
+        <div class="row-flex" style="flex-wrap:wrap;gap:6px">
+          <button class="btn btn-o btn-sm" type="button"><span class="st bk" aria-hidden="true"></span>Backlog</button>
+          <button class="btn btn-o btn-sm" type="button"><span class="ic s ic-sort"></span>No priority</button>
+          <button class="btn btn-o btn-sm" type="button"><span class="ic s ic-cal"></span>Due date</button>
+          <button class="btn btn-o btn-sm" type="button"><span class="ic s ic-tag"></span>Labels</button>
+          <button class="btn btn-o btn-sm" type="button"><span class="ic s ic-layers"></span>Parent task</button>
+          <button class="btn btn-g btn-sm btn-icon" type="button" aria-label="More properties"><span class="ic s ic-more"></span></button>
+        </div>
+      </div>
+      <div class="dlg-f">
+        <label class="row-flex sm" style="margin-right:auto"><input type="checkbox">Create another</label>
+        <button class="btn btn-o" type="button">Cancel</button>
+        <button class="btn btn-p" type="submit">Create task<span class="kbd" style="background:oklch(1 0 0 / 15%);color:var(--primary-foreground)">⌘↵</span></button>
+      </div>
+    </form>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

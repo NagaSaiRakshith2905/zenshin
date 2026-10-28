@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Task full page</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./ui.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="app ui">
+  <aside class="sb" aria-label="Primary">
+    <div class="sb-head"><span class="logo"><span class="ic ic-layers"></span></span><div><div style="font-weight:600;line-height:18px">Workspace</div><div class="xs muted">Personal</div></div></div>
+    <a class="sb-item" href="Main.dc.html"><span class="ic ic-inbox"></span>My work<span class="badge badge-s" style="margin-left:auto;height:20px;background:#fff">10</span></a>
+    <a class="sb-item" href="Search.dc.html"><span class="ic ic-search"></span>Search<span class="kbd" style="margin-left:auto">⌘K</span></a>
+    <div class="sb-label">Projects</div>
+    <a class="sb-item" href="Project.dc.html"><span class="ic ic-folder"></span>Tracker<span class="ic s ic-chev-d" style="margin-left:auto"></span></a>
+    <div class="sb-sub">
+      <a class="sb-item" href="Project.dc.html">Overview</a>
+      <a class="sb-item" href="Section.dc.html">All tasks</a>
+      <a class="sb-item" href="Section.dc.html">Version 1.0</a>
+      <div class="sb-sub"><a class="sb-item on" href="Section.dc.html">Authentication</a><a class="sb-item" href="Section.dc.html">MCP</a></div>
+      <a class="sb-item" href="Section.dc.html">Backlog ideas</a>
+    </div>
+    <a class="sb-item" href="Project.dc.html"><span class="ic ic-folder"></span>Portfolio site<span class="ic s ic-chev-r" style="margin-left:auto"></span></a>
+    <div class="sb-foot">
+      <a class="sb-item" href="Settings.dc.html"><span class="ic ic-settings"></span>Settings</a>
+      <div class="row-flex" style="padding:8px"><span class="avatar">O</span><div><div class="sm" style="font-weight:500">Owner</div><div class="xs muted">Signed in with GitHub</div></div></div>
+    </div>
+  </aside>
+  <main class="inset">
+    <header class="hdr">
+      <a class="btn btn-g btn-icon btn-sm" href="Section.dc.html" aria-label="Back to Authentication"><span class="ic ic-chev-l"></span></a>
+      <span class="vsep"></span>
+      <nav class="bc" aria-label="Breadcrumb"><a href="Section.dc.html">Authentication</a><span class="ic s ic-chev-r"></span><a href="Section.dc.html"><span class="mono">TRK-50</span> Agent credentials and grants</a><span class="ic s ic-chev-r"></span><b class="mono" style="color:var(--foreground)">TRK-52</b></nav>
+      <span class="grow"></span>
+      <button class="btn btn-o btn-sm"><span class="st ip" aria-hidden="true"></span>In progress<span class="ic s ic-chev-d"></span></button>
+      <button class="btn btn-g btn-sm btn-icon" aria-label="More: Promote to task, Move, Archive"><span class="ic s ic-more"></span></button>
+    </header>
+    <div style="flex:1;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) 320px">
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:16px;min-width:0">
+        <div><h1 class="title">Scope agent keys to project grants</h1>
+          <p class="muted" style="margin:6px 0 0">Each key lists the projects it can read and write; tools reject anything outside them.</p></div>
+        <div class="alert strong" role="alert">
+          <span class="ic ic-alert" style="margin-top:2px"></span>
+          <div class="grow"><b style="font-weight:600">This note changed elsewhere.</b><div class="sm muted">laptop-claude saved revision 14 while you were editing. Your text is kept below.</div></div>
+          <button class="btn btn-o btn-sm">Compare</button><button class="btn btn-p btn-sm">Retry on latest</button><button class="btn btn-g btn-sm">Discard mine</button>
+        </div>
+        <section class="grp">
+          <div class="grp-h"><span class="ic s ic-note"></span>Note<span class="grow"></span><span class="badge badge-s">Conflict</span></div>
+          <div class="grp-b" style="padding:14px 18px;font-size:15px;line-height:24px">
+            <p style="margin:0 0 10px;max-width:72ch">Grants are stored per key and project. A key without a grant gets <code style="font-family:'IBM Plex Mono',monospace;font-size:13px;background:var(--muted);padding:1px 5px;border-radius:4px">not_found</code>, never a permission error, so it can’t learn which projects exist.</p>
+            <p style="margin:0;max-width:72ch">Open question: should archive permission imply complete? <span class="muted">Leaning no.</span></p>
+          </div>
+        </section>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+          <section class="grp">
+            <div class="grp-h"><span class="ic s ic-ban"></span>Dependencies</div>
+            <div class="grp-b">
+              <div class="row"><span class="xs muted" style="width:64px">Blocked by</span><span class="mono">TRK-38</span><span class="t">Revision checks</span><span class="st ip" aria-hidden="true"></span></div>
+              <div class="row"><span class="xs muted" style="width:64px">Blocks</span><span class="mono">TRK-60</span><span class="t">MCP write tools</span></div>
+            </div>
+          </section>
+          <section class="grp">
+            <div class="grp-h"><span class="ic s ic-clip"></span>Attachments<span class="grow"></span><button class="btn btn-g btn-sm btn-icon" aria-label="Upload file"><span class="ic s ic-upload"></span></button></div>
+            <div class="grp-b">
+              <div class="row"><span class="t">grants-matrix.pdf</span><span class="mono">312 KB</span><button class="btn btn-g btn-sm btn-icon" aria-label="Download grants-matrix.pdf"><span class="ic s ic-download"></span></button></div>
+              <div class="row"><span class="t">token-flow.png<div class="xs muted">Upload failed</div></span><button class="btn btn-o btn-sm">Retry</button><button class="btn btn-g btn-sm btn-icon" aria-label="Remove token-flow.png"><span class="ic s ic-x"></span></button></div>
+            </div>
+          </section>
+        </div>
+        <section class="grp closed">
+          <div class="grp-h"><span class="ic s chev ic-chev-d"></span>Activity<span class="muted" style="font-weight:400">12</span></div>
+          <div class="grp-b"></div>
+        </section>
+      </div>
+      <aside style="border-left:1px solid var(--border);padding:20px 20px;display:flex;flex-direction:column;gap:16px" aria-label="Properties">
+        <dl class="props">
+          <dt><span class="ic s ic-layers"></span>Parent</dt><dd><span class="mono" style="color:var(--foreground)">TRK-50</span></dd>
+          <dt><span class="ic s ic-hash"></span>Section</dt><dd>Authentication</dd>
+          <dt><span class="ic s ic-sort"></span>Priority</dt><dd>High</dd>
+          <dt><span class="ic s ic-cal"></span>Due date</dt><dd>Nov 2</dd>
+          <dt><span class="ic s ic-tag"></span>Labels</dt><dd><span class="badge badge-s">security</span></dd>
+          <dt><span class="ic s ic-ban"></span>Blocked</dt><dd>By TRK-38</dd>
+        </dl>
+        <button class="btn btn-g btn-sm muted" style="align-self:flex-start;margin:-12px 0 0 -10px"><span class="ic s ic-plus"></span>Add property</button>
+        <div class="sep"></div>
+        <section class="grp">
+          <div class="grp-h"><span class="ic s ic-github"></span>GitHub</div>
+          <div class="grp-b">
+            <div class="row"><span class="ic s ic-pr"></span><span class="t">#22 Grant checks in MCP</span><span class="badge badge-s">Draft</span></div>
+            <div class="row xs muted">Checks pending · refreshed 1 min ago</div>
+          </div>
+        </section>
+        <button class="btn btn-o btn-sm" style="align-self:flex-start"><span class="ic s ic-plus"></span>Link PR or issue</button>
+      </aside>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

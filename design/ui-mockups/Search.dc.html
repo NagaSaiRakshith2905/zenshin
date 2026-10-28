@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Search</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./ui.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.cmd-i{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:10px}
+.cmd-i.on{background:oklch(0 0 0 / 5%)}
+.cmd-g{font-size:12px;line-height:16px;font-weight:500;color:var(--muted-foreground);padding:10px 10px 4px}
+.snip{font-size:13px;line-height:18px;color:var(--muted-foreground)}
+mark{background:oklch(0.92 0.004 286.32);color:var(--foreground);border-radius:3px;padding:0 2px}
+</style>
+</helmet>
+<div class="stage ui">
+  <dc-import name="Main" hint-size="1440px,900px"></dc-import>
+  <div class="overlay" style="padding-top:96px">
+    <div class="dlg" role="dialog" aria-label="Search" style="width:640px">
+      <div class="row-flex" style="gap:10px;padding:0 16px;height:52px;border-bottom:1px solid var(--border)">
+        <span class="ic ic-search muted"></span>
+        <input aria-label="Search" value="autosave" style="flex:1;border:0;outline:0;background:transparent;font:inherit;font-size:15px;color:var(--foreground)">
+        <span class="kbd">Esc</span>
+      </div>
+      <div class="row-flex" style="padding:10px 14px;gap:6px;border-bottom:1px solid var(--border)">
+        <span class="badge badge-s"><span class="ic s ic-folder"></span>All projects</span><span class="badge badge-s">Any status</span><span class="badge badge-s"><span class="ic s ic-archive"></span>Archived excluded</span>
+        <span class="grow"></span><button class="btn btn-g btn-sm"><span class="ic s ic-filter"></span>Open in filters</button>
+      </div>
+      <div style="padding:6px">
+        <div class="cmd-g">Tasks</div>
+        <div class="cmd-i on"><span class="st ip" style="margin-top:3px" aria-hidden="true"></span><div class="grow"><div><span class="mono">TRK-41</span>  Flush note <mark>autosave</mark> before navigation</div><div class="snip">Tracker › Version 1.0 › Authentication</div></div><span class="kbd"><span class="ic s ic-enter"></span></span></div>
+        <div class="cmd-i"><span class="st dn" style="margin-top:3px" aria-hidden="true"></span><div class="grow"><div><span class="mono">TRK-29</span>  <mark>Autosave</mark> status indicator</div><div class="snip">Note: shows Saving, Saved, Failed or Conflict after <mark>autosave</mark> fires…</div></div></div>
+        <div class="cmd-g">Sections</div>
+        <div class="cmd-i"><span class="ic ic-hash muted" style="margin-top:2px"></span><div class="grow"><div>Notes &amp; editor</div><div class="snip">Tracker › Version 1.0 · description mentions <mark>autosave</mark> and drafts</div></div></div>
+        <div class="cmd-g">Projects</div>
+        <div class="cmd-i"><span class="ic ic-folder muted" style="margin-top:2px"></span><div class="grow"><div>Tracker</div><div class="snip">Project note: conflict handling for <mark>autosave</mark></div></div></div>
+      </div>
+      <div class="dlg-f" style="justify-content:flex-start;gap:16px;padding:10px 16px">
+        <span class="row-flex xs muted"><span class="kbd">↑</span><span class="kbd">↓</span>Navigate</span>
+        <span class="row-flex xs muted"><span class="kbd"><span class="ic s ic-enter"></span></span>Open</span>
+        <span class="row-flex xs muted"><span class="kbd">Esc</span>Close</span>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

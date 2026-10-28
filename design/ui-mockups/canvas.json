@@ -1,0 +1,240 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Board.dc.html": {
+      "h": 900,
+      "title": "Section — board",
+      "w": 1440,
+      "x": 3040,
+      "y": 2700
+    },
+    "CompleteParent.dc.html": {
+      "h": 900,
+      "title": "Complete parent",
+      "w": 1440,
+      "x": 1520,
+      "y": 4050
+    },
+    "CreateProject.dc.html": {
+      "h": 900,
+      "title": "Create project",
+      "w": 1440,
+      "x": 3040,
+      "y": 0
+    },
+    "Delete.dc.html": {
+      "h": 900,
+      "title": "Settings dialog — permanent delete",
+      "w": 1440,
+      "x": 3040,
+      "y": 5400
+    },
+    "Empty.dc.html": {
+      "h": 900,
+      "title": "My work — first access",
+      "w": 1440,
+      "x": 1520,
+      "y": 0
+    },
+    "Import.dc.html": {
+      "h": 900,
+      "title": "Import GitHub issue",
+      "w": 1440,
+      "x": 3040,
+      "y": 4050
+    },
+    "Keys.dc.html": {
+      "h": 900,
+      "title": "Settings dialog — agent key created",
+      "w": 1440,
+      "x": 1520,
+      "y": 5400
+    },
+    "Main.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "My work",
+      "w": 1440,
+      "x": 0,
+      "y": 1350
+    },
+    "MobileTask.dc.html": {
+      "h": 844,
+      "title": "Mobile — Task",
+      "w": 390,
+      "x": 470,
+      "y": 6750
+    },
+    "MobileWork.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "title": "Mobile — My work",
+      "w": 390,
+      "x": 0,
+      "y": 6750
+    },
+    "NewTask.dc.html": {
+      "h": 900,
+      "title": "New task",
+      "w": 1440,
+      "x": 3040,
+      "y": 1350
+    },
+    "Project.dc.html": {
+      "h": 900,
+      "title": "Project overview",
+      "w": 1440,
+      "x": 0,
+      "y": 2700
+    },
+    "Search.dc.html": {
+      "h": 900,
+      "title": "Search (⌘K)",
+      "w": 1440,
+      "x": 1520,
+      "y": 1350
+    },
+    "Section.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "Section — list + task detail",
+      "w": 1440,
+      "x": 1520,
+      "y": 2700
+    },
+    "Settings.dc.html": {
+      "h": 900,
+      "title": "Settings dialog — repositories & rules",
+      "w": 1440,
+      "x": 0,
+      "y": 5400
+    },
+    "SignIn.dc.html": {
+      "h": 900,
+      "title": "Sign in",
+      "w": 1440,
+      "x": 0,
+      "y": 0
+    },
+    "Task.dc.html": {
+      "h": 900,
+      "title": "Task — full page (subtask, note conflict)",
+      "w": 1440,
+      "x": 0,
+      "y": 4050
+    },
+    "ProjectDark.dc.html": {
+      "x": 0,
+      "y": 8100,
+      "w": 1440,
+      "h": 900,
+      "title": "Project overview — dark"
+    },
+    "SectionDark.dc.html": {
+      "x": 1520,
+      "y": 8100,
+      "w": 1440,
+      "h": 900,
+      "title": "Section — list + task detail, dark",
+      "is_interactive": true
+    },
+    "TaskDark.dc.html": {
+      "x": 3040,
+      "y": 8100,
+      "w": 1440,
+      "h": 900,
+      "title": "Task — full page, dark"
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-28T10:00:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "t0": {
+      "kind": "title1",
+      "maxW": 4480,
+      "text": "First access",
+      "w": 240,
+      "x": 0,
+      "y": -260
+    },
+    "t1": {
+      "kind": "title1",
+      "maxW": 4480,
+      "text": "Daily work",
+      "w": 240,
+      "x": 0,
+      "y": 1090
+    },
+    "t2": {
+      "kind": "title1",
+      "maxW": 4480,
+      "text": "Planning",
+      "w": 240,
+      "x": 0,
+      "y": 2440
+    },
+    "t3": {
+      "kind": "title1",
+      "maxW": 4480,
+      "text": "Task flows",
+      "w": 240,
+      "x": 0,
+      "y": 3790
+    },
+    "t4": {
+      "kind": "title1",
+      "maxW": 4480,
+      "text": "Settings & archive",
+      "w": 240,
+      "x": 0,
+      "y": 5140
+    },
+    "t5": {
+      "kind": "title1",
+      "maxW": 4480,
+      "text": "Mobile",
+      "w": 240,
+      "x": 0,
+      "y": 6490
+    },
+    "t6": {
+      "kind": "title1",
+      "maxW": 4480,
+      "text": "Dark mode",
+      "w": 240,
+      "x": 0,
+      "y": 7840
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Search.dc.html",
+    "NewTask.dc.html",
+    "SignIn.dc.html",
+    "Empty.dc.html",
+    "CreateProject.dc.html",
+    "Project.dc.html",
+    "Section.dc.html",
+    "Board.dc.html",
+    "Task.dc.html",
+    "CompleteParent.dc.html",
+    "Import.dc.html",
+    "Settings.dc.html",
+    "Keys.dc.html",
+    "Delete.dc.html",
+    "MobileWork.dc.html",
+    "MobileTask.dc.html",
+    "ProjectDark.dc.html",
+    "SectionDark.dc.html",
+    "TaskDark.dc.html"
+  ],
+  "pages": [],
+  "title": "Tracker UI"
+}

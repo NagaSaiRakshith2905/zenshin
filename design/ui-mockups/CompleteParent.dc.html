@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Complete parent task</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./ui.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="stage ui">
+  <dc-import name="Section" hint-size="1440px,900px"></dc-import>
+  <div class="overlay" style="padding-top:160px">
+    <div class="dlg" role="alertdialog" aria-labelledby="cp-t" aria-describedby="cp-d" style="width:520px">
+      <div class="dlg-h">
+        <h2 id="cp-t" class="h2">Mark TRK-50 Done?</h2>
+        <p id="cp-d" class="muted" style="margin:0">2 subtasks aren’t finished. Choose what happens to them.</p>
+      </div>
+      <div class="dlg-c">
+        <section class="grp">
+          <div class="grp-h">Affected subtasks<span class="muted" style="font-weight:400">3</span></div>
+          <div class="grp-b">
+            <div class="row"><span class="st ip" aria-hidden="true"></span><span class="mono">TRK-52</span><span class="t">Scope agent keys to project grants</span><span class="badge badge-s">In progress → Done</span></div>
+            <div class="row"><span class="st" aria-hidden="true"></span><span class="mono">TRK-53</span><span class="t">Key expiry and revocation</span><span class="badge badge-s">Ready → Done</span></div>
+            <div class="row"><span class="st cn" aria-hidden="true"></span><span class="mono">TRK-54</span><span class="t muted">Rotate keys automatically</span><span class="badge">Canceled, unchanged</span></div>
+          </div>
+        </section>
+      </div>
+      <div class="dlg-f">
+        <button class="btn btn-o" style="margin-right:auto">Cancel</button>
+        <button class="btn btn-o">Keep parent open</button>
+        <button class="btn btn-p"><span class="ic s ic-check"></span>Complete all</button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

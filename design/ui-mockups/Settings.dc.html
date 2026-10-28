@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Settings, repositories and rules</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./ui.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.set{display:flex;width:900px;height:620px}
+.set-nav{width:212px;flex:none;background:oklch(0.967 0.001 286.375 / 70%);border-right:1px solid var(--border);padding:12px 8px;display:flex;flex-direction:column;gap:1px}
+.set-main{flex:1;min-width:0;display:flex;flex-direction:column}
+</style>
+</helmet>
+<div class="stage ui">
+  <dc-import name="Main" hint-size="1440px,900px"></dc-import>
+  <div class="overlay" style="padding-top:140px">
+    <div class="dlg" role="dialog" aria-labelledby="st-t">
+      <div class="set">
+        <nav class="set-nav" aria-label="Settings sections">
+          <div class="sb-label" style="padding-top:4px">Workspace</div>
+          <a class="sb-item" href="Settings.dc.html"><span class="ic ic-user"></span>Preferences</a>
+          <a class="sb-item" href="Keys.dc.html"><span class="ic ic-key"></span>Agent credentials</a>
+          <a class="sb-item" href="Delete.dc.html"><span class="ic ic-archive"></span>Archived work</a>
+          <a class="sb-item" href="Settings.dc.html"><span class="ic ic-download"></span>Exports</a>
+          <a class="sb-item" href="Settings.dc.html"><span class="ic ic-activity"></span>Integration health</a>
+          <div class="sb-label">Tracker</div>
+          <a class="sb-item" href="Settings.dc.html"><span class="ic ic-folder"></span>General</a>
+          <a class="sb-item" href="Settings.dc.html"><span class="ic ic-layers"></span>Workflow</a>
+          <a class="sb-item" href="Settings.dc.html"><span class="ic ic-tag"></span>Labels</a>
+          <a class="sb-item on" href="Settings.dc.html"><span class="ic ic-github"></span>Repositories &amp; rules</a>
+        </nav>
+        <div class="set-main">
+          <div class="row-flex" style="height:52px;padding:0 12px 0 24px;border-bottom:1px solid var(--border)">
+            <nav class="bc" aria-label="Breadcrumb">Tracker<span class="ic s ic-chev-r"></span><b id="st-t">Repositories &amp; rules</b></nav>
+            <span class="grow"></span>
+            <button class="btn btn-g btn-sm btn-icon" aria-label="Close settings"><span class="ic s ic-x"></span></button>
+          </div>
+          <div style="flex:1;overflow:hidden;padding:20px 24px;display:flex;flex-direction:column;gap:16px">
+            <section class="grp">
+              <div class="grp-h">Connected repositories<span class="muted" style="font-weight:400">2</span><span class="grow"></span><button class="btn btn-g btn-sm"><span class="ic s ic-plus"></span>Connect</button></div>
+              <div class="grp-b">
+                <div class="row"><span class="ic ic-github"></span><span class="t">nsr/tracker</span><span class="xs muted">Refreshed 1 min ago</span><button class="btn btn-g btn-sm btn-icon" aria-label="Refresh nsr/tracker"><span class="ic s ic-refresh"></span></button><button class="btn btn-o btn-sm">Disconnect</button></div>
+                <div class="row"><span class="ic ic-alert"></span><span class="t">nsr/tracker-mcp<div class="xs muted">App access removed. Reinstall the GitHub App to resume.</div></span><button class="btn btn-p btn-sm">Reinstall</button></div>
+              </div>
+            </section>
+            <section class="grp">
+              <div class="grp-h">Pull request rules<span class="grow"></span><span class="xs muted" style="font-weight:400">Off by default · never marks Done</span></div>
+              <div class="grp-b">
+                <div class="row"><button class="sw on" role="switch" aria-checked="true" aria-label="PR opened rule"></button><span class="t">When a non-draft PR opens<div class="xs muted">Move Ready to In progress</div></span><button class="btn btn-o btn-sm"><span class="st ip" aria-hidden="true"></span>In progress<span class="ic s ic-chev-d"></span></button></div>
+                <div class="row"><button class="sw" role="switch" aria-checked="false" aria-label="All PRs merged rule"></button><span class="t">When all linked PRs are merged<div class="xs muted">Move In progress to In review</div></span><button class="btn btn-o btn-sm"><span class="st rv" aria-hidden="true"></span>In review<span class="ic s ic-chev-d"></span></button></div>
+              </div>
+            </section>
+            <p class="sm muted" style="margin:0">Turning on a rule sets a baseline. PRs already open or merged won’t move tasks.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

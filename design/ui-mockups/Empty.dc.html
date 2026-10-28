@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>My work, first access</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./ui.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="app ui">
+  <aside class="sb" aria-label="Primary">
+    <div class="sb-head"><span class="logo"><span class="ic ic-layers"></span></span><div><div style="font-weight:600;line-height:18px">Workspace</div><div class="xs muted">Personal</div></div></div>
+    <a class="sb-item on" href="Empty.dc.html"><span class="ic ic-inbox"></span>My work</a>
+    <a class="sb-item" href="Search.dc.html"><span class="ic ic-search"></span>Search<span class="kbd" style="margin-left:auto">⌘K</span></a>
+    <div class="sb-label">Projects</div>
+    <a class="sb-item muted" href="CreateProject.dc.html"><span class="ic ic-plus"></span>New project</a>
+    <div class="sb-foot">
+      <a class="sb-item" href="Settings.dc.html"><span class="ic ic-settings"></span>Settings</a>
+      <div class="row-flex" style="padding:8px"><span class="avatar">O</span><div><div class="sm" style="font-weight:500">Owner</div><div class="xs muted">Signed in with GitHub</div></div></div>
+    </div>
+  </aside>
+  <main class="inset">
+    <header class="hdr">
+      <button class="btn btn-g btn-icon btn-sm" aria-label="Toggle sidebar"><span class="ic ic-panel"></span></button>
+      <span class="vsep"></span>
+      <nav class="bc" aria-label="Breadcrumb"><b>My work</b></nav>
+    </header>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px">
+      <div style="width:420px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px">
+        <span class="empty-ic"><span class="ic l ic-folder"></span></span>
+        <div><h2 class="h2" style="font-size:18px;line-height:26px">Create your first project</h2>
+          <p class="muted" style="margin:6px 0 0">A project holds sections, tasks and notes. Work that’s overdue, in progress, in review or ready shows up here.</p></div>
+        <div class="row-flex"><a class="btn btn-p" href="CreateProject.dc.html"><span class="ic s ic-plus"></span>Create project</a></div>
+        <section class="grp" style="width:100%;text-align:left;margin-top:8px">
+          <div class="grp-h">Next steps</div>
+          <div class="grp-b">
+            <div class="row"><span class="st" aria-hidden="true"></span><span class="t">Create a project with a short prefix, like TRK</span></div>
+            <div class="row"><span class="st bk" aria-hidden="true"></span><span class="t muted">Add sections for versions or features</span></div>
+            <div class="row"><span class="st bk" aria-hidden="true"></span><span class="t muted">Capture tasks, then move the next ones to Ready</span></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
