@@ -60,7 +60,7 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 
 - [x] Confirm the specification package, including explicitly proposed implementation defaults.
 - [x] Inspect the workspace again for new files, repository instructions, and user changes before scaffolding. Preserve existing work.
-- [ ] Establish source control and an appropriate working branch if none exists; do not overwrite another checkout or create a remote without authorization.
+- [x] Establish source control and an appropriate working branch if none exists; do not overwrite another checkout or create a remote without authorization.
 - [x] Choose the product name, initial domain strategy, and package manager. Use one lockfile. (Zenshin, zenshin.app, pnpm; see DECISIONS.md. Domain registration still pending.)
 - [x] Record required deployment inputs without committing their values: immutable owner GitHub ID, provider accounts, regions, app registrations, backup destination, operational alert destination.
 - [x] Review mutually compatible stable package releases at implementation time; record the selected Node version and dependency versions in manifests/tooling.

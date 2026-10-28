@@ -4,7 +4,7 @@
 
 The implementation request confirms the governing specification/defaults for this work. Inspected the existing workspace and preserved the planning/design files in place; there was no repository or applicable local AGENTS.md. Added `.gitignore`, pinned the local Node 26.9.0/pnpm 12.6.0 toolchain and compatible stable dependencies, and documented selections in `docs/TOOLING.md`. Added `.env.example` and `docs/ENVIRONMENT.md` covering server-only/browser-safe settings and outstanding deployment inputs.
 
-**Blocked:** `git init -b main` failed with `.git: Operation not permitted`. The active workspace permits reading but not writing `.git`, and escalation is unavailable. No repository, branch, remote, or commit was created. The requested initial `Planning package` commit and final `Phase 1: Scaffold application and checks` commit therefore remain outstanding. Source-control task remains unticked; repository permissions must change before either commit can be made.
+**Resolved:** Codex's sandbox could not write `.git`, so the orchestrator ran `git init -b main` and made the `Planning package` and per-phase commits. No remote.
 
 ## Phase 1 — Application foundation — 2026-10-29
 
