@@ -46,7 +46,9 @@ Phase 2 adds the following stable releases, selected from the registry and resol
 | `auth` | `1.7.14` | Current Better Auth schema-generation CLI (the old `@better-auth/cli` line is not used) |
 | `tsx` | `4.23.15` | Run typed seed/fixture scripts under Node |
 
-The isolated CI database uses PostgreSQL `18.6`, the [current stable release](https://www.postgresql.org/docs/18/release-18-6.html). No PostgreSQL instance was started during Phase 2. See [DATABASE.md](DATABASE.md) for generation, migration and seed commands and auth adapter mappings. Node/pnpm pins are unchanged.
+Phase 3 adds pinned `@tanstack/react-query` `5.105.0`, selected from the stable registry release with compatible peers, for settings server state. The existing pinned shadcn CLI generated the dialog, confirmation, input/select, checkbox, field, alert and badge primitives. Settings follows the accepted zinc mockups. Plaintext key creation responses stay outside query/mutation caches. No editor, provider-integration or MCP package is added ahead of its phase.
+
+The isolated CI database uses PostgreSQL `18.6`, the [current stable release](https://www.postgresql.org/docs/18/release-18-6.html). No PostgreSQL instance was started during Phases 2–3. See [DATABASE.md](DATABASE.md) for generation, migration and seed commands and auth adapter mappings. Node/pnpm pins are unchanged.
 
 pnpm configuration enforces exact saves, engine compatibility and strict peers. The `unrs-resolver` native-binding postinstall and esbuild's platform-binary installation used by Drizzle/tsx/auth tooling are explicitly allowed. The just-published Node types release is explicitly listed in pnpm’s minimum-release-age exception; all versions remain pinned. There is one package manifest and one lockfile.
 

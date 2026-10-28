@@ -132,6 +132,35 @@
     @apply font-sans;
     }
 }
+
+[data-slot="dialog-overlay"], [data-slot="alert-dialog-overlay"] {
+  background: rgb(0 0 0 / 45%);
+  backdrop-filter: blur(8px);
+}
+[data-slot="dialog-content"], [data-slot="alert-dialog-content"] {
+  border-radius: 20px;
+  background: var(--surface-a);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 0 0 4px #FFFFFF1A, 0 24px 64px var(--shadow);
+}
+.settings-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 14px;
+}
+.settings-nav svg { width: 16px; height: 16px; flex-shrink: 0; }
+.settings-nav:hover { background: var(--accent); }
+.settings-nav:focus-visible, summary:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+@media (max-width: 767px) {
+  [data-slot="button"], [data-slot="input"], [data-slot="native-select"], .settings-nav { min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
 /* Derived surfaces from design/ui-mockups/ui.css. */
 :root {
 

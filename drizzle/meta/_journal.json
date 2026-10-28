@@ -8,6 +8,20 @@
       "when": 1793217818966,
       "tag": "0000_database_model",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793218402035,
+      "tag": "0001_credential_history",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793218659649,
+      "tag": "0002_auth_rate_limits",
+      "breakpoints": true
     }
   ]
 }

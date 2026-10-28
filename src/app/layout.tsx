@@ -22,7 +22,8 @@ export const viewport: Viewport = { themeColor: "#18181B" };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head><script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.toggle('dark',matchMedia('(prefers-color-scheme: dark)').matches);" }} /></head>
       <body>{children}</body>
     </html>
   );

@@ -1,6 +1,6 @@
 # Environment and deployment inputs
 
-All variables below are server-only. Phase 1 needs only `APP_ENV` and `APP_ORIGIN` at server startup. The production build needs no application secrets or provider connection. The example file contains empty placeholders for future slices; those are not validated or used until their phase starts. Next.js supplies `NODE_ENV` itself; do not substitute the deployment name for it.
+All variables below are server-only. Phase 3 server startup requires `APP_ENV`, `APP_ORIGIN`, `DATABASE_URL` and all Phase 3 authentication settings. The production build needs no application secrets or provider connection. The example file contains empty placeholders for future slices; those are not validated or used until their phase starts. Next.js supplies `NODE_ENV` itself; do not substitute the deployment name for it.
 
 Copy `.env.example` to `.env.local` for local development. Keep real values in ignored environment files or the hosting/runner secret store. Do not paste them into planning notes, fixtures, CI YAML, client props, logs or issue bodies. Use distinct development, preview and production resources and credentials.
 
@@ -12,10 +12,10 @@ Copy `.env.example` to `.env.local` for local development. Keep real values in i
 | `APP_ORIGIN` | Phase 1 runtime | Canonical HTTP(S) origin, without credentials, path, query or fragment. HTTPS for preview/production. |
 | `DATABASE_URL` | Phase 2 | Application pooled Neon PostgreSQL URL; small transaction-capable pg pool. |
 | `DATABASE_MIGRATION_URL` | Phase 2 migration runner | Separate unpooled migration connection; never used automatically at app startup. |
-| `BETTER_AUTH_SECRET` | Phase 3 | Auth signing/encryption secret, generated securely for each environment. |
+| `BETTER_AUTH_SECRET` | Phase 3 | Auth signing/encryption secret, generated securely for each environment; at least 32 characters, no example/default placeholders. |
 | `BETTER_AUTH_URL` | Phase 3 | Canonical auth origin; must agree with `APP_ORIGIN` and registered OAuth callbacks. |
 | `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET` | Phase 3 | Separate GitHub OAuth application for human sign-in. |
-| `OWNER_GITHUB_ID` | Phase 3 | Immutable numeric GitHub account ID, not login name/email. Supply securely. |
+| `OWNER_GITHUB_ID` | Phase 3 | Immutable positive decimal GitHub account ID, not login name/email. No sign, spaces, decimal point or leading zeroes. Supply securely. |
 | `CRON_SECRET` | Phase 10 | Separate secret authenticating the minute worker. |
 | `JOBS_BATCH_LIMIT`, `JOBS_TIME_BUDGET_MS` | Phase 10 | Bounded execution settings; choose with hosting limits when implementing the worker. |
 | `R2_ENDPOINT` | Phase 11 | Account-scoped S3-compatible R2 HTTPS endpoint. |
@@ -28,7 +28,9 @@ Copy `.env.example` to `.env.local` for local development. Keep real values in i
 | `ERROR_REPORTING_DSN` | Observability provisioning | Reserved server-side provider connection; provider/adapter still to be selected. |
 | `OPERATIONAL_ALERT_EMAIL` | Operations provisioning | Owner operational alert destination; no in-product notification feature. |
 
-`getServerEnv()` is guarded by `server-only` and returns only validated Phase 1 fields. Startup validation skips Next's production-build phase rather than substituting fake credentials. Phase 2 validates database URLs before pool construction and migration execution; schema generation stays offline and imports never connect. Required provider validation must be added with each slice, before constructing clients. Errors name invalid fields without printing values. Do not introduce a general “skip validation” switch. Database/seed scripts load optional ignored `.env.local`; tests never load it. See [DATABASE.md](DATABASE.md) for exact local seed target restrictions.
+`getServerEnv()` is guarded by `server-only` and returns only validated application fields. `getAuthEnv()` additionally validates authentication settings and requires `BETTER_AUTH_URL` to equal the canonical `APP_ORIGIN` (one trailing slash is accepted). Server startup validates auth settings and the application database URL without opening a connection. Startup validation skips Next's production-build phase rather than substituting fake credentials. Schema/auth generation stays offline and imports never connect. Future provider validation belongs with its slice. Errors name invalid fields without printing values. Do not introduce a general “skip validation” switch. Database/seed scripts load optional ignored `.env.local`; tests never load it. See [DATABASE.md](DATABASE.md) for exact local seed target restrictions.
+
+Register exactly `${APP_ORIGIN}/api/auth/callback/github` in the separate human-login GitHub OAuth app. Keep GitHub's email scope available. The first explicit login provisions only the configured immutable account ID; implicit signup is disabled from the outset. Provisioning closes when that owner exists. The generated auth user's stable text ID is `github:<OWNER_GITHUB_ID>`; its stored GitHub provider/account binding is rechecked for authentication and owner settings. Changing the environment ID is not an account-transfer mechanism. Login uses normal OAuth state, CSRF/origin checks and secure HttpOnly SameSite=Lax cookies on HTTPS (HTTP is allowed only for local development). Repository permissions still use the separate Phase 12 GitHub App.
 
 ## Test process
 

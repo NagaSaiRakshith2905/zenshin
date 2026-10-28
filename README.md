@@ -1,6 +1,6 @@
 # Zenshin
 
-Status: Phase 1 application foundation is built. Feature implementation and verification remain in later phases. Local Git initialization/commits are blocked by this workspace's `.git` write restriction; see [implementation notes](IMPLEMENTATION-NOTES.md).
+Status: Phases 1–3 are built: application foundation, database model, owner authentication, scoped agent credentials and preference settings. Remaining features and all runtime verification are deferred to later phases. Source-control work is handled by the orchestrator; see [implementation notes](IMPLEMENTATION-NOTES.md).
 
 Start with [the product specification](docs/SPECIFICATION.md). It connects the accepted decisions to implementation and acceptance criteria.
 
@@ -30,8 +30,8 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-The placeholder page runs at `http://localhost:3000`. Only `APP_ENV` and `APP_ORIGIN` are required for this phase; provider fields stay empty. The existing `docs/` and `design/` folders remain in place.
+Before starting the server, fill the application/database and Phase 3 auth settings in the ignored `.env.local`. `OWNER_GITHUB_ID` must be the owner's immutable positive numeric GitHub ID. Register `http://localhost:3000/api/auth/callback/github` in the separate login OAuth app. Runtime also needs the migrations applied to the intended isolated application database; migration application has not been performed during implementation. The app runs at `http://localhost:3000` and redirects unauthenticated visitors to GitHub sign-in. The existing `docs/` and `design/` folders remain in place.
 
-See [selected versions](docs/TOOLING.md), [environment reference](docs/ENVIRONMENT.md), and [commands/test isolation](docs/TESTING.md). The scaffold uses ESM, strict TypeScript, the `@/*` → `src/*` alias and the documented source layout. Runtime configuration is validated at Node server startup; production builds need no provider secrets. Do not deploy this scaffold as a usable private workspace before the authentication phase.
+See [selected versions](docs/TOOLING.md), [environment reference](docs/ENVIRONMENT.md), [database commands](docs/DATABASE.md), and [commands/test isolation](docs/TESTING.md). The application uses ESM, strict TypeScript, the `@/*` → `src/*` alias and the documented source layout. Runtime configuration is validated at Node server startup; production builds need no provider secrets. Production launch still requires the remaining phases and delivery gates.
 
-`pnpm typecheck`, `pnpm lint` and `pnpm build` catch implementation mistakes. Tests and plan Verification checklists remain deferred by instruction. Migration scripts currently fail explicitly and are proposed until the Phase 2 database slice is implemented.
+`pnpm typecheck`, `pnpm lint` and `pnpm build` catch implementation mistakes. Tests, migration application, provider checks and plan Verification checklists remain deferred by instruction. Auth/Drizzle generation works offline; the migration runner requires an explicit `DATABASE_MIGRATION_URL` and never runs at startup.

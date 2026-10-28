@@ -17,3 +17,4 @@ export function createDatabase(connectionString: string) {
   return { db: drizzle(pool, { schema }), pool };
 }
 export type Database = ReturnType<typeof createDatabase>["db"];
+export type DatabaseExecutor = Database | Parameters<Parameters<Database["transaction"]>[0]>[0];

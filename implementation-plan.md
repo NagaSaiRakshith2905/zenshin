@@ -128,16 +128,16 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 
 ### Tasks
 
-- [ ] Configure GitHub-only Better Auth login and secure session handling.
-- [ ] Implement controlled provisioning against the immutable owner GitHub account ID, then close implicit public registration.
-- [ ] Protect application pages and service entry points. Preserve supported OAuth callbacks without weakening general origin/CSRF checks.
-- [ ] Store owner preferences: timezone initially Asia/Kolkata, system theme, default view.
-- [ ] Define the actor type: human, agent, system; owner ID; credential ID; action scopes; explicit project grants.
-- [ ] Implement API-key verification independently from browser sessions. A valid key must never produce full owner authority.
-- [ ] Implement owner-only key creation, one-time secret display, project-grant selection, presets, optional archive/complete permission, expiry, revocation, and management metadata.
-- [ ] Set Read only to read; Contributor to read/write/upload. Default expiry is 90 days. No all-future-project grant or agent key creation.
-- [ ] Ensure authorization does not depend on mutable user-supplied actor labels or permission metadata.
-- [ ] Add settings UI and server routes for credentials/preferences, with secret-redacted logging.
+- [x] Configure GitHub-only Better Auth login and secure session handling.
+- [x] Implement controlled provisioning against the immutable owner GitHub account ID, then close implicit public registration.
+- [x] Protect application pages and service entry points. Preserve supported OAuth callbacks without weakening general origin/CSRF checks.
+- [x] Store owner preferences: timezone initially Asia/Kolkata, system theme, default view.
+- [x] Define the actor type: human, agent, system; owner ID; credential ID; action scopes; explicit project grants.
+- [x] Implement API-key verification independently from browser sessions. A valid key must never produce full owner authority.
+- [x] Implement owner-only key creation, one-time secret display, project-grant selection, presets, optional archive/complete permission, expiry, revocation, and management metadata.
+- [x] Set Read only to read; Contributor to read/write/upload. Default expiry is 90 days. No all-future-project grant or agent key creation.
+- [x] Ensure authorization does not depend on mutable user-supplied actor labels or permission metadata.
+- [x] Add settings UI and server routes for credentials/preferences, with secret-redacted logging.
 
 ### Verification
 

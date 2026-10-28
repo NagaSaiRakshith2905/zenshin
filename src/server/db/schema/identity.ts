@@ -19,6 +19,8 @@ export const agentCredentials = pgTable("agent_credentials", {
   ...mutableColumns(), apiKeyId: text("api_key_id").unique().references(() => apikey.id, { onDelete: "set null" }),
   ownerId: text("owner_id").notNull().references(() => user.id, { onDelete: "restrict" }),
   displayName: text("display_name").notNull(), scopes: text("scopes").array().notNull(),
+  // Non-secret history survives the plugin's automatic expired-key cleanup.
+  expiresAt: eventTime("expires_at"), revokedAt: eventTime("revoked_at"), lastUsedAt: eventTime("last_used_at"),
 }, (t) => [
   unique("agent_credentials_owner_id").on(t.ownerId, t.id), positiveRevision("agent_credentials", t.revision),
   check("agent_credentials_scopes", sql`${t.scopes} <@ ARRAY['read', 'write', 'upload', 'archive', 'complete']::text[] AND cardinality(${t.scopes}) > 0`),

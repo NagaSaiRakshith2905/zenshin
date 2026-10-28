@@ -2,7 +2,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 
-const errorCodeSchema = z.enum(["internal_error", "configuration_error"]);
+const errorCodeSchema = z.enum(["internal_error", "configuration_error", "authentication_error"]);
 
 export function createRequestContext() {
   const requestId = randomUUID();

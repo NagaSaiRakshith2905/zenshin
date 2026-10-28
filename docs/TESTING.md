@@ -1,10 +1,10 @@
 # Checks and test isolation
 
-Verification is deferred until all build phases are complete, per the implementation instruction. Phases 1–2 write test infrastructure, unit tests and PostgreSQL suites but do not execute them, provider checks or plan Verification checklists. Typecheck, lint and production build may run to catch implementation mistakes.
+Verification is deferred until all build phases are complete, per the implementation instruction. Phases 1–3 write test infrastructure, unit tests and PostgreSQL suites but do not execute them, provider checks or plan Verification checklists. Typecheck, lint and production build may run to catch implementation mistakes.
 
 | Command | Status |
 | --- | --- |
-| `pnpm dev`, `pnpm build`, `pnpm start` | Implemented Next.js scripts. Runtime requires the two Phase 1 environment settings; build requires no provider secrets. |
+| `pnpm dev`, `pnpm build`, `pnpm start` | Implemented Next.js scripts. Runtime requires application/database/auth settings from ENVIRONMENT.md; build requires no provider secrets. |
 | `pnpm typecheck` | Implemented: generate route types, then strict TypeScript checking. |
 | `pnpm lint` | Implemented: ESLint with Next/TypeScript rules, zero warnings. Original design-source files are excluded. |
 | `pnpm test`, `pnpm test:watch` | Implemented: Vitest unit project, no database or external credentials. Execution deferred. |
@@ -19,6 +19,8 @@ CI installs from the single frozen pnpm lockfile with dependency caching, then r
 Vitest runs in Node with `@/` resolving to `src/`. Tests of server-only modules mock only the `server-only` marker; production imports retain the boundary. Each test creates fresh values via `environmentFixture()` and spies are restored between tests. No `.env.local` or provider credentials are loaded. Use deterministic mocked providers when those adapters begin; never run a provider client from an ordinary unit test.
 
 Current tests cover environment failure/redaction, HTTPS/origin validation, request log allowlisting, database safety and exact supplied brand assets/manifest metadata. They are written and typechecked, not yet executed.
+
+Phase 3 adds unit suites for immutable GitHub identity, browser/key transport separation, strict preference/credential contracts, scope/project/owner denials, fixed public auth-route exposure, current-grant reloads and origin/streamed-body validation. `tests/support/auth.ts` supplies synthetic GitHub token/profile/email responses and OAuth state/cookie roundtrips; unexpected provider fetches fail. `tests/integration/authentication.test.ts` uses an isolated migrated database for first-owner provisioning (including concurrent callbacks), implicit signup denial, renamed-owner sign-in, key hashing/session isolation, presets/grant updates, permission-metadata rejection, default/no expiry, revocation, expired-key history and revision conflicts. Test values are synthetic; no real GitHub account or credential is used. All these tests remain unrun.
 
 ## PostgreSQL strategy for Phase 2 onward
 

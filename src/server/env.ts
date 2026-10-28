@@ -27,3 +27,27 @@ export function parseServerEnv(input: Record<string, string | undefined>) {
 export function getServerEnv() {
   return parseServerEnv(process.env);
 }
+
+const authEnvSchema = z.object({
+  BETTER_AUTH_SECRET: z.string().min(32).refine((value) => !/placeholder|change.?me|example/i.test(value)),
+  BETTER_AUTH_URL: z.url(),
+  GITHUB_OAUTH_CLIENT_ID: z.string().trim().min(1),
+  GITHUB_OAUTH_CLIENT_SECRET: z.string().trim().min(1),
+  OWNER_GITHUB_ID: z.string().regex(/^[1-9]\d*$/),
+});
+
+export function parseAuthEnv(input: Record<string, string | undefined>) {
+  const app = parseServerEnv(input);
+  const result = authEnvSchema.safeParse(input);
+  if (!result.success) {
+    const fields = [...new Set(result.error.issues.map((issue) => issue.path.join(".")))];
+    throw new Error(`Invalid server environment: ${fields.join(", ")}. See docs/ENVIRONMENT.md.`);
+  }
+  if (result.data.BETTER_AUTH_URL !== app.APP_ORIGIN && result.data.BETTER_AUTH_URL !== `${app.APP_ORIGIN}/`) {
+    throw new Error("Invalid server environment: BETTER_AUTH_URL must match APP_ORIGIN. See docs/ENVIRONMENT.md.");
+  }
+  return { ...app, ...result.data, BETTER_AUTH_URL: app.APP_ORIGIN };
+}
+
+export const getAuthEnv = () => parseAuthEnv(process.env);
+export type AuthEnv = ReturnType<typeof parseAuthEnv>;
