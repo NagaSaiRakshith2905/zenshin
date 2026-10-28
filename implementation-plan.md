@@ -104,16 +104,16 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 
 ### Tasks
 
-- [ ] Translate SCHEMA.md into Drizzle definitions with clear modules for identity, organization/work, notes/activity, files, GitHub, and operations.
-- [ ] Generate Better Auth/plugin tables using the chosen versions. Verify generated identifiers and adapter mappings instead of hand-inventing authentication columns.
-- [ ] Add UTC event timestamps, calendar-date fields, integer revisions, UUID IDs, and foreign-key/index conventions.
-- [ ] Add unique project prefixes, project-local task numbers, label normalization, dependency pairs, task-label pairs, property definition/option uniqueness and per-task value uniqueness, note targets, and import provenance constraints.
-- [ ] Enforce same-owner/same-project references using composite constraints where practical. Document transactional validations for graph/depth rules that cannot be expressed as simple checks.
-- [ ] Enforce exactly one note/attachment target and at most one note per target. Index target lookups.
-- [ ] Add note revisions, job leases/deduplication, credential grants, GitHub rule targets, automation evaluation markers, sync state, exports, and idempotency records.
-- [ ] Define delete behavior deliberately for provenance, note revisions, activity references, jobs, and files; external-object deletion must remain retryable after local deletion.
-- [ ] Create the initial reviewed migrations and a deterministic development seed containing representative projects, nested sections, workflows, tasks/subtasks, and boundary cases.
-- [ ] Add a fixture generator for the larger performance dataset without treating it as production seed data.
+- [x] Translate SCHEMA.md into Drizzle definitions with clear modules for identity, organization/work, notes/activity, files, GitHub, and operations.
+- [x] Generate Better Auth/plugin tables using the chosen versions. Verify generated identifiers and adapter mappings instead of hand-inventing authentication columns.
+- [x] Add UTC event timestamps, calendar-date fields, integer revisions, UUID IDs, and foreign-key/index conventions.
+- [x] Add unique project prefixes, project-local task numbers, label normalization, dependency pairs, task-label pairs, property definition/option uniqueness and per-task value uniqueness, note targets, and import provenance constraints.
+- [x] Enforce same-owner/same-project references using composite constraints where practical. Document transactional validations for graph/depth rules that cannot be expressed as simple checks.
+- [x] Enforce exactly one note/attachment target and at most one note per target. Index target lookups.
+- [x] Add note revisions, job leases/deduplication, credential grants, GitHub rule targets, automation evaluation markers, sync state, exports, and idempotency records.
+- [x] Define delete behavior deliberately for provenance, note revisions, activity references, jobs, and files; external-object deletion must remain retryable after local deletion.
+- [x] Create the initial reviewed migrations and a deterministic development seed containing representative projects, nested sections, workflows, tasks/subtasks, and boundary cases.
+- [x] Add a fixture generator for the larger performance dataset without treating it as production seed data.
 
 ### Verification
 

@@ -33,9 +33,22 @@ shadcn CLI `4.23.0` initialized preset `bcivVQBO` using Radix Nova, zinc, lucide
 | `vite` | `8.3.5` | Development/build tooling |
 | `vitest` | `5.0.5` | Development/build tooling |
 
-No pg/Drizzle, Better Auth/API-key, TanStack Query, Tiptap, GitHub/R2, or MCP dependency is installed before its slice begins. Zod is already used for runtime environment/log boundary validation. The auth schema will be generated from the actual selected plugin versions in Phase 2.
+Phase 2 adds the following stable releases, selected from the registry and resolved with strict peer checking on 2026-10-29. Better Auth and its plugin/CLI share the same release. No TanStack Query, Tiptap, GitHub/R2 or MCP package is installed ahead of its slice.
 
-pnpm configuration enforces exact saves, engine compatibility and strict peers. The reviewed `unrs-resolver` native-binding postinstall is explicitly allowed. The just-published Node types release is explicitly listed in pnpm’s minimum-release-age exception; all versions remain pinned. There is one package manifest and one lockfile.
+| Dependency | Version | Use |
+| --- | --- | --- |
+| `drizzle-orm` | `0.45.4` | Typed PostgreSQL schema and transactions |
+| `pg` | `8.23.1` | Transaction-capable PostgreSQL pool |
+| `better-auth` | `1.7.14` | Generated core authentication model; runtime login is Phase 3 |
+| `@better-auth/api-key` | `1.7.14` | Generated API-key plugin model |
+| `drizzle-kit` | `0.31.11` | Development migration generation/application |
+| `@types/pg` | `8.23.1` | PostgreSQL TypeScript declarations |
+| `auth` | `1.7.14` | Current Better Auth schema-generation CLI (the old `@better-auth/cli` line is not used) |
+| `tsx` | `4.23.15` | Run typed seed/fixture scripts under Node |
+
+The isolated CI database uses PostgreSQL `18.6`, the [current stable release](https://www.postgresql.org/docs/18/release-18-6.html). No PostgreSQL instance was started during Phase 2. See [DATABASE.md](DATABASE.md) for generation, migration and seed commands and auth adapter mappings. Node/pnpm pins are unchanged.
+
+pnpm configuration enforces exact saves, engine compatibility and strict peers. The `unrs-resolver` native-binding postinstall and esbuild's platform-binary installation used by Drizzle/tsx/auth tooling are explicitly allowed. The just-published Node types release is explicitly listed in pnpm’s minimum-release-age exception; all versions remain pinned. There is one package manifest and one lockfile.
 
 CI actions are pinned to full release commit SHAs in `.github/workflows/ci.yml`: checkout 7.0.1, setup-node 7.1.0 and pnpm/action-setup 6.1.0. CI uses `.nvmrc`, the package-manager pin and pnpm store caching. No remote or deployment is configured.
 

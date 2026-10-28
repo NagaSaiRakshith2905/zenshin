@@ -1,6 +1,6 @@
 # Checks and test isolation
 
-Verification is deferred until all build phases are complete, per the implementation instruction. Phase 1 writes test infrastructure and unit tests but does not execute them, database integration suites, provider checks or plan Verification checklists. Typecheck, lint and production build may run to catch implementation mistakes.
+Verification is deferred until all build phases are complete, per the implementation instruction. Phases 1–2 write test infrastructure, unit tests and PostgreSQL suites but do not execute them, provider checks or plan Verification checklists. Typecheck, lint and production build may run to catch implementation mistakes.
 
 | Command | Status |
 | --- | --- |
@@ -8,10 +8,11 @@ Verification is deferred until all build phases are complete, per the implementa
 | `pnpm typecheck` | Implemented: generate route types, then strict TypeScript checking. |
 | `pnpm lint` | Implemented: ESLint with Next/TypeScript rules, zero warnings. Original design-source files are excluded. |
 | `pnpm test`, `pnpm test:watch` | Implemented: Vitest unit project, no database or external credentials. Execution deferred. |
-| `pnpm test:integration` | Project/guard configured, no database suites yet; first suites arrive in Phase 2. Execution deferred. |
-| `pnpm db:generate`, `pnpm db:migrate` | Proposed until Phase 2 supplies Drizzle schema/tooling/migrations. Current scripts fail explicitly without contacting a database. No schema push command. |
+| `pnpm test:integration` | Guarded local PostgreSQL provisioning, migration and schema constraint suites implemented. Execution deferred. |
+| `pnpm db:generate`, `pnpm db:migrate` | Implemented Drizzle Kit scripts; generation is offline, application requires `DATABASE_MIGRATION_URL`. No schema push command. |
+| `pnpm db:auth:generate`, `pnpm db:seed`, `pnpm db:fixture:perf` | Implemented; see [DATABASE.md](DATABASE.md). Both generators ran; migration application and fixture loading did not. |
 
-CI installs from the single frozen pnpm lockfile with dependency caching, then runs typecheck, lint, the unit project and production build. The workflow is prepared for future use; it has not been executed or published. It uses no provider secrets and has no deployment/migration step. Add database integration CI only with the Phase 2 database slice.
+CI installs from the single frozen pnpm lockfile with dependency caching, then runs typecheck, lint, the unit project and production build. A separate job provisions a disposable PostgreSQL 18.6 service with a test-only administration database and runs the integration project. The workflow is prepared for future use; it has not been executed or published. It uses no provider secrets and never migrates an application/provider database.
 
 ## Unit tests and fixtures
 
@@ -25,4 +26,6 @@ Use a disposable local PostgreSQL instance, or a disposable PostgreSQL service i
 
 Before importing a driver, `tests/support/integration-setup.ts` validates `TEST_DATABASE_URL`. Use `testDatabaseName()` to allocate a unique `zenshin_test_<UUID>` database per suite/run, provision it using test-only local administration, apply the committed migrations, and close pools/drop that database in `finally`/suite teardown. The target must never match `DATABASE_URL`, `DATABASE_MIGRATION_URL` or `BACKUP_DATABASE_URL`. The test role must have no access to application databases. Do not forward a production database onto localhost.
 
-Phase 2 supplies connection/provisioning/teardown code and domain fixture factories alongside the real schema and pg driver; these are intentionally absent now. Generate isolated owner/project graphs per test and clean them between cases. Transaction rollback alone is insufficient for concurrency tests using separate connections, so run those cases against their own database/fixture graph. Migrations run on the isolated database, never against a production or normal developer database. No auth/plugin tables are invented in this phase.
+Phase 2 supplies `tests/support/postgres.ts`: the guarded URL initially points to an existing test-only local administration database (e.g. `zenshin_test_runner`), with a role allowed to create/drop databases on that disposable server. It creates a fresh `zenshin_test_<UUID>` database per suite, migrates it and exposes a pool, typed db, migration runner and `dispose()`. Always dispose in teardown; setup failure also closes/drops its own database. The initial suites exercise cross-project/owner FKs, uniqueness, note/file targets, property values, defaults, provenance, audit/deletion behavior, job leases and migration journal repeatability. Pure unit tests cover deterministic fixture scale/isolation and generated auth model/field mappings. They are written and typechecked, not executed.
+
+Generate isolated owner/project graphs per test and clean them between cases. Transaction rollback alone is insufficient for concurrency tests using separate connections, so run those cases against their own database/fixture graph. Migrations run on the isolated database, never against a production or normal developer database. Future service phases add graph/concurrency behavior tests; SQL alone does not enforce graph/depth rules. See [DATABASE.md](DATABASE.md) for the SQL/service invariant split, fixture loading and forward migration-upgrade strategy.

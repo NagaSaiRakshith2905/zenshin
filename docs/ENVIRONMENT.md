@@ -28,7 +28,7 @@ Copy `.env.example` to `.env.local` for local development. Keep real values in i
 | `ERROR_REPORTING_DSN` | Observability provisioning | Reserved server-side provider connection; provider/adapter still to be selected. |
 | `OPERATIONAL_ALERT_EMAIL` | Operations provisioning | Owner operational alert destination; no in-product notification feature. |
 
-`getServerEnv()` is guarded by `server-only` and returns only validated Phase 1 fields. Startup validation skips Next's production-build phase rather than substituting fake credentials. Required provider validation must be added with each slice, before constructing clients. Errors name invalid fields without printing values. Do not introduce a general “skip validation” switch.
+`getServerEnv()` is guarded by `server-only` and returns only validated Phase 1 fields. Startup validation skips Next's production-build phase rather than substituting fake credentials. Phase 2 validates database URLs before pool construction and migration execution; schema generation stays offline and imports never connect. Required provider validation must be added with each slice, before constructing clients. Errors name invalid fields without printing values. Do not introduce a general “skip validation” switch. Database/seed scripts load optional ignored `.env.local`; tests never load it. See [DATABASE.md](DATABASE.md) for exact local seed target restrictions.
 
 ## Test process
 
