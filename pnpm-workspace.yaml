@@ -1,0 +1,7 @@
+saveExact: true
+engineStrict: true
+strictPeerDependencies: true
+allowBuilds:
+  unrs-resolver: true
+minimumReleaseAgeExclude:
+  - "@types/node@26.6.6"
