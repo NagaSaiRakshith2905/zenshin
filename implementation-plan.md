@@ -1,6 +1,6 @@
 # Detailed implementation plan
 
-Status: ready for review. This document plans implementation; it does not start application development or provision infrastructure.
+Status: implementation in progress. Phases 0–9 are complete and verified against a disposable local PostgreSQL; phases 10–16 remain. No infrastructure has been provisioned by this plan.
 
 ## 1. Purpose and governing documents
 
@@ -106,7 +106,7 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 
 ## 5. Phase 2 — Implement the database model
 
-**Status: ✅ Complete (2026-10-29).** All tasks done; Verification items deferred until all phases are built.
+**Status: ✅ Complete (2026-10-29).** Tasks and verification done; migrations applied and seed loaded on disposable PostgreSQL 18.6.
 
 ### Tasks
 
@@ -123,16 +123,16 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 
 ### Verification
 
-- [ ] Apply all migrations to an empty PostgreSQL database and inspect constraints/indexes.
-- [ ] Verify invalid foreign-project relationships and duplicate unique values fail.
-- [ ] Verify the generated auth schema works with the configured adapter.
-- [ ] Establish a migration-upgrade test path for future revisions; do not promise destructive down-migrations as the rollback strategy.
+- [x] Apply all migrations to an empty PostgreSQL database and inspect constraints/indexes.
+- [x] Verify invalid foreign-project relationships and duplicate unique values fail.
+- [x] Verify the generated auth schema works with the configured adapter.
+- [x] Establish a migration-upgrade test path for future revisions; do not promise destructive down-migrations as the rollback strategy.
 
 **Exit gate:** reproducible clean database creation, working seed, and documented distinction between SQL constraints and service-enforced invariants.
 
 ## 6. Phase 3 — Authentication, ownership, and agent credentials
 
-**Status: ✅ Complete (2026-10-29).** All tasks done; Verification items deferred until all phases are built.
+**Status: ✅ Tasks complete (2026-10-29).** Verification passes with mocked GitHub OAuth; two items wait on files (Phase 11) and export (Phase 15). Real GitHub sign-in needs the owner ID and OAuth app.
 
 ### Tasks
 
@@ -149,16 +149,16 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 
 ### Verification
 
-- [ ] Owner sign-in works and a different GitHub identity cannot provision/access the dashboard.
-- [ ] Expired/revoked keys fail on the next authenticated request.
-- [ ] Credential grants isolate projects on reads, counts, search, files, and mutations.
-- [ ] Agent credentials cannot reach owner-only configuration/export/delete operations.
+- [x] Owner sign-in works and a different GitHub identity cannot provision/access the dashboard.
+- [x] Expired/revoked keys fail on the next authenticated request.
+- [ ] Credential grants isolate projects on reads, counts, search, files, and mutations. (Reads/counts/search/mutations covered by integration tests; files arrive in Phase 11.)
+- [ ] Agent credentials cannot reach owner-only configuration/export/delete operations. (Configuration/delete covered; export arrives in Phase 15.)
 
 **Exit gate:** browser ownership and agent permissions are enforced at the server, with tested denial paths and no credential leakage.
 
 ## 7. Phase 4 — Shared service and contract foundation
 
-**Status: Implemented (2026-10-29), pending verification.** All task code is written; checks, tests and exit-gate verification remain deferred by request. See [domain service notes](docs/DOMAIN-SERVICES.md).
+**Status: ✅ Complete (2026-10-29).** Tasks and verification done against disposable PostgreSQL 18.6: 37 integration + 85 unit tests, typecheck, lint and Webpack build pass.
 
 ### Tasks
 
@@ -176,7 +176,7 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 
 ## 8. Phase 5 — Projects, workflows, and sections
 
-**Status: Implemented (2026-10-29), pending verification.** All task code is written; checks, tests and exit-gate verification remain deferred by request. See [domain service notes](docs/DOMAIN-SERVICES.md).
+**Status: ✅ Complete (2026-10-29).** Tasks and verification done against disposable PostgreSQL 18.6: 37 integration + 85 unit tests, typecheck, lint and Webpack build pass.
 
 ### Tasks
 
@@ -193,15 +193,15 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 
 ### Verification
 
-- [ ] Three section levels succeed; invalid/cyclic/depth-four moves and concurrent conflicting moves fail.
-- [ ] Workflow configuration cannot strand a task or remove a required category/default.
-- [ ] References/prefixes and project ownership stay stable across edits.
+- [x] Three section levels succeed; invalid/cyclic/depth-four moves and concurrent conflicting moves fail.
+- [x] Workflow configuration cannot strand a task or remove a required category/default.
+- [x] References/prefixes and project ownership stay stable across edits.
 
 **Exit gate:** project planning and nested organization work through shared services before building a complex UI around them.
 
 ## 9. Phase 6 — Tasks, subtasks, dependencies, and lifecycle
 
-**Status: Implemented (2026-10-29), pending verification.** All task code is written; checks, tests and exit-gate verification remain deferred by request. See [domain service notes](docs/DOMAIN-SERVICES.md).
+**Status: ✅ Complete (2026-10-29).** Tasks and verification done against disposable PostgreSQL 18.6: 37 integration + 85 unit tests, typecheck, lint and Webpack build pass.
 
 ### Tasks
 
@@ -220,61 +220,67 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 
 ### Verification
 
-- [ ] Concurrent creates allocate unique never-reused references.
-- [ ] Concurrent relationship edits cannot create a cycle or invalid nesting.
-- [ ] Completion/reopening/archiving needing a choice never produces a partial mutation.
-- [ ] Progress, canceled/archived prerequisites, date boundaries, restoration, and deletion match the specification.
+- [x] Concurrent creates allocate unique never-reused references.
+- [x] Concurrent relationship edits cannot create a cycle or invalid nesting.
+- [x] Completion/reopening/archiving needing a choice never produces a partial mutation.
+- [x] Progress, canceled/archived prerequisites, date boundaries, restoration, and deletion match the specification.
 
 **Exit gate:** core domain regression checks pass against PostgreSQL, including browser/agent-equivalent authorization and concurrency cases.
 
 ## 10. Phase 7 — Application shell and core screens
 
+**Status: ✅ Complete (2026-10-29).** Tasks and verification done against disposable PostgreSQL 18.6: 37 integration + 85 unit tests, typecheck, lint and Webpack build pass.
+
 ### Tasks
 
-- [ ] Implement self-hosted IBM Plex Sans/Mono, light/dark CSS tokens from shadcn preset `bcivVQBO` plus the derived tokens in design/ui-mockups/ui.css, system-theme default, focus styles, and layout primitives.
-- [ ] Build the 248 px sidebar, expandable project/section navigation, breadcrumbs, compact header, and responsive navigation alternatives.
-- [ ] Build My work with non-overlapping, collapsible Overdue/In progress/In review/Ready groups, blocked badges, and task creation.
-- [ ] Build project Overview/All tasks and section planning/task screens, including lifecycle, target date, progress, and descendant-scope toggle.
-- [ ] Build reusable task rows and property editors, subtasks, dependency selection, blocked reason, and activity feed.
-- [ ] Build the 560 px task detail panel, full-page route, shareable URLs, browser Back handling, focus restoration, and preserved list state.
-- [ ] Implement create/edit/move/archive/restore/delete dialogs and explicit completion/reopening choices, naming affected work.
-- [ ] Build owner settings as a dialog with its own sidebar, covering workflows/labels/properties and archived-work navigation.
-- [ ] Build custom property display and editors in the task panel and full page, plus the Add property menu (unset properties and New property).
-- [ ] Add empty/loading/error states with retry paths; never replace retained task data with an integration error screen.
+- [x] Implement self-hosted IBM Plex Sans/Mono, light/dark CSS tokens from shadcn preset `bcivVQBO` plus the derived tokens in design/ui-mockups/ui.css, system-theme default, focus styles, and layout primitives.
+- [x] Build the 248 px sidebar, expandable project/section navigation, breadcrumbs, compact header, and responsive navigation alternatives.
+- [x] Build My work with non-overlapping, collapsible Overdue/In progress/In review/Ready groups, blocked badges, and task creation.
+- [x] Build project Overview/All tasks and section planning/task screens, including lifecycle, target date, progress, and descendant-scope toggle.
+- [x] Build reusable task rows and property editors, subtasks, dependency selection, blocked reason, and activity feed.
+- [x] Build the 560 px task detail panel, full-page route, shareable URLs, browser Back handling, focus restoration, and preserved list state.
+- [x] Implement create/edit/move/archive/restore/delete dialogs and explicit completion/reopening choices, naming affected work.
+- [x] Build owner settings as a dialog with its own sidebar, covering workflows/labels/properties and archived-work navigation.
+- [x] Build custom property display and editors in the task panel and full page, plus the Add property menu (unset properties and New property).
+- [x] Add empty/loading/error states with retry paths; never replace retained task data with an integration error screen.
 
 **Exit gate:** the owner can complete the core planning/execution flow using the website on desktop and mobile, with no note/file/GitHub placeholder presented as a working feature.
 
 ## 11. Phase 8 — Notes and editing recovery
 
+**Status: ✅ Complete (2026-10-29).** Tasks and verification done against disposable PostgreSQL 18.6: 37 integration + 85 unit tests, typecheck, lint and Webpack build pass.
+
 ### Tasks
 
-- [ ] Configure a client-only Tiptap editor with structured JSON storage and the permitted formatting nodes/attributes.
-- [ ] Implement server-side document/size/link validation; derive plain text for search and Markdown for export.
-- [ ] Add compact toolbar, Markdown typing shortcuts, code-language selection, and keyboard-accessible controls.
-- [ ] Implement approximately 800 ms idle autosave with Saving/Saved/Failed/Conflict feedback and revision-aware persistence.
-- [ ] Preserve attempted content after rejected saves. Offer compare/retry/discard; do not use silent last-write-wins.
-- [ ] Implement device-local draft recovery keyed by owner/note/base revision, navigation safeguards, and explicit handling on sign-out.
-- [ ] Store the latest 20 persisted content revisions, with owner preview/restore; restoration creates a new revision.
-- [ ] Implement atomic note append for agents without replacing a stale document; record activity and idempotency.
-- [ ] Render supported nodes safely, including imported Markdown, without treating editor schema validation as a blanket XSS guarantee.
+- [x] Configure a client-only Tiptap editor with structured JSON storage and the permitted formatting nodes/attributes.
+- [x] Implement server-side document/size/link validation; derive plain text for search and Markdown for export.
+- [x] Add compact toolbar, Markdown typing shortcuts, code-language selection, and keyboard-accessible controls.
+- [x] Implement approximately 800 ms idle autosave with Saving/Saved/Failed/Conflict feedback and revision-aware persistence.
+- [x] Preserve attempted content after rejected saves. Offer compare/retry/discard; do not use silent last-write-wins.
+- [x] Implement device-local draft recovery keyed by owner/note/base revision, navigation safeguards, and explicit handling on sign-out.
+- [x] Store the latest 20 persisted content revisions, with owner preview/restore; restoration creates a new revision.
+- [x] Implement atomic note append for agents without replacing a stale document; record activity and idempotency.
+- [x] Render supported nodes safely, including imported Markdown, without treating editor schema validation as a blanket XSS guarantee.
 
 **Exit gate:** interruption and concurrent editing preserve user work, invalid documents are rejected, and history restoration is owner-only and non-destructive to revision ordering.
 
 ## 12. Phase 9 — Search, filters, list/board behavior
 
+**Status: ✅ Complete (2026-10-29).** Tasks and verification done against disposable PostgreSQL 18.6: 37 integration + 85 unit tests, typecheck, lint and Webpack build pass.
+
 ### Tasks
 
-- [ ] Implement PostgreSQL full-text search over titles/descriptions/note text/Text property values, task-reference lookup, and normalized label matching.
-- [ ] Implement custom property filters (empty/not empty, options, checkbox, ranges, contains) and sorts by Number/Date/Select with empty values last, with the same results in the UI and MCP.
-- [ ] Apply ownership/project grants and effective-archive visibility before results/counts/pagination.
-- [ ] Implement the agreed filters with AND across groups and OR within multi-selection groups.
-- [ ] Encode filters, sorting, view, archive inclusion, and descendant scope in URLs.
-- [ ] Implement cursor pagination, default 50/max 100; avoid loading every note/task into the browser.
-- [ ] Implement list subtask grouping and contextual parents for matching subtasks without inflating result counts.
-- [ ] Implement board columns by project statuses, default parent/standalone cards, Include subtasks, and subtask progress.
-- [ ] Implement status dragging through the transition service; preserve location, local ordering, required choices, and permission checks.
-- [ ] Disable ambiguous cross-section manual reorder in aggregated views. Explicit sort does not mutate manual ranks.
-- [ ] Implement Cmd/Ctrl+K search, C new task outside inputs, Escape close, and menu/keyboard alternatives to dragging.
+- [x] Implement PostgreSQL full-text search over titles/descriptions/note text/Text property values, task-reference lookup, and normalized label matching.
+- [x] Implement custom property filters (empty/not empty, options, checkbox, ranges, contains) and sorts by Number/Date/Select with empty values last, with the same results in the UI and MCP.
+- [x] Apply ownership/project grants and effective-archive visibility before results/counts/pagination.
+- [x] Implement the agreed filters with AND across groups and OR within multi-selection groups.
+- [x] Encode filters, sorting, view, archive inclusion, and descendant scope in URLs.
+- [x] Implement cursor pagination, default 50/max 100; avoid loading every note/task into the browser.
+- [x] Implement list subtask grouping and contextual parents for matching subtasks without inflating result counts.
+- [x] Implement board columns by project statuses, default parent/standalone cards, Include subtasks, and subtask progress.
+- [x] Implement status dragging through the transition service; preserve location, local ordering, required choices, and permission checks.
+- [x] Disable ambiguous cross-section manual reorder in aggregated views. Explicit sort does not mutate manual ranks.
+- [x] Implement Cmd/Ctrl+K search, C new task outside inputs, Escape close, and menu/keyboard alternatives to dragging.
 
 **Exit gate:** list, board, search, and My work produce consistent data and permissions, including blocked/archived/subtask edge cases and URL restoration.
 

@@ -6,4 +6,4 @@ Final UI mockups for V1, exported from the design canvas at https://claude.ai/ar
 - `canvas.json` lists every screen and its position on the canvas.
 - Each `*.dc.html` file is one screen. Dialog screens embed the screen behind them with `<dc-import>`, and `*Dark.dc.html` embeds its light screen inside `.dark`.
 
-These files need the canvas runtime (`support.js`) to render, so open the canvas link to view them. Treat them as a visual reference, not production code.
+PNG renders of every screen, in canvas order, are in [../ui-mockup-images](../ui-mockup-images). These files need the canvas runtime (`support.js`) to render, so open the canvas link to view them. Treat them as a visual reference, not production code.

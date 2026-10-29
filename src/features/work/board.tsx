@@ -1,0 +1,15 @@
+"use client";
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { NativeSelect } from "@/components/ui/native-select";
+import { useCollection } from "./api";
+import { ActionFeedback, useAction } from "./action";
+import { TaskLink } from "./task-list";
+import { LoadMore, LoadingRows, ProgressLine, QueryError, StatusGlyph } from "./primitives";
+import type { Status, Task } from "./types";
+export function TaskBoard({ tasks, projectId, hasMore, statusCounts }: { tasks: Task[]; projectId: string; hasMore: boolean; statusCounts?: Record<string, number> }) {
+  const statuses = useCollection<Status>("statuses", { projectId }); const action = useAction();
+  const [dragged, setDragged] = useState<Task | null>(null);
+  const transition = (task: Task, statusId: string) => { if (task.statusId !== statusId) void action.run(`tasks/${task.id}/transition`, { expectedRevision: task.revision, statusId }); };
+  return <><p className="mb-3 text-xs text-muted-foreground">Drag cards between statuses, or use each card’s status selector. Status changes keep the task’s section and append within its local ordering scope.</p><QueryError error={statuses.error} retry={statuses.refetch} retained={Boolean(statuses.data)} /><ActionFeedback action={action} />{statuses.isPending ? <LoadingRows /> : <div className="task-board" role="region" aria-label="Task board" tabIndex={0}>{statuses.items.map((status) => { const cards = tasks.filter((t) => t.statusId === status.id); return <section className="board-column" key={status.id} aria-label={status.name} onDragOver={(e) => { if (dragged) e.preventDefault(); }} onDrop={(e) => { e.preventDefault(); if (dragged && !action.pending) transition(dragged, status.id); setDragged(null); }}><h2 className="board-column-heading"><StatusGlyph category={status.category} /><span>{status.name}</span><span className="ml-auto text-muted-foreground">{statusCounts?.[status.id] ?? cards.length}</span></h2><div className="flex flex-col gap-3">{cards.map((task) => <article key={task.id} className="board-card" draggable={!action.pending} onDragStart={(e) => { e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", task.id); setDragged(task); }} onDragEnd={() => setDragged(null)}><TaskLink task={task} /><div className="my-3 flex flex-wrap items-center gap-2">{task.blocked && <Badge variant="outline">Blocked</Badge>}{task.dueDate && <span className="text-xs text-muted-foreground">Due {task.dueDate}</span>}</div>{task.progress && <ProgressLine value={task.progress} />}<NativeSelect aria-label={`Status for ${task.reference}`} value={task.statusId} disabled={action.pending} onChange={(e) => transition(task, e.target.value)}>{statuses.items.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</NativeSelect></article>)}{!cards.length && <p className="p-3 text-sm text-muted-foreground">{hasMore && (statusCounts?.[status.id] ?? 1) > 0 ? "Load more tasks to see cards in this status." : "No matching tasks."}</p>}</div></section>; })}</div>}<LoadMore query={statuses} /></>;
+}

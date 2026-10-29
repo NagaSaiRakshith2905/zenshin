@@ -14,7 +14,7 @@ export function assertBrowserOrigin(request: Request) {
   }
 }
 
-export async function readSettingsBody(request: Request) {
+export async function readSettingsBody(request: Request, limit = 32_768) {
   if (request.headers.get("content-type")?.split(";")[0].trim() !== "application/json") {
     throw new AccessError("validation_error", "Send a JSON request.");
   }
@@ -26,9 +26,9 @@ export async function readSettingsBody(request: Request) {
     const { value, done } = await reader.read();
     if (done) break;
     bytes += value.byteLength;
-    if (bytes > 32_768) {
+    if (bytes > limit) {
       await reader.cancel();
-      throw new AccessError("validation_error", "The settings request is too large.");
+      throw new AccessError("validation_error", "The request is too large.");
     }
     chunks.push(value);
   }

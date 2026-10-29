@@ -16,6 +16,8 @@ export async function createTestDatabase() {
   let created = false;
   const migrateLatest = () => migrate(connection.db, { migrationsFolder: fileURLToPath(new URL("../../drizzle", import.meta.url)) });
   async function dispose() {
+    // DROP ... WITH (FORCE) can race closing sockets; ignore only that admin-shutdown error.
+    connection.pool.on("error", (error: Error & { code?: string }) => { if (error.code !== "57P01") throw error; });
     try {
       await connection.pool.end();
       // name is generated internally, never caller-supplied SQL.

@@ -1,0 +1,16 @@
+import type { categories, priorities, propertyTypes } from "@/lib/contracts/work";
+export type Category = typeof categories[number];
+export type Base = { id: string; revision: number; createdAt: string; updatedAt: string; archivedAt: string | null };
+export type Progress = { done: number; total: number; state: string; unresolvedParents: number };
+export type Project = Base & { name: string; prefix: string; description: string; progress?: Progress; effectiveArchived?: boolean };
+export type Section = Base & { projectId: string; name: string; description: string; parentSectionId: string | null; lifecycle: "planned" | "active" | "completed"; targetDate: string | null; position: string; progress?: Progress; effectiveArchived?: boolean; breadcrumbs: { id: string; name: string }[] };
+export type Task = Base & { projectId: string; sectionId: string | null; parentTaskId: string | null; parentReference?: string | null; title: string; description: string; reference: string; number: number; statusId: string; statusName?: string; category: Category; priority: typeof priorities[number]; dueDate: string | null; manualBlockedReason: string | null; blocked: boolean; overdue: boolean; effectiveArchived: boolean; prerequisiteTaskIds: string[]; dependentTaskIds: string[]; dependencyBlockers: string[]; properties: Record<string, string | number | boolean | string[]>; labelIds: string[]; breadcrumbs: { id: string; name: string }[]; progress?: Progress; projectName?: string };
+export type Status = Base & { projectId: string; name: string; category: Category; position: string; isDefault: boolean };
+export type Label = Base & { projectId: string; name: string; color: string };
+export type Option = Base & { name: string; definitionId: string; position: string };
+export type Property = Base & { projectId: string; name: string; type: typeof propertyTypes[number]; position: string; options: Option[] };
+export type Activity = { id: string; taskId: string | null; actorKind: string; actorCredentialId: string | null; action: string; createdAt: string; changedFields: { fields?: string[]; reason?: string } };
+export type Page<T> = { items: T[]; nextCursor: string | null; hasMore: boolean; groupCounts?: Record<string, number>; statusCounts?: Record<string, number>; total?: number };
+export type Entity = Project | Section | Task;
+export type EntityKind = "project" | "section" | "task";
+export const entityName = (entity: Entity) => "title" in entity ? entity.title : entity.name;

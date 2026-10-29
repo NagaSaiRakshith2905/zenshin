@@ -55,7 +55,7 @@ The palette is monochrome and neutral. Tokens come from the shadcn preset `bcivV
 
 - No brand accent hue. Emphasis comes from the primary (near-black in light, near-white in dark). The only other colour is the dialog ring below.
 - Font: self-hosted IBM Plex Sans, weights 400/500/600. IBM Plex Mono for code and references only. Body 14 px/20 px; note body 15 px/24 px; screen title 22 px/30 px; group headings 13 px/18 px. No all-caps metadata styling.
-- Spacing scale: 4, 8, 12, 16, 24, 32 px. Radius follows the preset: controls 7–8 px, inner cards 10 px, outer cards and the content surface 14 px, dialogs 20 px.
+- Spacing scale: 4, 8, 12, 16, 24, 32 px. Radius follows the preset: controls 7–8 px, inner cards 10 px, outer group cards 18 px with 8 px padding around the inner card (so corners stay concentric), the content surface 14 px, dialogs 20 px.
 - Borders communicate containment. Group cards use a 1 px ring plus a faint shadow; stronger shadows are reserved for floating menus and dialogs. No gradient decoration, large metric card grid, or animated page-entry sequence.
 - Dialogs (Command, Dialog, AlertDialog, mobile Drawer) have a 4 px translucent ring (`#FFFFFF1A`) over a frosted, blurred surface. A 45% black overlay with an 8 px backdrop blur sits behind them. Menus use the preset's translucent style.
 - Status is monochrome: the glyph's shape carries the state, next to a visible label. Backlog dashed circle; Ready empty circle; In progress half-filled; In review three-quarter filled; Done filled; Canceled faint circle. Never convey state through hue.

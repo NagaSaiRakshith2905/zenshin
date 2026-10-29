@@ -1,6 +1,6 @@
 # Zenshin
 
-Status: Phases 1–3 are built: application foundation, database model, owner authentication, scoped agent credentials and preference settings. Remaining features and all runtime verification are deferred to later phases. Source-control work is handled by the orchestrator; see [implementation notes](IMPLEMENTATION-NOTES.md).
+Status: The application foundation, data model, authentication, planning UI, and initial notes and work discovery features are implemented. Database-backed and live sign-in verification remain pending. Source-control work is handled by the orchestrator; see [implementation notes](IMPLEMENTATION-NOTES.md).
 
 Start with [the product specification](docs/SPECIFICATION.md). It connects the accepted decisions to implementation and acceptance criteria.
 
@@ -34,6 +34,6 @@ Before starting the server, fill the application/database and Phase 3 auth setti
 
 See [selected versions](docs/TOOLING.md), [environment reference](docs/ENVIRONMENT.md), [database commands](docs/DATABASE.md), and [commands/test isolation](docs/TESTING.md). The application uses ESM, strict TypeScript, the `@/*` → `src/*` alias and the documented source layout. Runtime configuration is validated at Node server startup; production builds need no provider secrets. Production launch still requires the remaining phases and delivery gates.
 
-`pnpm typecheck`, `pnpm lint` and `pnpm build` catch implementation mistakes. Tests, migration application, provider checks and plan Verification checklists remain deferred by instruction. Auth/Drizzle generation works offline; the migration runner requires an explicit `DATABASE_MIGRATION_URL` and never runs at startup.
+`pnpm typecheck`, `pnpm lint` and `pnpm build` catch implementation mistakes. The database-free unit suite runs locally; isolated database and provider checks require their respective test environments. Auth/Drizzle generation works offline; the migration runner requires an explicit `DATABASE_MIGRATION_URL` and never runs at startup.
 
-Phases 4–6 domain services and HTTP adapters are implemented, pending verification. See [domain service usage and routes](docs/DOMAIN-SERVICES.md). The core planning/task website UI follows in Phase 7. No checks were run for these phases by request.
+Phases 4–6 domain services and HTTP adapters are implemented. See [domain service usage and routes](docs/DOMAIN-SERVICES.md). Phase 7 adds the core planning/task website UI, project settings and responsive navigation; see [workspace UI notes](docs/WORKSPACE-UI.md). The unit suite, typecheck, lint and `pnpm build` pass. The build uses Webpack because Turbopack cannot bind its worker port in this environment. Database and real sign-in verification remain deferred.

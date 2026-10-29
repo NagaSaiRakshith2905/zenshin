@@ -13,8 +13,9 @@ describe("generated Better Auth adapter mapping", () => {
       const table = tables[model.modelName ?? key];
       expect(table, key).toBeDefined();
       const config = getTableConfig(table);
-      expect(config.name).toBe(model.modelName ?? key);
       const columns = table as unknown as Record<string, { getSQLType(): string; name: string }>;
+      // The adapter resolves schema exports; SQL names may use snake_case.
+      expect(config.columns).toContain(columns.id);
       for (const [field, attribute] of Object.entries(model.fields)) {
         const column = columns[attribute.fieldName ?? field];
         expect(column, `${key}.${field}`).toBeDefined();

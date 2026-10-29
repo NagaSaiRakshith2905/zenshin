@@ -13,7 +13,7 @@ describe("owner authentication and credential lifecycle", () => {
   let database: Awaited<ReturnType<typeof createTestDatabase>>;
   const owner: HumanActor = { kind: "human", ownerId: "github:42", credentialId: null, scopes: actionScopes, projectIds: null };
   beforeAll(async () => { database = await createTestDatabase(); }, 30_000);
-  beforeEach(async () => { await database.pool.query('TRUNCATE TABLE "user", "rate_limit" CASCADE'); });
+  beforeEach(async () => { await database.pool.query('TRUNCATE TABLE "user", "apikey", "rate_limit" CASCADE'); });
   afterEach(() => { vi.unstubAllGlobals(); });
   afterAll(async () => { await database?.dispose(); });
 
