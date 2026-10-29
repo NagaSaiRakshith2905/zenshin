@@ -158,34 +158,38 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 
 ## 7. Phase 4 — Shared service and contract foundation
 
+**Status: Implemented (2026-10-29), pending verification.** All task code is written; checks, tests and exit-gate verification remain deferred by request. See [domain service notes](docs/DOMAIN-SERVICES.md).
+
 ### Tasks
 
-- [ ] Implement Zod input/output contracts, stable enums, calendar-date validation, pagination, sorting, and common error types.
-- [ ] Define service signatures receiving an actor and validated input. Separate provider adapters from business rules.
-- [ ] Implement authorization helpers and scoped query helpers used by all transports.
-- [ ] Implement revision-checked writes and conflict results that preserve enough authorized current context for a deliberate retry.
-- [ ] Implement request-scoped transactions and a per-project structural guard for tree/dependency mutations.
-- [ ] Write activity in the same transaction as the successful mutation. Record human/credential/system attribution and changed-field summaries, without secrets/full binary content.
-- [ ] Implement actor-bound idempotency records, input fingerprints, prior-result lookup, conflicts, and default 24-hour expiry.
-- [ ] Define decision_required responses for parent completion, completed-ancestor reopening, and archives affecting active dependents.
-- [ ] Implement common API error mapping and request IDs. Keep business errors consistent between HTTP and later MCP adapters.
+- [x] Implement Zod input/output contracts, stable enums, calendar-date validation, pagination, sorting, and common error types.
+- [x] Define service signatures receiving an actor and validated input. Separate provider adapters from business rules.
+- [x] Implement authorization helpers and scoped query helpers used by all transports.
+- [x] Implement revision-checked writes and conflict results that preserve enough authorized current context for a deliberate retry.
+- [x] Implement request-scoped transactions and a per-project structural guard for tree/dependency mutations.
+- [x] Write activity in the same transaction as the successful mutation. Record human/credential/system attribution and changed-field summaries, without secrets/full binary content.
+- [x] Implement actor-bound idempotency records, input fingerprints, prior-result lookup, conflicts, and default 24-hour expiry.
+- [x] Define decision_required responses for parent completion, completed-ancestor reopening, and archives affecting active dependents.
+- [x] Implement common API error mapping and request IDs. Keep business errors consistent between HTTP and later MCP adapters.
 
 **Exit gate:** a representative mutation proves atomic state/activity/idempotency behavior; stale writes, missing permissions, and changed-input retries fail deterministically.
 
 ## 8. Phase 5 — Projects, workflows, and sections
 
+**Status: Implemented (2026-10-29), pending verification.** All task code is written; checks, tests and exit-gate verification remain deferred by request. See [domain service notes](docs/DOMAIN-SERVICES.md).
+
 ### Tasks
 
-- [ ] Implement owner-only project creation/update/archive, unique immutable prefixes, and transactionally allocated task counters.
-- [ ] Initialize each project's six default workflow categories/statuses and one Backlog default status.
-- [ ] Implement owner-only status rename/order/add/remove, category preservation, mandatory replacement of populated removed statuses, and at least one status per category.
-- [ ] Implement project-specific label definitions and safe removal of associations when a label is removed.
-- [ ] Implement owner-only custom property definitions: the seven types, immutable type, rename/reorder, select options, the 30-definition and 50-option limits, and confirmed deletion of a property or a used option that names the affected task count.
-- [ ] Implement section creation/update/move with root/child ordering, descriptions, lifecycle, target dates, and archive markers.
-- [ ] Validate a moved subtree's deepest descendant against the three-level cap and reject cycles under the structural guard.
-- [ ] Implement completed-ancestor discovery and explicit atomic reopening when adding/reopening unfinished work.
-- [ ] Implement project/section read models containing breadcrumb/tree context and paginated work summaries.
-- [ ] Implement section lifecycle transitions with complete permission for agents setting Completed; owner-only project configuration remains separate.
+- [x] Implement owner-only project creation/update/archive, unique immutable prefixes, and transactionally allocated task counters.
+- [x] Initialize each project's six default workflow categories/statuses and one Backlog default status.
+- [x] Implement owner-only status rename/order/add/remove, category preservation, mandatory replacement of populated removed statuses, and at least one status per category.
+- [x] Implement project-specific label definitions and safe removal of associations when a label is removed.
+- [x] Implement owner-only custom property definitions: the seven types, immutable type, rename/reorder, select options, the 30-definition and 50-option limits, and confirmed deletion of a property or a used option that names the affected task count.
+- [x] Implement section creation/update/move with root/child ordering, descriptions, lifecycle, target dates, and archive markers.
+- [x] Validate a moved subtree's deepest descendant against the three-level cap and reject cycles under the structural guard.
+- [x] Implement completed-ancestor discovery and explicit atomic reopening when adding/reopening unfinished work.
+- [x] Implement project/section read models containing breadcrumb/tree context and paginated work summaries.
+- [x] Implement section lifecycle transitions with complete permission for agents setting Completed; owner-only project configuration remains separate.
 
 ### Verification
 
@@ -197,20 +201,22 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 
 ## 9. Phase 6 — Tasks, subtasks, dependencies, and lifecycle
 
+**Status: Implemented (2026-10-29), pending verification.** All task code is written; checks, tests and exit-gate verification remain deferred by request. See [domain service notes](docs/DOMAIN-SERVICES.md).
+
 ### Tasks
 
-- [ ] Implement task create/read/update and explicit transitions using the project workflow, revision checks, stable references, priority, due date, labels, custom property values (type-validated, revisioned, with activity), and blocked reason.
-- [ ] Implement root/section task locations and one subtask level. Validate parent location on creation, move, promotion, and demotion.
-- [ ] Move subtasks with their parent without rewriting their references or independent tracking fields.
-- [ ] Prevent demotion of a task with its own subtasks until children are moved/promoted.
-- [ ] Implement Complete all or Keep parent open atomically; leave canceled subtasks canceled; require complete permission for Done/bulk completion.
-- [ ] Implement dependencies, reverse-dependency lookup, cycle prevention, same-project restriction, and parent/subtask dependency prohibition.
-- [ ] Derive blocking from unresolved dependencies plus a manual reason. Only Done and not effectively archived satisfies a prerequisite. Do not prohibit starting blocked work.
-- [ ] Implement leaf-only progress and unresolved-parent counts with empty/all-canceled states.
-- [ ] Implement overdue evaluation in the owner's calendar timezone, excluding terminal/archived work.
-- [ ] Implement effective archive across project/section/task ancestors, explicit dependent warnings, restore preserving independent archive markers, and owner-only permanent deletion of archived subtrees.
-- [ ] Prevent deletion while surviving external tasks depend on the deletion set. Queue required file cleanup durably rather than abandoning object keys after database deletion.
-- [ ] Implement manual gapped ordering and bounded rebalance within the correct local scope.
+- [x] Implement task create/read/update and explicit transitions using the project workflow, revision checks, stable references, priority, due date, labels, custom property values (type-validated, revisioned, with activity), and blocked reason.
+- [x] Implement root/section task locations and one subtask level. Validate parent location on creation, move, promotion, and demotion.
+- [x] Move subtasks with their parent without rewriting their references or independent tracking fields.
+- [x] Prevent demotion of a task with its own subtasks until children are moved/promoted.
+- [x] Implement Complete all or Keep parent open atomically; leave canceled subtasks canceled; require complete permission for Done/bulk completion.
+- [x] Implement dependencies, reverse-dependency lookup, cycle prevention, same-project restriction, and parent/subtask dependency prohibition.
+- [x] Derive blocking from unresolved dependencies plus a manual reason. Only Done and not effectively archived satisfies a prerequisite. Do not prohibit starting blocked work.
+- [x] Implement leaf-only progress and unresolved-parent counts with empty/all-canceled states.
+- [x] Implement overdue evaluation in the owner's calendar timezone, excluding terminal/archived work.
+- [x] Implement effective archive across project/section/task ancestors, explicit dependent warnings, restore preserving independent archive markers, and owner-only permanent deletion of archived subtrees.
+- [x] Prevent deletion while surviving external tasks depend on the deletion set. Queue required file cleanup durably rather than abandoning object keys after database deletion.
+- [x] Implement manual gapped ordering and bounded rebalance within the correct local scope.
 
 ### Verification
 
@@ -278,7 +284,7 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 
 - [ ] Implement database-backed job enqueue/deduplication, claim leases, bounded batches, retries, next-attempt times, and terminal failure state.
 - [ ] Ensure external calls occur outside open domain transactions. Store enough state to resume after process failure.
-- [ ] Run due jobs after app/MCP requests via Next.js `after()` in small time-boxed batches (no cron, no internal cron endpoint), plus per-kind handlers for GitHub sync, file cleanup/deletion, exports, and maintenance. Screens awaiting a job advance it on each poll.
+- [ ] Run due jobs after app/MCP requests via Next.js `after()` in small time-boxed batches (no cron, no internal cron endpoint), plus per-kind handlers for GitHub sync, file cleanup/deletion, exports, and maintenance. Screens awaiting a job advance it on each refetch or Refresh.
 - [ ] Make overlapping triggers safe, recover expired leases, and prevent multiple workers processing the same claimed job.
 - [ ] Configure execution limits from actual hosting limits with safety margins, rather than unlimited batches.
 - [ ] Add structured logging and owner-visible integration health/retry information without creating an unsolicited task-notification system.
@@ -322,7 +328,7 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 - [ ] Implement task issue/PR links, read models, head-SHA check/status summaries, and lost-access/deleted-item states.
 - [ ] Implement signed webhook receipt, delivery-ID deduplication, durable enqueue, and prompt acknowledgement.
 - [ ] Implement reconciliation shared by webhooks, stale-on-read refresh, and manual Refresh, with conditional requests, stale-result protection, bounded per-installation requests, backoff, and rate-limit header handling.
-- [ ] Put refresh-if-stale (older than 60 seconds) in the shared service so browser polls and MCP reads both trigger it; poll from visible screens with TanStack Query `refetchInterval` (~5 s, paused when hidden). Query import candidates on demand instead of scanning all account issues.
+- [ ] Put refresh-if-stale (older than 60 seconds) in the shared service so page loads, refetches and MCP reads all trigger it. No polling by default: screens refetch on load, navigation and tab focus (TanStack Query defaults), plus manual Refresh. A slow `refetchInterval` may be added later to specific screens if live watching proves necessary. Query import candidates on demand instead of scanning all account issues.
 - [ ] Add Last refreshed/Refreshing/Stale/Connection unavailable UI. Refresh requests coalesce and cannot bypass GitHub limits.
 
 **Exit gate:** personal/organization staging repositories import/link correctly; a missed webhook is repaired by the minute sweep; provider failure retains usable local data; duplicate imports and stale overwrites fail.

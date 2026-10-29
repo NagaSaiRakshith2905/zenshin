@@ -41,7 +41,7 @@ src/server/auth/            Better Auth, owner provisioning, actor construction
 src/server/services/        shared product operations and policy checks
 src/server/db/              Drizzle schema, queries, transaction helpers
 src/server/integrations/    GitHub and R2 adapters
-src/server/jobs/            bounded polling, exports, cleanup, retry handlers
+src/server/jobs/            GitHub reconciliation, exports, cleanup, retry handlers
 src/server/mcp/             tools and protocol adapter
 src/lib/contracts/          shared Zod input/output contracts
 drizzle/                    reviewed SQL migrations
@@ -90,18 +90,18 @@ External image links in imported issue bodies remain links; do not silently prox
 - A GitHub App requests only metadata, issues, pull requests, checks, and commit statuses read permissions. No content/write/administration permissions unless later justified. Install on selected personal/organization repositories.
 - Organization administrators may restrict installation; show unavailable repositories rather than bypassing their policies.
 - Cache linked issue/PR state and relevant head-SHA check summaries in Neon. Fetch selectable import candidates on demand. Never crawl all issues in every account.
-- No scheduled cron. Freshness is demand-driven: screens showing GitHub data poll Zenshin's own API (TanStack Query `refetchInterval`, about 5 seconds, paused while the tab is hidden and stopped on unmount). They never call GitHub directly.
-- Refresh-if-stale lives in the shared service, not in components: any read of tracked GitHub data (browser poll, MCP read, page load) enqueues/coalesces reconciliation when cached data is older than 60 seconds, then returns cached data with its freshness state. Agents therefore get fresh data while the owner is away.
-- Poll tracked items and repository accessibility with conditional requests. Serialize bounded requests per installation, respect primary/secondary limits and Retry-After/reset headers, and apply exponential retry with jitter. Preserve cached results on transient failures and mark them stale.
+- No scheduled cron and no browser polling by default. Freshness is demand-driven: screens read Zenshin's own API and refetch on load, navigation and tab focus (TanStack Query defaults), plus manual Refresh. They never call GitHub directly. A slow TanStack Query `refetchInterval` may be added later to specific screens if live watching proves necessary.
+- Refresh-if-stale lives in the shared service, not in components: any read of tracked GitHub data (page load, refetch, MCP read) enqueues/coalesces reconciliation when cached data is older than 60 seconds, then returns cached data with its freshness state. Agents therefore get fresh data while the owner is away.
+- Fetch tracked items and repository accessibility with conditional requests. Serialize bounded requests per installation, respect primary/secondary limits and Retry-After/reset headers, and apply exponential retry with jitter. Preserve cached results on transient failures and mark them stale.
 - Signed webhooks enqueue the same reconciliation path, deduplicated by delivery ID. Acknowledge after durable enqueue within GitHub's response window. Stale-on-read refresh repairs missed events the next time the data is viewed or read.
 - Manual Refresh requests immediate reconciliation, coalesces concurrent refreshes, and remains subject to GitHub limits. It does not create a separate bypass.
-- Reconciliation checks remote timestamps/revisions before overwriting cached state and evaluates opt-in transitions atomically against the task's current status. Repeated webhook/poll/manual results do not repeat transitions/activity.
+- Reconciliation checks remote timestamps/revisions before overwriting cached state and evaluates opt-in transitions atomically against the task's current status. Repeated webhook/stale-on-read/manual results do not repeat transitions/activity.
 - Persist import provenance independently from removable task links. Persist rule baselines and processed-event fingerprints; link/enable actions do not replay historical PR events.
 - Display Last refreshed, Refreshing, Stale, and Connection unavailable. Freshness is guaranteed only while data is being viewed or read; nothing refreshes while the app is unused.
 
 ## Durable work
 
-Use Neon-backed job records for GitHub reconciliation, exports, cleanup, and external deletion retries. Handlers have bounded batches, leases, attempt counts, deduplication keys, next-attempt times, and visible terminal error state. No cron drives the worker: after each app/MCP request, Next.js `after()` processes a small time-boxed batch of due jobs; screens awaiting a job (for example an export) advance it on each poll. Claims use short leases, so overlapping triggers cannot duplicate work and a crashed run is retried by the next trigger after its lease expires. Consequence: cleanup and retries wait while the app is unused; this is accepted for a single-owner tool. Do not rely on in-memory queues or unawaited promises after a request returns; `after()` is the platform-supported way to extend the request, and every job it runs is already durable in the jobs table.
+Use Neon-backed job records for GitHub reconciliation, exports, cleanup, and external deletion retries. Handlers have bounded batches, leases, attempt counts, deduplication keys, next-attempt times, and visible terminal error state. No cron drives the worker: after each app/MCP request, Next.js `after()` processes a small time-boxed batch of due jobs; a screen awaiting a job (for example an export) shows its state and advances it on each refetch or Refresh. Claims use short leases, so overlapping triggers cannot duplicate work and a crashed run is retried by the next trigger after its lease expires. Consequence: cleanup and retries wait while the app is unused; this is accepted for a single-owner tool. Do not rely on in-memory queues or unawaited promises after a request returns; `after()` is the platform-supported way to extend the request, and every job it runs is already durable in the jobs table.
 
 If future needs require work while the app is unused, replace its execution adapter with a managed queue without moving domain logic out of services. This is not a V1 requirement.
 
@@ -130,7 +130,7 @@ If future needs require work while the app is unused, replace its execution adap
 - [Better Auth API keys](https://better-auth.com/docs/plugins/api-key), [GitHub provider](https://better-auth.com/docs/authentication/github), [hooks](https://better-auth.com/docs/concepts/database#database-hooks).
 - [Vercel MCP](https://vercel.com/docs/mcp/deploy-mcp-servers-to-vercel), [handler protocol support](https://github.com/vercel-labs/mcp-handler#protocol-support), [MCP authorization](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization).
 - [Drizzle Neon drivers](https://orm.drizzle.team/docs/connect-neon), [Vercel pooling](https://vercel.com/kb/guide/connection-pooling-with-functions).
-- [Next.js `after()`](https://nextjs.org/docs/app/api-reference/functions/after), [TanStack Query refetchInterval](https://tanstack.com/query/latest/docs/framework/react/reference/useQuery).
+- [Next.js `after()`](https://nextjs.org/docs/app/api-reference/functions/after), [TanStack Query refetch options](https://tanstack.com/query/latest/docs/framework/react/reference/useQuery).
 - [GitHub webhook practices](https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks), [API practices](https://docs.github.com/en/rest/using-the-rest-api/best-practices-for-using-the-rest-api), [rate limits](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api).
 - [R2 presigned URLs](https://developers.cloudflare.com/r2/api/s3/presigned-urls/), [conditional operations/API support](https://developers.cloudflare.com/r2/api/s3/api/), [CORS](https://developers.cloudflare.com/r2/buckets/cors/).
 - [Neon history](https://neon.com/docs/postgres/backup-restore/history-window), [pg_dump backups](https://neon.com/docs/manage/backup-pg-dump).

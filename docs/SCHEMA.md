@@ -93,7 +93,7 @@ Important constraints:
 - GitHub provider credentials used for login are separate from installation authorization.
 - Store stable external IDs; names and URLs can change.
 - Repository loss, removed installations, or deleted issues leave tasks usable and show the integration's unavailable state.
-- Polling/manual refresh/webhooks share one idempotent reconciliation path. Old responses must not overwrite newer cached data.
+- Stale-on-read refresh/manual refresh/webhooks share one idempotent reconciliation path. Old responses must not overwrite newer cached data.
 
 ## Operational work
 

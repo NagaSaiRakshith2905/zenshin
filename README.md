@@ -35,3 +35,5 @@ Before starting the server, fill the application/database and Phase 3 auth setti
 See [selected versions](docs/TOOLING.md), [environment reference](docs/ENVIRONMENT.md), [database commands](docs/DATABASE.md), and [commands/test isolation](docs/TESTING.md). The application uses ESM, strict TypeScript, the `@/*` → `src/*` alias and the documented source layout. Runtime configuration is validated at Node server startup; production builds need no provider secrets. Production launch still requires the remaining phases and delivery gates.
 
 `pnpm typecheck`, `pnpm lint` and `pnpm build` catch implementation mistakes. Tests, migration application, provider checks and plan Verification checklists remain deferred by instruction. Auth/Drizzle generation works offline; the migration runner requires an explicit `DATABASE_MIGRATION_URL` and never runs at startup.
+
+Phases 4–6 domain services and HTTP adapters are implemented, pending verification. See [domain service usage and routes](docs/DOMAIN-SERVICES.md). The core planning/task website UI follows in Phase 7. No checks were run for these phases by request.
