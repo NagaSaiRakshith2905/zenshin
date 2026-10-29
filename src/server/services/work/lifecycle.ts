@@ -7,6 +7,7 @@ import { checkRevision, decision, invalid, ownerOnly } from "./foundation";
 import type { Graph } from "./graph";
 import { patch, type Rows } from "./store";
 import type { Handlers } from "./types";
+import { cleanupMarginMs } from "@/lib/contracts/attachments";
 
 function subtree(g: Graph, kind: "project" | "section" | "task", id: string) {
   const target = kind === "project" ? g.project : kind === "section" ? g.section(id) : g.task(id);
@@ -49,7 +50,7 @@ export const lifecycle: Pick<Handlers, "archive_item" | "restore_item" | "delete
     const expected = { name: "title" in target ? target.title : target.name, sectionCount: sectionIds.length, taskCount: taskIds.length, fileCount: files.length };
     if (!input.confirmation || Object.entries(expected).some(([k, v]) => input.confirmation![k as keyof typeof expected] !== v)) decision("Confirm the exact subtree and files to permanently delete. Backups may retain data for 30 days.", { confirmation: expected, backupRetentionDays: 30 });
     // Object keys outlive the cascading database records in independently retryable jobs.
-    if (files.length) await db.insert(backgroundJobs).values(files.map((file) => ({ ownerId: actor.ownerId, kind: "attachment_cleanup", deduplicationKey: `attachment-delete:${file.id}`, payload: { objectKey: file.objectKey, attachmentId: file.id } }))).onConflictDoNothing();
+    if (files.length) await db.insert(backgroundJobs).values(files.map((file) => ({ ownerId: actor.ownerId, kind: "attachment_cleanup", deduplicationKey: `attachment-delete:${file.id}`, payload: { objectKey: file.objectKey, attachmentId: file.id }, availableAt: new Date(Math.max(Date.now(), file.uploadExpiresAt.getTime() + cleanupMarginMs)) }))).onConflictDoNothing();
     if (taskIds.length) await db.execute(sql`delete from task_dependencies where task_id in (${sql.join(taskIds.map((id) => sql`${id}::uuid`), sql`, `)})`);
     const table = input.kind === "project" ? "projects" : input.kind === "section" ? "sections" : "tasks";
     await db.execute(sql`delete from ${sql.identifier(table)} where id = ${target.id} and owner_id = ${actor.ownerId}`);

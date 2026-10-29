@@ -8,6 +8,10 @@ export function parseDatabaseUrl(value: string | undefined, name = "DATABASE_URL
   if (!url || !["postgres:", "postgresql:"].includes(url.protocol) || !url.hostname || url.pathname === "/" || !url.pathname) {
     throw new Error(`Set a valid server-only ${name}.`);
   }
+  // Preserve pg 8's certificate and hostname verification as SSL aliases change.
+  if (url.searchParams.get("uselibpqcompat") !== "true" && ["prefer", "require", "verify-ca"].includes(url.searchParams.get("sslmode") ?? "")) {
+    url.searchParams.set("sslmode", "verify-full");
+  }
   return url.href;
 }
 

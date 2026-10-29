@@ -30,7 +30,7 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-Before starting the server, fill the application/database and Phase 3 auth settings in the ignored `.env.local`. `OWNER_GITHUB_ID` must be the owner's immutable positive numeric GitHub ID. Register `http://localhost:3000/api/auth/callback/github` in the separate login OAuth app. Runtime also needs the migrations applied to the intended isolated application database; migration application has not been performed during implementation. The app runs at `http://localhost:3000` and redirects unauthenticated visitors to GitHub sign-in. The existing `docs/` and `design/` folders remain in place.
+Before starting the server, fill the application/database and Phase 3 auth settings in the ignored `.env.local`. `OWNER_GITHUB_ID` must be the owner's immutable positive numeric GitHub ID. Register `http://localhost:3000/api/auth/callback/github` in the separate login OAuth app. Run `pnpm db:migrate` against the intended isolated application database using its unpooled `DATABASE_MIGRATION_URL` before the first `pnpm dev`; otherwise sign-in fails because the auth tables do not exist. The app runs at `http://localhost:3000` and redirects unauthenticated visitors to GitHub sign-in. The existing `docs/` and `design/` folders remain in place.
 
 See [selected versions](docs/TOOLING.md), [environment reference](docs/ENVIRONMENT.md), [database commands](docs/DATABASE.md), and [commands/test isolation](docs/TESTING.md). The application uses ESM, strict TypeScript, the `@/*` → `src/*` alias and the documented source layout. Runtime configuration is validated at Node server startup; production builds need no provider secrets. Production launch still requires the remaining phases and delivery gates.
 

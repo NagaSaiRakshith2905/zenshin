@@ -9,6 +9,7 @@ import { scheduleJobs } from "@/server/jobs/schedule";
 import { createRequestContext } from "@/server/request-context";
 import { createWorkService, createWorkReader, DomainError } from ".";
 import { createNoteReader } from "./notes";
+import { createAttachmentService } from "../attachments";
 import { resources, type Resource } from "./read";
 
 const creates: Partial<Record<Resource, Command>> = { projects: "create_project", sections: "create_section", tasks: "create_task", statuses: "create_status", labels: "create_label", properties: "create_property", options: "create_option" };
@@ -26,6 +27,31 @@ export async function workRoute(request: Request, path: string[]) {
     const actor = await authenticateActor(request.headers);
     scheduleJobs(actor.ownerId);
     const [resourceName, targetId, action] = path;
+    if (resourceName === "attachments") {
+      if (path.length > 3) throw new DomainError("not_found", "Route was not found.");
+      const service = createAttachmentService(getDatabase());
+      if (targetId) z.uuid().parse(targetId);
+      if (request.method === "GET") {
+        if (!targetId && !action) return Response.json(await service.list(actor, Object.fromEntries(new URL(request.url).searchParams)), { headers });
+        if (targetId && action === "download") {
+          const result = await service.download(actor, { id: targetId });
+          return new URL(request.url).searchParams.get("redirect") === "true"
+            ? new Response(null, { status: 302, headers: { ...headers, Location: result.url, "Referrer-Policy": "no-referrer" } })
+            : Response.json(result, { headers });
+        }
+      }
+      if (actor.kind === "human") assertBrowserOrigin(request);
+      if (request.method === "POST" && ((!targetId && !action) || (targetId && ["finalize", "remove"].includes(action)))) {
+        const envelope = mutationEnvelope.parse(await readSettingsBody(request));
+        const input = z.record(z.string(), z.unknown()).parse(envelope.input);
+        const key = request.headers.get("idempotency-key") ?? envelope.idempotencyKey;
+        const result = !targetId ? await service.begin(actor, input, context.requestId, z.string().min(1).parse(key))
+          : action === "finalize" ? await service.finalize(actor, { id: targetId }, context.requestId)
+            : await service.remove(actor, { ...input, id: targetId }, context.requestId, z.string().min(1).parse(key));
+        return Response.json(result, { status: !targetId ? 201 : 200, headers });
+      }
+      throw new DomainError("not_found", "Route was not found.");
+    }
     if (!resources.includes(resourceName as Resource) || path.length > 4) return Response.json({ error: { code: "not_found", message: "Route was not found.", requestId: context.requestId } }, { status: 404, headers });
     const resource = resourceName as Resource;
     const db = getDatabase();
@@ -68,7 +94,7 @@ export async function workRoute(request: Request, path: string[]) {
     return Response.json(result, { status: operation.startsWith("create_") ? 201 : 200, headers });
   } catch (error) {
     if (error instanceof DomainError || error instanceof AccessError) {
-      const statuses: Record<string, number> = { unauthenticated: 401, forbidden: 403, not_found: 404, conflict: 409, decision_required: 409, idempotency_conflict: 409, validation_error: 422, dependency_cycle: 422, hierarchy_limit: 422, rate_limited: 429 };
+      const statuses: Record<string, number> = { unauthenticated: 401, forbidden: 403, not_found: 404, conflict: 409, decision_required: 409, idempotency_conflict: 409, validation_error: 422, dependency_cycle: 422, hierarchy_limit: 422, rate_limited: 429, upload_rejected: 422, integration_unavailable: 503 };
       return Response.json({ error: { code: error.code, message: error.message, ...(error instanceof DomainError ? { details: error.details } : {}), requestId: context.requestId } }, { status: statuses[error.code] ?? 500, headers });
     }
     if (error instanceof z.ZodError) return Response.json({ error: { code: "validation_error", message: "Check the request fields.", fields: error.issues.map(({ path, message }) => ({ path, message })), requestId: context.requestId } }, { status: 422, headers });

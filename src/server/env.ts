@@ -51,3 +51,15 @@ export function parseAuthEnv(input: Record<string, string | undefined>) {
 
 export const getAuthEnv = () => parseAuthEnv(process.env);
 export type AuthEnv = ReturnType<typeof parseAuthEnv>;
+
+const storageEnvSchema = z.object({
+  R2_ENDPOINT: z.url().regex(/^https:\/\/[a-f0-9]{32}(?:\.(?:eu|fedramp))?\.r2\.cloudflarestorage\.com\/?$/),
+  R2_BUCKET: z.string().regex(/^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/),
+  R2_ACCESS_KEY_ID: z.string().min(1),
+  R2_SECRET_ACCESS_KEY: z.string().min(1),
+});
+export function parseStorageEnv(input: Record<string, string | undefined>) {
+  const result = storageEnvSchema.safeParse(input);
+  if (!result.success) throw new Error(`Invalid server environment: ${[...new Set(result.error.issues.map((issue) => issue.path.join(".")))].join(", ")}. See docs/R2.md.`);
+  return result.data;
+}

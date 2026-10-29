@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { ListFilter } from "lucide-react";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -13,7 +14,7 @@ import { applyFilters, filterValues, splitValues } from "./filter-state";
 import type { Project, Property, Section, Status, Label } from "./types";
 export function Filters({ projectId }: { projectId?: string }) {
   const [open, setOpen] = useState(false);
-  return <><Button variant="outline" size="sm" onClick={() => setOpen(true)}>Filters</Button>{open && <FilterEditor projectId={projectId} close={() => setOpen(false)} />}</>;
+  return <><Button variant="outline" size="sm" onClick={() => setOpen(true)}><ListFilter data-icon="inline-start" />Filters</Button>{open && <FilterEditor projectId={projectId} close={() => setOpen(false)} />}</>;
 }
 function FilterEditor({ projectId, close }: { projectId?: string; close: () => void }) {
   const search = useSearchParams(), router = useRouter(), path = usePathname();

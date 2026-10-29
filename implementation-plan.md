@@ -1,6 +1,6 @@
 # Detailed implementation plan
 
-Status: implementation in progress. Phases 0–9 are complete and verified against a disposable local PostgreSQL; phases 10–16 remain. No infrastructure has been provisioned by this plan.
+Status: implementation in progress. Phases 0–9 are complete and verified against disposable local PostgreSQL. Phase 10 job infrastructure and Phase 11 application code are implemented; Phase 11 provisioning and real R2 acceptance remain open. Phases 12–16 remain. No provider infrastructure has been provisioned by this plan.
 
 ## 1. Purpose and governing documents
 
@@ -151,7 +151,7 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 
 - [x] Owner sign-in works and a different GitHub identity cannot provision/access the dashboard.
 - [x] Expired/revoked keys fail on the next authenticated request.
-- [ ] Credential grants isolate projects on reads, counts, search, files, and mutations. (Reads/counts/search/mutations covered by integration tests; files arrive in Phase 11.)
+- [x] Credential grants isolate projects on reads, counts, search, files, and mutations. (Including Phase 11 file list/upload/finalize/download denial tests against disposable PostgreSQL with mocked storage.)
 - [ ] Agent credentials cannot reach owner-only configuration/export/delete operations. (Configuration/delete covered; export arrives in Phase 15.)
 
 **Exit gate:** browser ownership and agent permissions are enforced at the server, with tested denial paths and no credential leakage.
@@ -300,24 +300,30 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 
 ## 14. Phase 11 — Cloudflare R2 attachments
 
+**Status: application implementation complete (2026-10-29); provider acceptance pending.** See [R2 setup and acceptance](docs/R2.md). No real buckets, credentials or CORS settings were provisioned.
+
 ### Tasks
 
 - [ ] Provision isolated private development/preview/production storage and narrowly scoped server credentials.
 - [ ] Configure application-origin CORS and the exact signed upload headers.
-- [ ] Implement upload initiation: authorize target, validate extension/type/declared size, create pending metadata, generate immutable object key.
-- [ ] Issue ten-minute presigned conditional PUT instructions and upload bytes directly from browser/local agent to R2.
-- [ ] Implement authenticated idempotent finalization using actual object metadata/content inspection. Enforce the 20,000,000-byte cap and allowed image/PDF/UTF-8 text types.
-- [ ] Enforce pending → verifying → ready/failed; pending/failed files cannot be downloaded as successful attachments.
+- [x] Implement upload initiation: authorize target, validate extension/type/declared size, create pending metadata, generate immutable object key.
+- [x] Issue ten-minute presigned conditional PUT instructions and upload bytes directly from browser/local agent to R2.
+- [x] Implement authenticated idempotent finalization using actual object metadata/content inspection. Enforce the 20,000,000-byte cap and allowed image/PDF/UTF-8 text types.
+- [x] Enforce pending → verifying → ready/failed; pending/failed files cannot be downloaded as successful attachments.
 - [ ] Prevent URL reuse from replacing verified bytes through the signed conditional write strategy; verify this against real staging R2 behavior.
-- [ ] Implement authorized five-minute GET links and safe filename/content disposition; keep the bucket nonpublic.
-- [ ] Build progress/retry/failure/removal UI, task/project/section placement, and links from notes.
-- [ ] Implement expired-pending cleanup after upload expiry, failed-object cleanup, and durable deletion on permanent removal.
+- [x] Implement authorized five-minute GET links and safe filename/content disposition; keep the bucket nonpublic.
+- [x] Build progress/retry/failure/removal UI, task/project/section placement, and links from notes.
+- [x] Implement expired-pending cleanup after upload expiry, failed-object cleanup, and durable deletion on permanent removal.
+
+The conditional-write strategy is implemented and tests assert that `content-type` and `if-none-match` are signed. The combined implementation/live-verification checkbox remains open until actual staging R2 overwrite tests pass.
 
 ### Verification
 
 - [ ] Authorized desktop/mobile uploads work; agent upload instructions work without binary MCP content.
 - [ ] Oversize/wrong-format objects, missing objects, unauthorized targets, expired URLs, and overwritten-object attempts are handled safely.
 - [ ] Temporary oversized bytes are rejected/cleaned at finalization; do not claim the presigned PUT imposes an S3 POST size policy.
+
+**Local evidence:** 100 unit tests and 55 disposable PostgreSQL integration tests pass; typecheck, lint and Webpack production build pass. The attachment suite covers grants/scopes, initiation retries, finalization, invalid/missing/oversized files, transient failures, stale verifiers, deletion races and cleanup. Desktop/mobile fixture checks cover display, retry verification, note picker and removal confirmation. Live transfers, CORS, expired signed URLs and conditional overwrite behavior remain unverified.
 
 **Exit gate:** ready attachment metadata agrees with actual private bytes; download access and cleanup are demonstrably correct.
 

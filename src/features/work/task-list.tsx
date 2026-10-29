@@ -12,19 +12,19 @@ import { StatusGlyph } from "./primitives";
 import type { Task } from "./types";
 export function TaskLink({ task, context = false }: { task: Task; context?: boolean }) {
   const pathname = usePathname(); const search = useSearchParams();
-  return <Link data-task-link={task.id} className={cn("work-task-title", context && "text-muted-foreground")} href={taskHref(pathname, search.toString(), task.id)} scroll={false}><span className="work-reference">{task.reference}</span><span className="min-w-0 break-words">{task.parentReference && <span className="text-muted-foreground">{task.parentReference} / </span>}{task.title}</span></Link>;
+  return <Link data-task-link={task.id} className={cn("work-task-title", context && "text-muted-foreground")} href={taskHref(pathname, search.toString(), task.id)} scroll={false}><span className="work-reference">{task.reference}</span><span className="min-w-0 break-words">{task.parentReference && <span className="text-muted-foreground">{task.parentReference} › </span>}{task.title}</span></Link>;
 }
 export function TaskRow({ task, standalone = false, context = false, subtasks = [] }: { task: Task; standalone?: boolean; context?: boolean; subtasks?: Task[] }) {
   const [expanded, setExpanded] = useState(true);
   const selected = useSearchParams().get("task") === task.id;
   const hasChildren = !standalone && subtasks.length > 0;
   return <><div className={cn("work-task-row", selected && "is-selected", task.parentTaskId && "is-subtask")}>
-    {hasChildren ? <Button variant="ghost" size="icon-sm" aria-label={`${expanded ? "Collapse" : "Expand"} subtasks for ${task.reference}`} aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>{expanded ? <ChevronDown /> : <ChevronRight />}</Button> : <span className="size-8 shrink-0" />}
     <StatusGlyph category={task.category} /><TaskLink task={task} context={context} />
-    {task.blocked && <Badge variant="outline"><Ban aria-hidden="true" />Blocked</Badge>}
+    {task.blocked && <Badge variant="secondary"><Ban aria-hidden="true" />Blocked</Badge>}
     {task.projectName && <span className="work-row-project text-muted-foreground">{task.projectName}</span>}
-    {task.priority !== "none" && <span className="work-row-priority text-muted-foreground">{task.priority[0].toUpperCase() + task.priority.slice(1)}</span>}
-    <span className={cn("work-row-date", task.overdue && "font-semibold")}>{task.dueDate ? new Intl.DateTimeFormat("en", { month: "short", day: "numeric", timeZone: "UTC" }).format(new Date(`${task.dueDate}T00:00:00Z`)) : "—"}</span>
+    {task.priority !== "none" && <Badge className="work-row-priority" variant={task.priority === "urgent" ? "default" : "outline"}>{task.priority[0].toUpperCase() + task.priority.slice(1)}</Badge>}
+    {hasChildren && <Button variant="ghost" size="icon-sm" aria-label={`${expanded ? "Collapse" : "Expand"} subtasks for ${task.reference}`} aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>{expanded ? <ChevronDown /> : <ChevronRight />}</Button>}
+    <span className={cn("work-row-date", task.overdue && "is-overdue")}>{task.dueDate ? new Intl.DateTimeFormat("en", { month: "short", day: "numeric", timeZone: "UTC" }).format(new Date(`${task.dueDate}T00:00:00Z`)) : "—"}</span>
   </div>{hasChildren && expanded && <div className="work-subtasks">{subtasks.map((child) => <TaskRow key={child.id} task={child} standalone />)}</div>}</>;
 }
 function ContextParent({ parentId, children }: { parentId: string; children: Task[] }) {
