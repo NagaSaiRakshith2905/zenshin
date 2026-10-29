@@ -73,7 +73,7 @@ Implementation targets to validate, not guarantees claimed before measurement:
 ## Launch configuration checklist
 
 - Product name/domain and immutable owner GitHub account ID supplied securely.
-- Vercel Pro, Neon paid recovery configuration, private R2 bucket, independent backup destination and runner provisioned.
+- Vercel Hobby project, Neon paid recovery configuration, private R2 bucket, independent backup destination and runner provisioned.
 - Database migrations reviewed/applied; preview credentials and resources isolated.
 - OAuth callbacks/owner provisioning tested; public signup closed. GitHub App permissions/installations/webhook secret verified.
 - R2 CORS, presigning/conditional upload, file allowlist, cleanup, and download disposition verified.

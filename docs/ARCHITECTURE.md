@@ -24,7 +24,7 @@ flowchart TD
   Backup --> Vault[Encrypted independent backup storage]
 ```
 
-- One Next.js App Router application, TypeScript, Node runtime, Vercel Pro. Avoid Edge-runtime constraints for authentication, PostgreSQL transactions, uploads, and SDK compatibility.
+- One Next.js App Router application, TypeScript, Node runtime, Vercel Hobby (Pro only if limits or commercial use require it). Avoid Edge-runtime constraints for authentication, PostgreSQL transactions, uploads, and SDK compatibility.
 - Server Components perform authenticated initial reads. Interactive views use client components and a small server-state layer; browser mutations call versioned API routes.
 - API and MCP adapters validate input and construct an actor; both call the same domain services. MCP does not loop back through public HTTP routes.
 - Services own authorization, invariants, transactions, optimistic concurrency, activity, and idempotency. UI hiding is not authorization.

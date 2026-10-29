@@ -56,7 +56,7 @@ No `NEXT_PUBLIC_*` variable is needed. App name, monochrome theme and relative a
 ## Inputs to collect during provisioning
 
 - Immutable owner GitHub ID; GitHub OAuth app and repository App registrations, permitted installations and exact callbacks.
-- Vercel Pro and Neon accounts; supported nearby application/database regions based on latency from India; Neon plan/history configured for seven days.
+- Vercel (Hobby) and Neon accounts; supported nearby application/database regions based on latency from India; Neon plan/history configured for seven days.
 - Private R2 account/buckets and approved CORS origins, isolated across environments.
 - Independent S3 account/bucket/region/encryption configuration, backup runner and operational alert destinations.
 - Domain registration (`zenshin.app` preferred), DNS and canonical deployed origins.

@@ -7,7 +7,7 @@ This is the consolidated planning record, not authorization to begin implementat
 - Private dashboard for planning future features, choosing next work, tracking development, and sharing task context with local agents.
 - Personal use initially; record ownership without introducing teams, invitations, roles, or billing.
 - V1 includes search, filters, priorities, optional due dates, dependencies, private attachments, GitHub integration, responsive UI, and MCP access.
-- Hosting: Vercel Pro. Stack requested: Next.js, Better Auth, Neon PostgreSQL, Drizzle ORM, shadcn/ui, and Tailwind CSS. Integration architecture is specified in docs/ARCHITECTURE.md; compatible exact package versions lock during scaffolding.
+- Hosting: Vercel Hobby (switched from Pro on 2026-10-29 once the minute cron was dropped). Move to Pro if usage limits are hit or use becomes commercial; this is a billing change only. Stack requested: Next.js, Better Auth, Neon PostgreSQL, Drizzle ORM, shadcn/ui, and Tailwind CSS. Integration architecture is specified in docs/ARCHITECTURE.md; compatible exact package versions lock during scaffolding.
 - Package manager: pnpm (single `pnpm-lock.yaml`). Product name: Zenshin (前進, "moving forward"); preferred domain zenshin.app, pending registration and trademark checks.
 - Logo: brush-stroke ensō, design/brand/zenshin-logo.svg (single path, `currentColor`); generated favicon/app-icon/OG assets in design/brand/ are installed in Phase 1. Uses the project zinc palette only: foreground on background in-app; primary-foreground on primary for the app icon/favicon. No brand accent colour.
 
