@@ -75,7 +75,7 @@ This is the consolidated planning record, not authorization to begin implementat
 - Remote MCP with explicitly configured bearer API keys; OAuth MCP login is deferred. Required initial clients are Codex and Claude Code.
 - Default agent credential expiry is 90 days, configurable by the owner. Read only and Contributor presets, separate opt-ins for archiving and completion.
 - Contributor credentials may create sections/tasks within selected projects. Project creation, credential management, GitHub integration management, and permanent deletion are owner-only.
-- GitHub repositories may belong to the owner's personal account or organizations. Refresh tracked GitHub data every minute and provide manual refresh; retain signed webhooks for prompt updates. Bounded cron/reconciliation mechanics are specified in docs/ARCHITECTURE.md.
+- GitHub repositories may belong to the owner's personal account or organizations. Signed webhooks deliver prompt updates. Screens showing GitHub data poll Zenshin every few seconds while visible; the server refreshes from GitHub only when cached data is over a minute old. Manual refresh remains. No scheduled cron: background work runs when the app or MCP is used (2026-10-29). Mechanics are specified in docs/ARCHITECTURE.md.
 - Private attachment storage: Cloudflare R2, replacing the proposed Vercel Blob.
 - No user-imposed cost or availability cap; explain infrastructure tradeoffs rather than optimizing for free-tier limits.
 - Target recovery point: at most 24 hours of data loss, using the independent database/files backup approach in docs/ARCHITECTURE.md. Actual configuration and a full restore must be verified before launch.

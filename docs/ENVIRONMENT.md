@@ -16,8 +16,7 @@ Copy `.env.example` to `.env.local` for local development. Keep real values in i
 | `BETTER_AUTH_URL` | Phase 3 | Canonical auth origin; must agree with `APP_ORIGIN` and registered OAuth callbacks. |
 | `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET` | Phase 3 | Separate GitHub OAuth application for human sign-in. |
 | `OWNER_GITHUB_ID` | Phase 3 | Immutable positive decimal GitHub account ID, not login name/email. No sign, spaces, decimal point or leading zeroes. Supply securely. |
-| `CRON_SECRET` | Phase 10 | Separate secret authenticating the minute worker. |
-| `JOBS_BATCH_LIMIT`, `JOBS_TIME_BUDGET_MS` | Phase 10 | Bounded execution settings; choose with hosting limits when implementing the worker. |
+| `JOBS_BATCH_LIMIT`, `JOBS_TIME_BUDGET_MS` | Phase 10 | Bounded execution settings; per after-request batch; choose with hosting limits when implementing the job runner. |
 | `R2_ENDPOINT` | Phase 11 | Account-scoped S3-compatible R2 HTTPS endpoint. |
 | `R2_BUCKET` | Phase 11 | Private bucket for this environment. |
 | `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` | Phase 11 | Narrowly scoped credentials for that bucket. |

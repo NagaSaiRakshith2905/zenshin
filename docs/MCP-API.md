@@ -4,7 +4,7 @@ Status: proposed contract implementing accepted scope. Names below are canonical
 
 ## Actors and permission presets
 
-Every operation receives a server-constructed actor: owner user ID, kind human/agent/system, credential ID when applicable, project grants, and scopes. Browser owner sessions have full owner privileges. GitHub/cron system actors can perform only their explicitly defined jobs.
+Every operation receives a server-constructed actor: owner user ID, kind human/agent/system, credential ID when applicable, project grants, and scopes. Browser owner sessions have full owner privileges. GitHub/job-runner system actors can perform only their explicitly defined jobs.
 
 | Scope | Capability |
 | --- | --- |
@@ -101,7 +101,7 @@ External calls and uploads are not wrapped in an open database transaction. Use 
 
 ## Browser/API routes
 
-`/api/auth/*`: Better Auth routes. `/api/mcp`: agent-only MCP. `/api/github/webhook`: signed event receiver. `/api/internal/cron`: cron-secret authentication. Keep these separate from domain routing.
+`/api/auth/*`: Better Auth routes. `/api/mcp`: agent-only MCP. `/api/github/webhook`: signed event receiver. Keep these separate from domain routing.
 
 `/api/v1/projects`, `/sections`, `/tasks`, `/labels`, `/properties`, `/notes`, `/attachments`, `/github`, `/search`, `/activity`: typed domain adapters, scoped nested/ID routes as appropriate. GET reads; POST creates/commands; PATCH revisioned updates. Permanent deletion and management routes require an owner session, never a bearer agent key. Browser callers use protected sessions/origin checks; domain calls accepting keys construct the same restricted actor as MCP.
 

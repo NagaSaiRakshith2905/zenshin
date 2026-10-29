@@ -77,7 +77,7 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 | Better Auth | Secret, canonical auth URL, GitHub OAuth client ID/secret, owner identity |
 | GitHub App | App ID, private key, webhook secret, installation callback configuration |
 | R2 | Account endpoint, bucket, narrowly scoped credentials, approved CORS origins |
-| Jobs | Cron authentication secret, execution limits |
+| Jobs | Execution limits (no cron) |
 | Recovery | Independent destination, separate credentials, retention, backup runner and age alerts |
 | Observability | Error/log provider configuration and owner alert destination |
 
@@ -278,9 +278,8 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 
 - [ ] Implement database-backed job enqueue/deduplication, claim leases, bounded batches, retries, next-attempt times, and terminal failure state.
 - [ ] Ensure external calls occur outside open domain transactions. Store enough state to resume after process failure.
-- [ ] Add an authenticated internal cron endpoint and per-kind handlers for GitHub sync, file cleanup/deletion, exports, and maintenance.
-- [ ] Authenticate cron independently from human sessions/agent keys; reject unauthenticated invocation.
-- [ ] Make overlapping invocations safe, recover expired leases, and prevent multiple workers processing the same claimed job.
+- [ ] Run due jobs after app/MCP requests via Next.js `after()` in small time-boxed batches (no cron, no internal cron endpoint), plus per-kind handlers for GitHub sync, file cleanup/deletion, exports, and maintenance. Screens awaiting a job advance it on each poll.
+- [ ] Make overlapping triggers safe, recover expired leases, and prevent multiple workers processing the same claimed job.
 - [ ] Configure execution limits from actual hosting limits with safety margins, rather than unlimited batches.
 - [ ] Add structured logging and owner-visible integration health/retry information without creating an unsolicited task-notification system.
 - [ ] Add retention cleanup for expired idempotency records, webhook delivery data where appropriate, and temporary export/upload artifacts.
@@ -322,8 +321,8 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 - [ ] Preserve provenance after unlink/archive; permanent task deletion frees the mapping for a deliberate fresh import/reference.
 - [ ] Implement task issue/PR links, read models, head-SHA check/status summaries, and lost-access/deleted-item states.
 - [ ] Implement signed webhook receipt, delivery-ID deduplication, durable enqueue, and prompt acknowledgement.
-- [ ] Implement reconciliation shared by webhooks, cron, and manual Refresh, with conditional requests, stale-result protection, bounded per-installation requests, backoff, and rate-limit header handling.
-- [ ] Configure Vercel Pro's every-minute cron for tracked data; query import candidates on demand instead of scanning all account issues.
+- [ ] Implement reconciliation shared by webhooks, stale-on-read refresh, and manual Refresh, with conditional requests, stale-result protection, bounded per-installation requests, backoff, and rate-limit header handling.
+- [ ] Put refresh-if-stale (older than 60 seconds) in the shared service so browser polls and MCP reads both trigger it; poll from visible screens with TanStack Query `refetchInterval` (~5 s, paused when hidden). Query import candidates on demand instead of scanning all account issues.
 - [ ] Add Last refreshed/Refreshing/Stale/Connection unavailable UI. Refresh requests coalesce and cannot bypass GitHub limits.
 
 **Exit gate:** personal/organization staging repositories import/link correctly; a missed webhook is repaired by the minute sweep; provider failure retains usable local data; duplicate imports and stale overwrites fail.
@@ -408,7 +407,7 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 - [ ] Apply reviewed backward-compatible production migrations before compatible code deploys; never run destructive schema push on app startup.
 - [ ] Verify preview/production resources, app callbacks, GitHub installations, R2 origins, and secrets are isolated.
 - [ ] Run typecheck, lint, targeted automated tests, production build, full critical E2E flows, and both MCP acceptance scenarios.
-- [ ] Deploy and smoke-test owner login, task mutation, notes, file upload/download, GitHub freshness, cron processing, and exports.
+- [ ] Deploy and smoke-test owner login, task mutation, notes, file upload/download, GitHub freshness, after-request job processing, and exports.
 - [ ] Verify backup age/restore evidence and operational alert destination before declaring launch complete.
 - [ ] Record code rollback compatibility and forward-fix procedures; rehearse a safe application rollback in staging.
 - [ ] Complete the launch checklist in DELIVERY.md and update the planning index with actual runbooks/setup references.
@@ -457,7 +456,7 @@ Do not mark an integration complete based only on mocks, or recovery complete ba
 - [ ] Planning future features and finding/executing next work are usable in the agreed responsive interface.
 - [ ] Notes save safely, recover interrupted drafts, and retain/restore 20 saved revisions.
 - [ ] Private R2 files work from browser and agents with verified upload limits and authorized downloads.
-- [ ] Personal/organization GitHub repositories link/import safely; tracked state refreshes every minute and manually; opt-in rules are replay-safe.
+- [ ] Personal/organization GitHub repositories link/import safely; tracked state refreshes while viewed and manually; opt-in rules are replay-safe.
 - [ ] Codex and Claude Code use scoped, expiring, revocable keys and cannot exceed their grants.
 - [ ] Search/filter/list/board behavior is consistent across UI/API/MCP, without archived or unauthorized data leakage.
 - [ ] Owner exports are usable and secret-free; database-plus-files recovery is tested against the agreed retention/RPO target.

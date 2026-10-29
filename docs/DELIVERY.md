@@ -54,7 +54,7 @@ Use mocked external APIs for deterministic failure cases plus a staging smoke te
 2. Owner plans dependencies, sees blocked/overdue behavior in the correct timezone, works via list/board, and completes a parent with an explicit choice.
 3. Notes autosave; interruption restores a local draft; stale writes retain attempted text; owner restores one of the last 20 revisions.
 4. Browser/mobile uploads an allowed file and downloads it privately. Agent performs the same direct-transfer flow without binary MCP payloads.
-5. Personal and organization repositories connect where authorized. Import/link PR/check data refreshes on the minute cycle and manually; failure shows freshness rather than data loss.
+5. Personal and organization repositories connect where authorized. Import/link PR/check data refreshes while viewed (stale-on-read) and manually; failure shows freshness rather than data loss.
 6. Each required MCP client completes the acceptance scenario in MCP-API.md. Revocation, scoped access, and completion denial are demonstrated.
 7. Archive/restore and blocked permanent deletion work through the UI; deletion cleans external files via durable retries.
 8. Keyboard-only navigation, mobile touch flows, dark/light themes, zoom, reduced motion, and screen-reader labels work on principal screens.
@@ -66,7 +66,7 @@ Implementation targets to validate, not guarantees claimed before measurement:
 
 - Exercise a representative fixture of 50 projects, 10,000 tasks, and 50,000 activity entries; lists/search remain paginated and do not fetch all notes into memory.
 - Warm indexed task-list/search reads target p95 below 500 ms server time in the deployed region, excluding external APIs. UI remains interactive during background sync; measure cold-start behavior separately.
-- GitHub reconciliation is scheduled every minute for tracked data, with freshness/error indicators under rate limits or provider failures.
+- GitHub reconciliation runs on webhooks, stale-on-read and manual refresh, with freshness/error indicators under rate limits or provider failures.
 - Complete recoverable backup age stays <=24 hours. Alerts fire before/at breach; recovery is proven against isolated infrastructure before launch.
 - No missing required check, known cross-project data exposure, destructive data-loss bug, or broken required MCP client at launch.
 
@@ -77,7 +77,7 @@ Implementation targets to validate, not guarantees claimed before measurement:
 - Database migrations reviewed/applied; preview credentials and resources isolated.
 - OAuth callbacks/owner provisioning tested; public signup closed. GitHub App permissions/installations/webhook secret verified.
 - R2 CORS, presigning/conditional upload, file allowlist, cleanup, and download disposition verified.
-- Cron secret and minute schedule verified; jobs observable and retry bounded. GitHub App access limits documented for organizations.
+- After-request job processing verified (no cron); jobs observable and retry bounded. GitHub App access limits documented for organizations.
 - Backup encryption, independent credentials, 30-day retention, age alerts, and full restore drill verified. Record measured recovery duration.
 - Logs/redaction, error monitoring, integration health, and operational owner alerts configured.
 - Typecheck, lint, targeted tests, production build, E2E gates, and production smoke check pass.

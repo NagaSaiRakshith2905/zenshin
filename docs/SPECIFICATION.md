@@ -91,7 +91,7 @@ Filters: project, section/subtree, workflow category/status, label, priority, du
 - A new non-draft PR opening may move Ready → In progress. All linked PRs merged may move In progress → In review, requiring at least one linked PR and verified states for every linked PR. Closed-unmerged is not merged; unavailable data prevents transition. Never regress or mark Done.
 - Rules act on the linked task only, not its parent/children. If a category has several statuses, the owner selects the rule's target status. Draft-to-ready can trigger the PR-open rule once.
 - Linking an already-open/merged PR or enabling a rule establishes a baseline without retroactive transitions. Persist processed remote-event fingerprints, including no-op evaluations, so returning a task to Ready does not replay an old PR opening. All-merged evaluation identifies the linked PR set plus merge states and requires a qualifying merge after the baseline.
-- Poll connected, tracked GitHub data every minute, supplement with webhooks, and expose manual refresh. Import browsing fetches issues on demand instead of mirroring entire accounts.
+- Refresh tracked GitHub data on demand: webhooks for prompt updates, visible screens poll Zenshin every few seconds, the server refreshes from GitHub when cached data is over a minute old, plus manual refresh. No scheduled cron. Import browsing fetches issues on demand instead of mirroring entire accounts.
 
 ## Archive and deletion
 
