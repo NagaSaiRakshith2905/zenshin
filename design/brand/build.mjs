@@ -26,12 +26,14 @@ const write = (name, data) => fs.writeFileSync(path.join(out, name), data);
 // SVGs
 write("zenshin-logo-black.svg", src.replace('fill="currentColor"', `fill="${C.ink}"`));
 write("zenshin-logo-white.svg", src.replace('fill="currentColor"', `fill="${C.paper}"`));
-write("favicon.svg", `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}"><style>path{fill:${C.ink}}@media (prefers-color-scheme:dark){path{fill:${C.paper}}}</style><path d="${d}"/></svg>`);
+// Favicons are a light tile with the dark mark so they read on light and dark browser chrome.
+const favicon = (size) => compose(size, { fill: C.ink, bg: C.paper, scale: 0.72, radius: size * 0.22 });
+write("favicon.svg", favicon(32));
 write("icon-tile.svg", compose(512, { fill: C.paper, bg: C.ink, scale: 0.62, radius: 112 }));
 
 // PNGs
 const fav = {};
-for (const s of [16, 32, 48]) fav[s] = png(compose(s, { fill: C.ink, scale: 0.92 }));
+for (const s of [16, 32, 48]) fav[s] = png(favicon(s));
 write("favicon-32.png", fav[32]);
 write("apple-touch-icon.png", png(compose(180, { fill: C.paper, bg: C.ink, scale: 0.62 })));
 write("icon-192.png", png(compose(192, { fill: C.paper, bg: C.ink, scale: 0.62 })));

@@ -14,8 +14,8 @@ Colours come from the zinc tokens in [ui.css](../ui-mockups/ui.css). There is no
 |---|---|---|
 | `zenshin-logo.svg` | In-app logo: sidebar, sign-in, empty states. Inherits the text colour. | inline as a React component (`components/brand/logo.tsx`) |
 | `zenshin-logo-black.svg` / `-white.svg` | Fixed-colour logo for docs and outside use | `public/brand/` |
-| `favicon.svg` | Browser tab icon; follows the system light/dark setting | `app/icon.svg` |
-| `favicon.ico` | Fallback favicon with 16/32/48 px images | `app/favicon.ico` |
+| `favicon.svg` | Browser tab icon: dark mark on a light `#FAFAFA` rounded tile, readable on light and dark browser chrome | `app/icon.svg` |
+| `favicon.ico` | Fallback favicon with 16/32/48 px images of the same light tile | `app/favicon.ico` |
 | `favicon-32.png` | PNG favicon fallback | `public/brand/` |
 | `apple-touch-icon.png` | iOS home-screen icon, 180 px | `app/apple-icon.png` |
 | `icon-192.png`, `icon-512.png` | Web app manifest icons | `public/brand/`, listed in `app/manifest.ts` |

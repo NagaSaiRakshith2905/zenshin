@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
     applicationName: "Zenshin",
     description: "A private workspace for planning and tracking development.",
     robots: { index: false, follow: false },
-    icons: { icon: [{ url: "/brand/favicon-32.png", sizes: "32x32", type: "image/png" }] },
+    // Icons come from app/favicon.ico, icon.svg and apple-icon.png; a metadata `icons` value would hide them.
   };
 }
 
