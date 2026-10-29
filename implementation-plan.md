@@ -288,13 +288,13 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 
 ### Tasks
 
-- [ ] Implement database-backed job enqueue/deduplication, claim leases, bounded batches, retries, next-attempt times, and terminal failure state.
-- [ ] Ensure external calls occur outside open domain transactions. Store enough state to resume after process failure.
-- [ ] Run due jobs after app/MCP requests via Next.js `after()` in small time-boxed batches (no cron, no internal cron endpoint), plus per-kind handlers for GitHub sync, file cleanup/deletion, exports, and maintenance. Screens awaiting a job advance it on each refetch or Refresh.
-- [ ] Make overlapping triggers safe, recover expired leases, and prevent multiple workers processing the same claimed job.
-- [ ] Configure execution limits from actual hosting limits with safety margins, rather than unlimited batches.
-- [ ] Add structured logging and owner-visible integration health/retry information without creating an unsolicited task-notification system.
-- [ ] Add retention cleanup for expired idempotency records, webhook delivery data where appropriate, and temporary export/upload artifacts.
+- [x] Implement database-backed job enqueue/deduplication, claim leases, bounded batches, retries, next-attempt times, and terminal failure state.
+- [x] Ensure external calls occur outside open domain transactions. Store enough state to resume after process failure.
+- [x] Run due jobs after app/MCP requests via Next.js `after()` in small time-boxed batches (no cron, no internal cron endpoint), plus per-kind handlers for GitHub sync, file cleanup/deletion, exports, and maintenance. Screens awaiting a job advance it on each refetch or Refresh.
+- [x] Make overlapping triggers safe, recover expired leases, and prevent multiple workers processing the same claimed job.
+- [x] Configure execution limits from actual hosting limits with safety margins, rather than unlimited batches.
+- [x] Add structured logging and owner-visible integration health/retry information without creating an unsolicited task-notification system.
+- [x] Add retention cleanup for expired idempotency records, webhook delivery data where appropriate, and temporary export/upload artifacts.
 
 **Exit gate:** process interruption, retry, duplicate enqueue, and overlapping invocation tests pass. No business work relies on an in-memory queue or detached post-response promise.
 

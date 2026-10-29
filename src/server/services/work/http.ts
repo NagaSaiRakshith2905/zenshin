@@ -5,6 +5,7 @@ import { AccessError } from "@/server/auth/access";
 import { authenticateActor } from "@/server/auth/actors";
 import { assertBrowserOrigin, readSettingsBody } from "@/server/auth/http";
 import { getDatabase } from "@/server/db";
+import { scheduleJobs } from "@/server/jobs/schedule";
 import { createRequestContext } from "@/server/request-context";
 import { createWorkService, createWorkReader, DomainError } from ".";
 import { createNoteReader } from "./notes";
@@ -23,6 +24,7 @@ export async function workRoute(request: Request, path: string[]) {
   const headers = { "Cache-Control": "no-store, private", "X-Request-ID": context.requestId };
   try {
     const actor = await authenticateActor(request.headers);
+    scheduleJobs(actor.ownerId);
     const [resourceName, targetId, action] = path;
     if (!resources.includes(resourceName as Resource) || path.length > 4) return Response.json({ error: { code: "not_found", message: "Route was not found.", requestId: context.requestId } }, { status: 404, headers });
     const resource = resourceName as Resource;

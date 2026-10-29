@@ -2,6 +2,7 @@ import "server-only";
 import { z } from "zod";
 import { getDatabase } from "@/server/db";
 import { getAuthEnv, getServerEnv } from "@/server/env";
+import { scheduleJobs } from "@/server/jobs/schedule";
 import { createRequestContext } from "@/server/request-context";
 import { createSettingsService } from "@/server/services/settings";
 import { AccessError, type HumanActor } from "./access";
@@ -42,6 +43,7 @@ export async function ownerSettingsRoute(request: Request,
   const headers = { "Cache-Control": "no-store, private", "X-Request-ID": context.requestId };
   try {
     const actor = await authenticateOwner(request.headers);
+    scheduleJobs(actor.ownerId);
     if (!["GET", "HEAD"].includes(request.method)) assertBrowserOrigin(request);
     const result = await operation(createSettingsService(getDatabase(), getAuthEnv()), actor);
     return Response.json(result ?? { success: true }, { status, headers });
