@@ -56,6 +56,8 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 
 ## 3. Phase 0 — Establish the implementation baseline
 
+**Status: ✅ Complete (2026-10-29).** All tasks done; Verification items deferred until all phases are built.
+
 ### Tasks
 
 - [x] Confirm the specification package, including explicitly proposed implementation defaults.
@@ -83,6 +85,8 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 
 ## 4. Phase 1 — Scaffold the application and checks
 
+**Status: ✅ Complete (2026-10-29).** All tasks done; Verification items deferred until all phases are built.
+
 ### Tasks
 
 - [x] Create Next.js App Router with TypeScript, Tailwind, and shadcn/ui using current compatible setup instructions.
@@ -101,6 +105,8 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 **Exit gate:** the empty application runs locally and its production build, typecheck, and lint pass. CI can reproduce the result.
 
 ## 5. Phase 2 — Implement the database model
+
+**Status: ✅ Complete (2026-10-29).** All tasks done; Verification items deferred until all phases are built.
 
 ### Tasks
 
@@ -125,6 +131,8 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 **Exit gate:** reproducible clean database creation, working seed, and documented distinction between SQL constraints and service-enforced invariants.
 
 ## 6. Phase 3 — Authentication, ownership, and agent credentials
+
+**Status: ✅ Complete (2026-10-29).** All tasks done; Verification items deferred until all phases are built.
 
 ### Tasks
 
