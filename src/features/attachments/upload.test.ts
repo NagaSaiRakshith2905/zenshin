@@ -26,9 +26,16 @@ describe("direct attachment uploads", () => {
     const current = attempt();
     const request = vi.fn().mockResolvedValueOnce(instructions).mockRejectedValueOnce(new WorkError("storage unavailable", "integration_unavailable")).mockResolvedValueOnce(ready);
     const put = vi.fn().mockRejectedValue(new Error("lost PUT response"));
-    await expect(uploadAttachment(current, vi.fn(), request, put)).rejects.toThrow("storage unavailable");
+    await expect(uploadAttachment(current, vi.fn(), request, put)).rejects.toThrow("lost PUT response");
     await expect(uploadAttachment(current, vi.fn(), request, put)).resolves.toEqual(ready);
     expect(request.mock.calls.map((args) => args[0])).toEqual(["attachments", `attachments/${pending.id}/finalize`, `attachments/${pending.id}/finalize`]);
+  });
+  it("retries an interrupted transfer with the same instructions when the file has not arrived", async () => {
+    const current = attempt(); const request = vi.fn().mockResolvedValueOnce(instructions).mockRejectedValueOnce(new WorkError("The file has not arrived yet.", "conflict")).mockResolvedValueOnce(ready);
+    const put = vi.fn().mockRejectedValueOnce(new Error("File transfer was interrupted.")).mockResolvedValueOnce(undefined);
+    await expect(uploadAttachment(current, vi.fn(), request, put)).rejects.toThrow("File transfer was interrupted.");
+    await expect(uploadAttachment(current, vi.fn(), request, put)).resolves.toEqual(ready);
+    expect(put).toHaveBeenCalledTimes(2); expect(put.mock.calls[1][1]).toBe(instructions.upload);
   });
   it("tries finalization without reusing expired upload URLs", async () => {
     const current = attempt(); current.instructions = { ...instructions, upload: { ...instructions.upload!, expiresAt: new Date(0).toISOString() } };

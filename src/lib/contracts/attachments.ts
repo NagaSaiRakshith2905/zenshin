@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { noteTarget } from "./notes";
 
+export const maxConcurrentUploads = 20;
 export const maxAttachmentBytes = 20_000_000;
 export const uploadLifetimeSeconds = 600;
 export const downloadLifetimeSeconds = 300;

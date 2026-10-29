@@ -323,7 +323,7 @@ The conditional-write strategy is implemented and tests assert that `content-typ
 - [ ] Oversize/wrong-format objects, missing objects, unauthorized targets, expired URLs, and overwritten-object attempts are handled safely.
 - [ ] Temporary oversized bytes are rejected/cleaned at finalization; do not claim the presigned PUT imposes an S3 POST size policy.
 
-**Local evidence:** 100 unit tests and 55 disposable PostgreSQL integration tests pass; typecheck, lint and Webpack production build pass. The attachment suite covers grants/scopes, initiation retries, finalization, invalid/missing/oversized files, transient failures, stale verifiers, deletion races and cleanup. Desktop/mobile fixture checks cover display, retry verification, note picker and removal confirmation. Live transfers, CORS, expired signed URLs and conditional overwrite behavior remain unverified.
+**Local evidence:** 109 unit tests pass; 55 disposable PostgreSQL integration tests passed before two audit cases were added (the updated integration suite awaits an available test database); typecheck, lint and Webpack production build pass. The attachment suite covers grants/scopes, initiation retries, finalization, invalid/missing/oversized files, transient failures, stale verifiers, deletion races and cleanup. Desktop/mobile fixture checks cover display, retry verification, note picker and removal confirmation. Live transfers, CORS, expired signed URLs and conditional overwrite behavior remain unverified.
 
 **Exit gate:** ready attachment metadata agrees with actual private bytes; download access and cleanup are demonstrably correct.
 

@@ -1,5 +1,5 @@
 import { attachmentMediaType, beginAttachment, type AttachmentTarget, type Attachment, type UploadInstructions } from "@/lib/contracts/attachments";
-import { workRequest } from "@/features/work/api";
+import { workRequest, WorkError } from "@/features/work/api";
 
 export type UploadAttempt = { file: File; target: AttachmentTarget; key: string; instructions?: UploadInstructions };
 export function attachmentLink(id: string, origin: string) { return `${origin}/api/v1/attachments/${id}/download?redirect=true`; }
@@ -28,11 +28,13 @@ export async function uploadAttachment(attempt: UploadAttempt, status: (stage: "
   const { attachment, upload } = attempt.instructions;
   if (attachment.state === "ready") return attachment;
   if (attachment.state === "failed") throw new Error("This upload failed verification. Remove it and select the file again.");
+  let putError: unknown;
   if (upload && new Date(upload.expiresAt).getTime() > Date.now()) {
     status("uploading", 0);
     // A transfer error can mean only its response was lost; finalization remains authoritative.
-    try { await put(attempt.file, upload, (progress) => status("uploading", progress)); } catch { /* Check actual storage before asking for another transfer. */ }
+    try { await put(attempt.file, upload, (progress) => status("uploading", progress)); } catch (error) { putError = error; }
   }
   status("verifying", 100);
-  return request<Attachment>(`attachments/${attachment.id}/finalize`, "POST", {});
+  try { return await request<Attachment>(`attachments/${attachment.id}/finalize`, "POST", {}); }
+  catch (error) { if (putError && !(error instanceof WorkError && error.code === "upload_rejected")) throw putError; throw error; }
 }

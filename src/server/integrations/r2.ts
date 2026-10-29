@@ -7,7 +7,7 @@ import { attachmentDisposition } from "./attachment-content";
 
 export type ObjectMetadata = { size: number; mediaType: string; etag: string; encoding?: string };
 export type AttachmentStorage = {
-  signUpload(key: string, mediaType: string, expiresAt: Date): Promise<{ url: string; headers: Record<string, string> }>;
+  signUpload(key: string, mediaType: string, size: number, expiresAt: Date): Promise<{ url: string; headers: Record<string, string> }>;
   head(key: string, signal: AbortSignal): Promise<ObjectMetadata | null>;
   inspect(key: string, metadata: ObjectMetadata, text: boolean, signal: AbortSignal): Promise<Uint8Array>;
   signDownload(key: string, name: string, mediaType: string): Promise<string>;
@@ -19,11 +19,11 @@ export function createR2Storage(env = parseStorageEnv(process.env)): AttachmentS
     requestChecksumCalculation: "WHEN_REQUIRED", responseChecksumValidation: "WHEN_REQUIRED", maxAttempts: 2 });
   const Bucket = env.R2_BUCKET;
   return {
-    async signUpload(Key, ContentType, expiresAt) {
+    async signUpload(Key, ContentType, ContentLength, expiresAt) {
       const expiresIn = Math.floor((expiresAt.getTime() - Date.now()) / 1000);
       if (expiresIn < 1) throw new Error("Upload instructions expired");
-      const url = await getSignedUrl(client, new PutObjectCommand({ Bucket, Key, ContentType, IfNoneMatch: "*" }), {
-        expiresIn, signableHeaders: new Set(["content-type", "if-none-match"]),
+      const url = await getSignedUrl(client, new PutObjectCommand({ Bucket, Key, ContentType, ContentLength, IfNoneMatch: "*" }), {
+        expiresIn, signableHeaders: new Set(["content-type", "content-length", "if-none-match"]),
       });
       return { url, headers: { "Content-Type": ContentType, "If-None-Match": "*" } };
     },

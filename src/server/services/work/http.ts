@@ -23,6 +23,7 @@ const actions: Partial<Record<Resource, Record<string, Command>>> = {
 export async function workRoute(request: Request, path: string[]) {
   const context = createRequestContext();
   const headers = { "Cache-Control": "no-store, private", "X-Request-ID": context.requestId };
+  const noteDownload = request.method === "GET" && path.length === 3 && path[0] === "attachments" && path[2] === "download" && new URL(request.url).searchParams.get("redirect") === "true";
   try {
     const actor = await authenticateActor(request.headers);
     scheduleJobs(actor.ownerId);
@@ -95,6 +96,8 @@ export async function workRoute(request: Request, path: string[]) {
   } catch (error) {
     if (error instanceof DomainError || error instanceof AccessError) {
       const statuses: Record<string, number> = { unauthenticated: 401, forbidden: 403, not_found: 404, conflict: 409, decision_required: 409, idempotency_conflict: 409, validation_error: 422, dependency_cycle: 422, hierarchy_limit: 422, rate_limited: 429, upload_rejected: 422, integration_unavailable: 503 };
+      if (noteDownload && error.code === "unauthenticated") return new Response(null, { status: 302, headers: { ...headers, Location: "/sign-in", "Referrer-Policy": "no-referrer" } });
+      if (noteDownload && ["conflict", "not_found", "forbidden"].includes(error.code)) return new Response('<!doctype html><html lang="en"><title>Attachment unavailable</title><body><p>This attachment is unavailable.</p><a href="/">Back to Zenshin</a></body></html>', { status: statuses[error.code], headers: { ...headers, "Content-Type": "text/html; charset=utf-8", "Referrer-Policy": "no-referrer" } });
       return Response.json({ error: { code: error.code, message: error.message, ...(error instanceof DomainError ? { details: error.details } : {}), requestId: context.requestId } }, { status: statuses[error.code] ?? 500, headers });
     }
     if (error instanceof z.ZodError) return Response.json({ error: { code: "validation_error", message: "Check the request fields.", fields: error.issues.map(({ path, message }) => ({ path, message })), requestId: context.requestId } }, { status: 422, headers });

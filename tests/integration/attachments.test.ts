@@ -83,15 +83,21 @@ describe("private attachment lifecycle", () => {
   it.each(["oversize", "size", "mime", "binary", "missing", "expired"])("rejects %s uploads and durably defers cleanup past reusable URL expiry", async (kind) => {
     const started = await begin(); const id = started.attachment.id;
     await put(id, kind === "binary" ? "a\0bcd" : "hello", kind === "oversize" ? { size: 20_000_001 } : kind === "size" ? { size: 4 } : kind === "mime" ? { mediaType: "text/html" } : {});
-    if (kind === "missing") objects.delete((await row(id)).objectKey);
+    if (kind === "missing") { objects.delete((await row(id)).objectKey); await database.db.update(attachments).set({ uploadExpiresAt: new Date(Date.now() - 1000) }).where(eq(attachments.id, id)); }
     if (kind === "expired") await database.db.update(attachments).set({ uploadExpiresAt: new Date(Date.now() - cleanupMarginMs - 1) }).where(eq(attachments.id, id));
     await expect(service().finalize(owner, { id }, "reject")).rejects.toMatchObject({ code: "upload_rejected" });
     expect(await row(id)).toMatchObject({ state: "failed", verifiedAt: null });
     await expect(service().download(owner, { id })).rejects.toMatchObject({ code: "conflict" });
     const [job] = await database.db.select().from(backgroundJobs).where(eq(backgroundJobs.deduplicationKey, `attachment-failed:${id}`));
     expect(job.payload).toMatchObject({ attachmentId: id });
-    if (kind !== "expired") expect(job.availableAt.getTime()).toBeGreaterThan(Date.now() + cleanupMarginMs);
+    if (kind !== "expired" && kind !== "missing") expect(job.availableAt.getTime()).toBeGreaterThan(Date.now() + cleanupMarginMs);
     await expect(service().finalize(owner, { id }, "reject-retry")).rejects.toMatchObject({ code: "upload_rejected" });
+  });
+  it("keeps a missing upload pending until its URL expires", async () => {
+    const started = await begin(); const id = started.attachment.id;
+    await expect(service().finalize(owner, { id }, "missing")).rejects.toMatchObject({ code: "conflict", message: "The file has not arrived yet. Retry the upload." });
+    expect((await row(id)).state).toBe("pending");
+    await put(id); expect((await service().finalize(owner, { id }, "retry")).state).toBe("ready");
   });
   it("retains a retryable state after a provider outage", async () => {
     const started = await begin(); await put(started.attachment.id);
@@ -159,5 +165,16 @@ describe("private attachment lifecycle", () => {
     const [job] = await database.db.select().from(backgroundJobs).where(and(eq(backgroundJobs.ownerId, owner.ownerId), eq(backgroundJobs.deduplicationKey, `attachment-delete:${id}`)));
     expect(job.payload).toMatchObject({ objectKey: current.objectKey });
     expect(job.availableAt.getTime()).toBeGreaterThan(Date.now() + cleanupMarginMs);
+  });
+  it("caps concurrent unexpired uploads across projects and permits replay", async () => {
+    await database.db.update(attachments).set({ uploadExpiresAt: new Date(0) }).where(eq(attachments.ownerId, owner.ownerId));
+    const key = randomUUID(); const first = await service().begin(owner, input(), "first", key);
+    const results = await Promise.allSettled(Array.from({ length: 20 }, (_, i) => begin(i % 2 ? { kind: "project", id: projectId } : {})));
+    expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(19);
+    expect(results.filter((result) => result.status === "rejected")).toHaveLength(1);
+    expect((await service().begin(owner, input(), "replay", key)).attachment.id).toBe(first.attachment.id);
+    await expect(begin()).rejects.toMatchObject({ code: "validation_error" });
+    await database.db.update(attachments).set({ state: "failed" }).where(eq(attachments.id, first.attachment.id));
+    await expect(begin()).resolves.toHaveProperty("upload");
   });
 });

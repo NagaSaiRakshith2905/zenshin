@@ -23,7 +23,7 @@ export function TaskRow({ task, standalone = false, context = false, subtasks = 
     {task.blocked && <Badge variant="secondary"><Ban aria-hidden="true" />Blocked</Badge>}
     {task.projectName && <span className="work-row-project text-muted-foreground">{task.projectName}</span>}
     {task.priority !== "none" && <Badge className="work-row-priority" variant={task.priority === "urgent" ? "default" : "outline"}>{task.priority[0].toUpperCase() + task.priority.slice(1)}</Badge>}
-    {hasChildren && <Button variant="ghost" size="icon-sm" aria-label={`${expanded ? "Collapse" : "Expand"} subtasks for ${task.reference}`} aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>{expanded ? <ChevronDown /> : <ChevronRight />}</Button>}
+    {!standalone && (hasChildren ? <Button variant="ghost" size="icon-sm" className="max-md:size-11" aria-label={`${expanded ? "Collapse" : "Expand"} subtasks for ${task.reference}`} aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>{expanded ? <ChevronDown /> : <ChevronRight />}</Button> : <span className="size-7 shrink-0 max-md:size-11" aria-hidden="true" />)}
     <span className={cn("work-row-date", task.overdue && "is-overdue")}>{task.dueDate ? new Intl.DateTimeFormat("en", { month: "short", day: "numeric", timeZone: "UTC" }).format(new Date(`${task.dueDate}T00:00:00Z`)) : "—"}</span>
   </div>{hasChildren && expanded && <div className="work-subtasks">{subtasks.map((child) => <TaskRow key={child.id} task={child} standalone />)}</div>}</>;
 }

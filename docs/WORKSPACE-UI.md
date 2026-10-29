@@ -25,6 +25,6 @@ Queries retain existing data when refresh fails and provide retries. List endpoi
 
 ## Checks and limitations
 
-The unit suite passes: 78 tests in 14 files. Typecheck, lint and `pnpm exec next build --webpack` pass. The default Turbopack build remains subject to the previously recorded sandbox worker-port restriction; the package build script is unchanged.
+For current test evidence, see [IMPLEMENTATION-NOTES.md](../IMPLEMENTATION-NOTES.md). Typecheck, lint and `pnpm exec next build --webpack` pass. The default Turbopack build remains subject to the previously recorded sandbox worker-port restriction; the package build script is unchanged.
 
 The isolated preview in `tests/ui/` renders the actual client components using in-memory fetch fixtures and navigation shims. Desktop (1440×900), intermediate overlay and mobile (390×844) layouts were inspected; task editing, property creation/editing, completion choices, project navigation, focus restoration and light/dark appearance were exercised. This is UI evidence, not verification of PostgreSQL transactions or live authentication. No database, migrations, seeds, real sign-in, providers, deployment or production data was used.

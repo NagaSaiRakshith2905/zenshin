@@ -77,9 +77,9 @@ drizzle/                    reviewed SQL migrations
 ## Private R2 storage
 
 1. An authorized caller selects the target, original name, size, and declared MIME type. Validate allowlist and 20,000,000-byte cap; create pending attachment and a random immutable object key.
-2. Issue a ten-minute presigned PUT for that key with the required signed content type and conditional `If-None-Match: *` header. Configure CORS only for approved app origins/headers; agents send the same required headers.
+2. Issue a ten-minute presigned PUT for that key with the required signed content type, declared content length and conditional `If-None-Match: *` header. Configure CORS only for approved app origins/headers; agents send the same required headers.
 3. Client/agent uploads directly to R2. Do not send binary/base64 content through MCP or a normal app function.
-4. An authenticated finalize call checks ownership and performs HEAD plus limited content inspection. Verify actual size, signature/text encoding where applicable, and metadata; transition to ready only on success. R2 PUT presigning does not supply an S3 POST content-length-range policy, so oversized bytes can temporarily arrive and must be rejected/cleaned.
+4. An authenticated finalize call checks ownership and performs HEAD plus limited content inspection. Verify actual size, signature/text encoding where applicable, and metadata; transition to ready only on success. R2 enforcement of signed content length requires provider verification; finalization still rejects and cleans oversized bytes.
 5. Downloads first authorize the ready attachment and issue a five-minute GET URL with safe disposition/filename. Serve potentially active content as downloads. No public bucket or custom public delivery domain.
 6. Abandoned uploads are removed after URL expiry and a cleanup margin; ensure a reusable old URL cannot overwrite verified bytes. Deletion is retryable and idempotent.
 

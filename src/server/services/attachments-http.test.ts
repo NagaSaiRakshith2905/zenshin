@@ -7,6 +7,7 @@ vi.mock("./attachments", () => ({ createAttachmentService: vi.fn() }));
 import { authenticateActor } from "@/server/auth/actors";
 import { actionScopes, AccessError, type HumanActor } from "@/server/auth/access";
 import { createAttachmentService } from "./attachments";
+import { DomainError } from "./work/foundation";
 import { workRoute } from "./work/http";
 const id = "11111111-1111-4111-8111-111111111111";
 const owner: HumanActor = { kind: "human", ownerId: "owner", credentialId: null, projectIds: null, scopes: actionScopes };
@@ -44,4 +45,19 @@ it("keeps denied downloads from redirecting", async () => {
   service.download.mockRejectedValueOnce(new AccessError("forbidden", "Not permitted."));
   const response = await workRoute(new Request(`http://localhost:3000/api/v1/attachments/${id}/download?redirect=true`), ["attachments", id, "download"]);
   expect(response.status).toBe(403); expect(response.headers.has("location")).toBe(false);
+});
+
+it("renders stable-link errors for navigation while keeping API errors JSON", async () => {
+  const request = (query = "") => new Request(`http://localhost:3000/api/v1/attachments/${id}/download${query}`);
+  vi.mocked(authenticateActor).mockRejectedValueOnce(new AccessError("unauthenticated", "Sign in."));
+  const signIn = await workRoute(request("?redirect=true"), ["attachments", id, "download"]);
+  expect(signIn.status).toBe(302); expect(signIn.headers.get("location")).toBe("/sign-in");
+  for (const code of ["conflict", "not_found", "forbidden"] as const) {
+    service.download.mockRejectedValueOnce(new AccessError(code, "unavailable"));
+    const response = await workRoute(request("?redirect=true"), ["attachments", id, "download"]);
+    expect(response.headers.get("content-type")).toContain("text/html"); expect(response.headers.get("referrer-policy")).toBe("no-referrer");
+    expect(response.headers.get("cache-control")).toContain("no-store"); expect(await response.text()).toContain('href="/"');
+  }
+  service.download.mockRejectedValueOnce(new DomainError("conflict", "unavailable"));
+  const api = await workRoute(request(), ["attachments", id, "download"]); expect((await api.json()).error.code).toBe("conflict");
 });

@@ -53,9 +53,9 @@ describe("private attachment contracts and inspection", () => {
   });
   it("signs the content type and immutable-write condition and limits both URL lifetimes", async () => {
     const storage = createR2Storage(storageEnv);
-    const upload = await storage.signUpload("attachments/test/key", "text/plain", new Date(Date.now() + 600_000));
+    const upload = await storage.signUpload("attachments/test/key", "text/plain", 5, new Date(Date.now() + 600_000));
     const url = new URL(upload.url);
-    expect(url.searchParams.get("X-Amz-SignedHeaders")?.split(";")).toEqual(expect.arrayContaining(["host", "content-type", "if-none-match"]));
+    expect(url.searchParams.get("X-Amz-SignedHeaders")?.split(";")).toEqual(expect.arrayContaining(["host", "content-type", "content-length", "if-none-match"]));
     expect(Number(url.searchParams.get("X-Amz-Expires"))).toBeLessThanOrEqual(600);
     expect(upload.headers).toEqual({ "Content-Type": "text/plain", "If-None-Match": "*" });
     const download = new URL(await storage.signDownload("attachments/test/key", "a.txt", "text/plain"));

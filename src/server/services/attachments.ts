@@ -1,9 +1,9 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { and, desc, eq, lt, or, sql } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, lt, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { noteTarget } from "@/lib/contracts/notes";
-import { beginAttachment, attachmentId, attachmentMediaType, cleanupMarginMs, uploadLifetimeSeconds, downloadLifetimeSeconds, type AttachmentTarget, type Attachment, type UploadInstructions } from "@/lib/contracts/attachments";
+import { beginAttachment, attachmentId, attachmentMediaType, cleanupMarginMs, maxConcurrentUploads, uploadLifetimeSeconds, downloadLifetimeSeconds, type AttachmentTarget, type Attachment, type UploadInstructions } from "@/lib/contracts/attachments";
 import { wireValue } from "@/lib/contracts/work";
 import { assertHumanOwner, assertProjectScope, type Actor, type Scope } from "@/server/auth/access";
 import type { Database, DatabaseExecutor } from "@/server/db";
@@ -51,7 +51,10 @@ export function createAttachmentService(db: Database, storage: () => AttachmentS
       z.string().min(1).max(200).parse(key);
       const input = beginAttachment.parse(raw);
       const receipt = await atomicMutation(db, actor, "begin_attachment_upload", input, requestId, key, async (tx) => {
+        await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`attachment-uploads:${actor.ownerId}`}, 0))`);
         const projectId = await authorize(tx, actor, input, "upload", true);
+        const [count] = await tx.select({ value: sql<number>`count(*)::int` }).from(attachments).where(and(eq(attachments.ownerId, actor.ownerId), inArray(attachments.state, ["pending", "verifying"]), gt(attachments.uploadExpiresAt, new Date())));
+        if (count.value >= maxConcurrentUploads) throw new DomainError("validation_error", "Too many uploads are in progress. Finish or remove an upload and retry.");
         const id = randomUUID();
         const [row] = await tx.insert(attachments).values({ id, ownerId: actor.ownerId,
           [input.kind === "task" ? "taskId" : input.kind === "section" ? "sectionId" : "projectId"]: input.id,
@@ -63,7 +66,7 @@ export function createAttachmentService(db: Database, storage: () => AttachmentS
       const { row } = await find(db, actor, receipt.id, "upload");
       if (row.state !== "pending" || row.uploadExpiresAt.getTime() <= Date.now()) return { attachment: publicAttachment(row), upload: null };
       try {
-        const signed = await storage().signUpload(row.objectKey, row.declaredMediaType, row.uploadExpiresAt);
+        const signed = await storage().signUpload(row.objectKey, row.declaredMediaType, row.declaredSize, row.uploadExpiresAt);
         return { attachment: publicAttachment(row), upload: { method: "PUT", ...signed, expiresAt: row.uploadExpiresAt.toISOString() } };
       } catch { throw providerUnavailable(); }
     },
@@ -101,6 +104,7 @@ export function createAttachmentService(db: Database, storage: () => AttachmentS
         const signal = AbortSignal.timeout(20_000);
         const adapter = storage();
         const head = await adapter.head(row.objectKey, signal);
+        if (!head && row.uploadExpiresAt.getTime() > Date.now()) throw new DomainError("conflict", "The file has not arrived yet. Retry the upload.");
         if (!head) throw new UploadRejected("The uploaded object is missing. Select the file again to retry.");
         verifyAttachmentMetadata(row, head);
         const type = attachmentMediaType(row.originalName);
@@ -111,7 +115,7 @@ export function createAttachmentService(db: Database, storage: () => AttachmentS
         if (error instanceof UploadRejected) failure = error.message;
         else {
           await db.update(attachments).set({ state: "pending", updatedAt: new Date(), revision: row.revision + 1 }).where(and(eq(attachments.id, id), eq(attachments.revision, row.revision), eq(attachments.state, "verifying")));
-          throw providerUnavailable();
+          throw error instanceof DomainError ? error : providerUnavailable();
         }
       }
       const result = await db.transaction(async (tx) => {
