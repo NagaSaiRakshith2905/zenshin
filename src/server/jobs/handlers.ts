@@ -3,10 +3,13 @@ import type { Database } from "@/server/db/connection";
 import type { Handlers } from "./index";
 import { cleanupAttachment } from "@/server/services/attachments";
 
+import { reconcileGithub } from "@/server/services/github/refresh";
+import { expandGithubDelivery } from "@/server/services/github/webhook";
+
 export function jobHandlers(db: Database): Handlers {
   const unavailable = async () => { throw new Error("Integration not yet implemented"); };
   return {
-    github_sync: unavailable,
+    github_sync: (job, signal) => job.payload.deliveryId ? expandGithubDelivery(db, job.ownerId, job.payload) : reconcileGithub(db, job.ownerId, job.payload, signal),
     attachment_cleanup: (job, signal) => cleanupAttachment(db, job.ownerId, job.payload, signal),
     export: unavailable,
     export_cleanup: unavailable,

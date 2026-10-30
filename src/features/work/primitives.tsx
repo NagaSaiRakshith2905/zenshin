@@ -26,7 +26,7 @@ export function useOnline() { return useSyncExternalStore(subscribeOnline, () =>
 // One toast for the whole workspace instead of a QueryError per query while offline.
 export function OfflineToast() {
   if (useOnline()) return null;
-  return <div role="status" className="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-md border bg-popover px-4 py-2 text-sm text-popover-foreground shadow-lg"><WifiOff aria-hidden="true" className="size-4" />You're offline. Showing the last loaded data.</div>;
+  return <div role="status" className="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-md border bg-popover px-4 py-2 text-sm text-popover-foreground shadow-lg"><WifiOff aria-hidden="true" className="size-4" />You’re offline. Showing the last loaded data.</div>;
 }
 export function QueryError({ error, retry, retained = false }: { error: Error | null; retry: () => unknown; retained?: boolean }) {
   const online = useOnline();

@@ -50,6 +50,13 @@
       "when": 1793295136034,
       "tag": "0006_gifted_smasher",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793375773003,
+      "tag": "0007_overjoyed_black_cat",
+      "breakpoints": true
     }
   ]
 }

@@ -66,3 +66,15 @@ export function parseStorageEnv(input: Record<string, string | undefined>) {
   if (!result.success) throw new Error(`Invalid server environment: ${[...new Set(result.error.issues.map((issue) => issue.path.join(".")))].join(", ")}. See docs/R2.md.`);
   return result.data;
 }
+
+const githubEnvSchema = z.object({
+  GITHUB_APP_ID: z.string().regex(/^[1-9]\d*$/),
+  GITHUB_APP_SLUG: z.string().regex(/^[a-z0-9][a-z0-9-]*$/),
+  GITHUB_APP_PRIVATE_KEY: z.string().min(1),
+  GITHUB_APP_WEBHOOK_SECRET: z.string().min(32),
+});
+export function parseGithubEnv(input: Record<string, string | undefined>) {
+  const result = githubEnvSchema.safeParse(input);
+  if (!result.success) throw new Error(`Invalid server environment: ${[...new Set(result.error.issues.map((issue) => issue.path.join(".")))].join(", ")}. See docs/GITHUB.md.`);
+  return result.data;
+}

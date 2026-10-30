@@ -1,0 +1,11 @@
+import { z } from "zod";
+import { id, revision } from "./work";
+export const githubPage = z.coerce.number().int().min(1).max(10000).default(1);
+export const githubProject = z.strictObject({ projectId: id });
+export const githubRepository = githubProject.extend({ repositoryId: id });
+export const githubItemInput = githubRepository.extend({ number: z.coerce.number().int().positive().max(2147483647), type: z.enum(["issue", "pr"]) });
+export const githubLinkInput = githubItemInput.extend({ taskId: id, expectedRevision: revision });
+export const githubImportInput = githubItemInput.omit({ type: true }).extend({ sectionId: id.nullable().default(null), statusId: id.optional(), reopenCompletedAncestors: z.boolean().default(false) });
+export const githubRuleInput = githubProject.extend({ ruleKind: z.enum(["pr_open", "all_prs_merged"]), enabled: z.boolean(), targetStatusId: id, expectedRevision: z.number().int().nonnegative() });
+export type GithubRuleKind = z.infer<typeof githubRuleInput>["ruleKind"];
+export type GithubItemState = { id: string; type: "issue" | "pr"; state: string; isDraft: boolean; isMerged: boolean; availability: string; remoteUpdatedAt: Date; openedAt: Date | null; readyAt: Date | null; mergedAt: Date | null };

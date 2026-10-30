@@ -42,7 +42,7 @@ export function useAction() {
     };
     if (change) { await client.cancelQueries({ queryKey: ["work", resource] }); patchCache(change); }
     try {
-      const result = await workRequest(next.path, next.input.expectedRevision === undefined && !next.path.includes("/delete") ? "POST" : next.path.split("/").length === 2 ? "PATCH" : "POST", next.input, next.key);
+      const result = await workRequest(next.path, resource === "github" || (next.input.expectedRevision === undefined && !next.path.includes("/delete")) ? "POST" : next.path.split("/").length === 2 ? "PATCH" : "POST", next.input, next.key);
       // Adopt the new revision now so a quick follow-up edit isn't a false conflict.
       // Only trust a revision that belongs to this row; some actions return a different record.
       if (change && result && typeof result === "object" && "revision" in result && (result as { id?: string }).id === id) patchCache(() => ({ revision: (result as { revision: number }).revision }));

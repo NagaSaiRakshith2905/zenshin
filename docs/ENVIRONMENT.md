@@ -23,8 +23,8 @@ Copy `.env.example` to `.env.local` for local development. Keep real values in i
 | `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` | Phase 11 | Narrowly scoped credentials for that bucket. |
 | `R2_CORS_ORIGINS` | Phase 11 provisioning | Explicit approved app origins, comma separated. Operator inventory only: configure the bucket using [R2 setup](R2.md), including `Content-Type` and `If-None-Match`; no runtime bucket administration. |
 | `GITHUB_APP_ID`, `GITHUB_APP_PRIVATE_KEY` | Phase 12 | Repository GitHub App identity/signing key, distinct from OAuth login. Multiline PEM can use quoted `\n` escapes in local env files. |
-| `GITHUB_APP_WEBHOOK_SECRET` | Phase 12 | Signature verification secret for the registered webhook. |
-| `GITHUB_APP_SLUG`, `GITHUB_APP_CALLBACK_URL` | Phase 12 | Installation URL identity and approved installation callback configuration. Register exact deployed callback/webhook routes when that slice defines them. |
+| `GITHUB_APP_WEBHOOK_SECRET` | Phase 12 | At least 32 characters, used to verify `/api/github/webhook`. See [GitHub setup](GITHUB.md). |
+| `GITHUB_APP_SLUG`, `GITHUB_APP_CALLBACK_URL` | Phase 12 | App slug for installation links; optional operator setup URL inventory (`${APP_ORIGIN}/api/github/setup`, not read by runtime). See [GitHub setup](GITHUB.md). |
 | `ERROR_REPORTING_DSN` | Observability provisioning | Reserved server-side provider connection; provider/adapter still to be selected. |
 | `OPERATIONAL_ALERT_EMAIL` | Operations provisioning | Owner operational alert destination; no in-product notification feature. |
 

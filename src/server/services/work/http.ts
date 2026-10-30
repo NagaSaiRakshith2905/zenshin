@@ -10,6 +10,7 @@ import { createRequestContext } from "@/server/request-context";
 import { createWorkService, createWorkReader, DomainError } from ".";
 import { createNoteReader } from "./notes";
 import { createAttachmentService } from "../attachments";
+import { githubRoute } from "../github/http";
 import { resources, type Resource } from "./read";
 
 const creates: Partial<Record<Resource, Command>> = { projects: "create_project", sections: "create_section", tasks: "create_task", statuses: "create_status", labels: "create_label", properties: "create_property", options: "create_option" };
@@ -28,6 +29,7 @@ export async function workRoute(request: Request, path: string[]) {
     const actor = await authenticateActor(request.headers);
     scheduleJobs(actor.ownerId);
     const [resourceName, targetId, action] = path;
+    if (resourceName === "github") return Response.json(await githubRoute(getDatabase(), actor, request, path.slice(1), context.requestId), { headers });
     if (resourceName === "attachments") {
       if (path.length > 3) throw new DomainError("not_found", "Route was not found.");
       const service = createAttachmentService(getDatabase());

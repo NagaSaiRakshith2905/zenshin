@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowUpRight, X, Link2, Unlink, History, Paperclip } from "lucide-react";
 import { NoteEditor } from "@/features/notes/editor";
+import { TaskGithub } from "@/features/github/panels";
 import { AttachmentPanel } from "@/features/attachments/panel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +53,7 @@ function TaskContent({ task, fullPage, dialog, closeDialog }: { task: Task; full
     {task.blocked && <Badge className="self-start" variant="outline">Blocked</Badge>}<TaskProperties task={task} />
     <NoteEditor kind="task" id={task.id} variant="inline" />
     {!task.parentTaskId && <Group title="Subtasks" count={task.progress?.total}><ProgressLine value={task.progress} /><QueryError error={children.error} retry={children.refetch} retained={Boolean(children.data)} />{children.isPending ? <LoadingRows /> : <TaskList tasks={children.items} standalone />}<LoadMore query={children} /><div className="p-3"><NewTaskButton parentTask={task} projectId={task.projectId} /></div></Group>}
+    <TaskGithub task={task} />
     {dialog && <Dialog open onOpenChange={(open) => { if (!open) closeDialog(); }}><DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-xl"><DialogHeader><DialogTitle>{dialog}</DialogTitle><DialogDescription className="sr-only">Manage {dialog.toLowerCase()} for this task.</DialogDescription></DialogHeader>{dialog === "Dependencies and blocking" ? <div className="flex flex-col gap-3 p-3">{task.blocked && <Badge variant="outline">Blocked</Badge>}<p className="text-muted-foreground">{task.manualBlockedReason ?? "No manual blocking reason."}</p><Button className="self-start" variant="outline" size="sm" onClick={() => setReasonEditor(true)}>Edit blocking reason</Button><Dependencies task={task} />{task.dependentTaskIds.length > 0 && <><p className="font-medium">Required by</p>{task.dependentTaskIds.map((id) => <RelatedTask key={id} id={id} />)}</>}</div> : dialog === "Activity" ? <div className="flex flex-col gap-4 p-4"><QueryError error={activity.error} retry={activity.refetch} retained={Boolean(activity.data)} />{activity.isPending ? <LoadingRows /> : activity.items.length === 0 ? <p className="text-muted-foreground">No activity yet.</p> : <ol className="flex flex-col gap-4">{activity.items.map((a) => <li key={a.id}><p><span className="font-medium">{a.actorKind === "agent" ? "Agent credential" : a.actorKind === "system" ? "System" : "You"}</span> {a.action.replaceAll("_", " ")}{a.changedFields?.fields?.length ? ` (${a.changedFields.fields.join(", ")})` : ""}</p>{a.changedFields?.reason && <p>{a.changedFields.reason}</p>}<time className="text-xs text-muted-foreground" dateTime={a.createdAt}>{new Date(a.createdAt).toLocaleString()}</time></li>)}</ol>}<LoadMore query={activity} /></div> : <AttachmentPanel kind="task" id={task.id} />}</DialogContent></Dialog>}
     {reasonEditor && <ReasonEditor task={task} close={() => setReasonEditor(false)} />}
   </div>;

@@ -11,6 +11,7 @@ const externalId = (name: string) => bigint(name, { mode: "bigint" });
 
 export const githubInstallations = pgTable("github_installations", {
   ...mutableColumns(), ownerId: owner(), installationId: externalId("installation_id").notNull().unique(),
+  requestLeaseToken: uuid("request_lease_token"), requestLeaseExpiresAt: eventTime("request_lease_expires_at"), nextRequestAt: eventTime("next_request_at").defaultNow().notNull(),
   accountId: externalId("account_id").notNull(), accountName: text("account_name").notNull(), status: text("status").default("active").notNull(),
 }, (t) => [
   unique("github_installations_scope_id").on(t.ownerId, t.id),

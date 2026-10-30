@@ -1,6 +1,6 @@
 # Detailed implementation plan
 
-Status: implementation in progress. Phases 0–9 are complete and verified against disposable local PostgreSQL. Phase 10 job infrastructure and Phase 11 application code are implemented; Phase 11 provisioning and real R2 acceptance remain open. Phases 12–16 remain. No provider infrastructure has been provisioned by this plan.
+Status: implementation in progress. Phases 0–9 are complete and verified against disposable local PostgreSQL. Phase 10 job infrastructure and Phase 11 application code are implemented; Phase 11 provisioning and real R2 acceptance remain open. Phases 12–13 application code is implemented; PostgreSQL verification, GitHub App provisioning and staging acceptance remain open. Phases 14–16 remain. No provider infrastructure has been provisioned by this plan.
 
 ## 1. Purpose and governing documents
 
@@ -329,33 +329,39 @@ The conditional-write strategy is implemented and tests assert that `content-typ
 
 ## 15. Phase 12 — GitHub installation, import, and refresh
 
+**Status: Application code implemented (2026-10-30); acceptance pending.** See [GitHub setup and acceptance](docs/GITHUB.md).
+
 ### Tasks
 
 - [ ] Register/configure the separate GitHub App with only agreed read permissions and selected repository access.
-- [ ] Implement owner-only installation/repository connection for personal and authorized organization accounts; handle organization approval restrictions.
-- [ ] Persist installation/repository stable IDs, installation status, and project associations; keep login OAuth credentials separate.
-- [ ] Implement paginated issue browsing, excluding pull requests from the issue feed.
-- [ ] Implement explicit issue import with selected section/status, supported Markdown conversion, snapshot semantics, and independent provenance unique per project/issue.
-- [ ] Preserve provenance after unlink/archive; permanent task deletion frees the mapping for a deliberate fresh import/reference.
-- [ ] Implement task issue/PR links, read models, head-SHA check/status summaries, and lost-access/deleted-item states.
-- [ ] Implement signed webhook receipt, delivery-ID deduplication, durable enqueue, and prompt acknowledgement.
-- [ ] Implement reconciliation shared by webhooks, stale-on-read refresh, and manual Refresh, with conditional requests, stale-result protection, bounded per-installation requests, backoff, and rate-limit header handling.
-- [ ] Put refresh-if-stale (older than 60 seconds) in the shared service so page loads, refetches and MCP reads all trigger it. No polling by default: screens refetch on load, navigation and tab focus (TanStack Query defaults), plus manual Refresh. A slow `refetchInterval` may be added later to specific screens if live watching proves necessary. Query import candidates on demand instead of scanning all account issues.
-- [ ] Add Last refreshed/Refreshing/Stale/Connection unavailable UI. Refresh requests coalesce and cannot bypass GitHub limits.
+- [x] Implement owner-only installation/repository connection for personal and authorized organization accounts; handle organization approval restrictions.
+- [x] Persist installation/repository stable IDs, installation status, and project associations; keep login OAuth credentials separate.
+- [x] Implement paginated issue browsing, excluding pull requests from the issue feed.
+- [x] Implement explicit issue import with selected section/status, supported Markdown conversion, snapshot semantics, and independent provenance unique per project/issue.
+- [x] Preserve provenance after unlink/archive; permanent task deletion frees the mapping for a deliberate fresh import/reference.
+- [x] Implement task issue/PR links, read models, head-SHA check/status summaries, and lost-access/deleted-item states.
+- [x] Implement signed webhook receipt, delivery-ID deduplication, durable enqueue, and prompt acknowledgement.
+- [x] Implement reconciliation shared by webhooks, stale-on-read refresh, and manual Refresh, with conditional requests, stale-result protection, bounded per-installation requests, backoff, and rate-limit header handling.
+- [x] Put refresh-if-stale (older than 60 seconds) in the shared service so page loads, refetches and MCP reads all trigger it. No polling by default: screens refetch on load, navigation and tab focus (TanStack Query defaults), plus manual Refresh. A slow `refetchInterval` may be added later to specific screens if live watching proves necessary. Query import candidates on demand instead of scanning all account issues.
+- [x] Add Last refreshed/Refreshing/Stale/Connection unavailable UI. Refresh requests coalesce and cannot bypass GitHub limits.
 
-**Exit gate:** personal/organization staging repositories import/link correctly; a missed webhook is repaired by the minute sweep; provider failure retains usable local data; duplicate imports and stale overwrites fail.
+**Exit gate:** personal/organization staging repositories import/link correctly; a missed webhook is repaired by the next stale read; provider failure retains usable local data; duplicate imports and stale overwrites fail.
 
 ## 16. Phase 13 — GitHub automation
 
+**Status: Application code implemented (2026-10-30); acceptance pending.** See [GitHub setup and acceptance](docs/GITHUB.md).
+
 ### Tasks
 
-- [ ] Implement owner-only opt-in rule settings, separate enablement per rule, compatible selected target statuses, and default-disabled behavior.
-- [ ] On link/rule enable, establish a baseline without replaying historical open/merged events.
-- [ ] Persist event fingerprints and no-op evaluations so repeated refreshes or returning a task to Ready cannot replay an old event.
-- [ ] Apply new non-draft PR-open/draft-to-ready events only to Ready → In progress.
-- [ ] Apply all-linked-PRs-merged only to In progress → In review, with at least one PR, verified data for every PR, and a qualifying merge after baseline.
-- [ ] Treat draft, closed-unmerged, missing, or unavailable PR states explicitly. Do not auto-Done, regress statuses, or propagate to parent/subtasks.
-- [ ] Recheck task revision/status within the transition transaction; record system attribution and avoid duplicated activity.
+- [x] Implement owner-only opt-in rule settings, separate enablement per rule, compatible selected target statuses, and default-disabled behavior.
+- [x] On link/rule enable, establish a baseline without replaying historical open/merged events.
+- [x] Persist event fingerprints and no-op evaluations so repeated refreshes or returning a task to Ready cannot replay an old event.
+- [x] Apply new non-draft PR-open/draft-to-ready events only to Ready → In progress.
+- [x] Apply all-linked-PRs-merged only to In progress → In review, with at least one PR, verified data for every PR, and a qualifying merge after baseline.
+- [x] Treat draft, closed-unmerged, missing, or unavailable PR states explicitly. Do not auto-Done, regress statuses, or propagate to parent/subtasks.
+- [x] Recheck task revision/status within the transition transaction; record system attribution and avoid duplicated activity.
+
+**Verification pending:** PostgreSQL integration cases cover replay, races, multiple PRs and custom targets, but this session could not access the local PostgreSQL/Docker socket. Unit checks pass; staging acceptance is open.
 
 **Exit gate:** replay/race/multiple-PR/custom-status tests pass; linking an old PR has no surprise status effect.
 

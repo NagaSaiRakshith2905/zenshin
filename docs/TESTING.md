@@ -1,6 +1,6 @@
 # Checks and test isolation
 
-The unit suite runs 109 tests in 22 files. The integration suite previously passed 55 tests in 5 files against disposable PostgreSQL; two audit cases were added, but their run requires an available test database. Both suites are configured for local and CI runs. Real provider acceptance remains separate. See [IMPLEMENTATION-NOTES.md](../IMPLEMENTATION-NOTES.md) for current results.
+The unit suite runs 141 tests in 28 files. The integration suite previously passed 55 tests in 5 files against disposable PostgreSQL; two audit cases were added, but their run requires an available test database. Both suites are configured for local and CI runs. Real provider acceptance remains separate. See [IMPLEMENTATION-NOTES.md](../IMPLEMENTATION-NOTES.md) for current results.
 
 | Command | Status |
 | --- | --- |
@@ -31,3 +31,7 @@ Before importing a driver, `tests/support/integration-setup.ts` validates `TEST_
 Phase 2 supplies `tests/support/postgres.ts`: the guarded URL initially points to an existing test-only local administration database (e.g. `zenshin_test_runner`), with a role allowed to create/drop databases on that disposable server. It creates a fresh `zenshin_test_<UUID>` database per suite, migrates it and exposes a pool, typed db, migration runner and `dispose()`. Always dispose in teardown; setup failure also closes/drops its own database. The initial suites exercise cross-project/owner FKs, uniqueness, note/file targets, property values, defaults, provenance, audit/deletion behavior, job leases and migration journal repeatability. Pure unit tests cover deterministic fixture scale/isolation and generated auth model/field mappings. These suites run against disposable PostgreSQL.
 
 Generate isolated owner/project graphs per test and clean them between cases. Transaction rollback alone is insufficient for concurrency tests using separate connections, so run those cases against their own database/fixture graph. Migrations run on the isolated database, never against a production or normal developer database. Future service phases add graph/concurrency behavior tests; SQL alone does not enforce graph/depth rules. See [DATABASE.md](DATABASE.md) for the SQL/service invariant split, fixture loading and forward migration-upgrade strategy.
+
+## GitHub phases 12–13
+
+`src/server/integrations/github/github.test.ts` verifies App JWTs, exact webhook signatures, conditional responses, rate limits and safe Markdown snapshots. `src/server/services/github/automation.test.ts` verifies new-event eligibility, historical/draft/closed/unavailable/stale suppression and merged-set fingerprints. `tests/integration/github.test.ts` adds PostgreSQL-backed connections, scope denials, snapshot/provenance/deletion, event baselines/no-ops/replay, custom targets, task/cache races, current-head summaries, request coalescing, rate-limit deferral and durable webhook delivery tests. The integration suite remains pending in this session because local socket/network access was denied. No Redis or Upstash client/configuration is added to tests. See [GitHub staging acceptance](GITHUB.md).

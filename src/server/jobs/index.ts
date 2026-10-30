@@ -4,6 +4,10 @@ import { and, eq, sql } from "drizzle-orm";
 import type { Database, DatabaseExecutor } from "@/server/db/connection";
 import { backgroundJobs } from "@/server/db/schema";
 
+export class JobDeferred extends Error {
+  constructor(public availableAt: Date) { super("Job waiting for provider backoff."); }
+}
+
 type Job = typeof backgroundJobs.$inferSelect;
 type Handler = (job: Job, signal: AbortSignal) => Promise<void>;
 export type Handlers = Record<string, Handler>;
@@ -61,7 +65,11 @@ export async function runJobs(db: Database, ownerId: string, handlers: Handlers,
       if (signal.aborted) throw new Error("Time budget exceeded");
       await db.update(backgroundJobs).set({ state: "succeeded", completedAt: new Date(), leaseToken: null, leaseExpiresAt: null, lastError: null, updatedAt: new Date(), revision: sql`${backgroundJobs.revision} + 1` }).where(and(eq(backgroundJobs.id, job.id), eq(backgroundJobs.leaseToken, job.leaseToken!)));
       console.info(JSON.stringify({ event: "job.succeeded", jobId: job.id, kind: job.kind, attempts: job.attempts }));
-    } catch {
+    } catch (error) {
+      if (error instanceof JobDeferred) {
+        await db.update(backgroundJobs).set({ state: "pending", availableAt: error.availableAt, attempts: Math.max(0, job.attempts - 1), leaseToken: null, leaseExpiresAt: null, lastError: "Waiting for provider backoff.", updatedAt: new Date() }).where(and(eq(backgroundJobs.id, job.id), eq(backgroundJobs.leaseToken, job.leaseToken!)));
+        continue;
+      }
       const terminal = job.attempts >= job.maxAttempts;
       const delay = Math.min(3600_000, 1000 * 2 ** Math.min(job.attempts, 12)) * (0.5 + Math.random() * 0.5);
       await db.update(backgroundJobs).set({ state: terminal ? "failed" : "pending", availableAt: new Date(Date.now() + delay), leaseToken: null, leaseExpiresAt: null, lastError: "Job failed; check integration configuration and retry.", updatedAt: new Date(), revision: sql`${backgroundJobs.revision} + 1` }).where(and(eq(backgroundJobs.id, job.id), eq(backgroundJobs.leaseToken, job.leaseToken!)));
