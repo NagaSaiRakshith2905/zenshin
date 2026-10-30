@@ -20,6 +20,19 @@ describe("transactional work services (deferred execution)", () => {
   afterAll(async () => { await database?.dispose(); });
   const create = async (title: string) => await service.execute(owner, "create_task", { projectId: fixture.projects[0].id, title }, randomUUID()) as { id: string; revision: number; number: number };
 
+  it("changes only unused property types and removes obsolete options", async () => {
+    const projectId = fixture.projects[0].id!;
+    const property = await service.execute(owner, "create_property", { projectId, name: "Type change test", type: "select", icon: "Star" }, randomUUID()) as { id: string; revision: number; icon: string };
+    expect(property.icon).toBe("Star");
+    await service.execute(owner, "create_option", { definitionId: property.id, name: "Choice" }, randomUUID());
+    const changed = await service.execute(owner, "update_property", { id: property.id, expectedRevision: property.revision, type: "text", icon: null }, randomUUID()) as { revision: number; icon: null };
+    expect(changed.icon).toBeNull();
+    expect((await database.pool.query("select count(*)::int as count from property_options where definition_id = $1", [property.id])).rows[0].count).toBe(0);
+    const task = await create("Property type guard");
+    await service.execute(owner, "set_task_properties", { id: task.id, expectedRevision: task.revision, values: { [property.id]: "used" } }, randomUUID());
+    await expect(service.execute(owner, "update_property", { id: property.id, expectedRevision: changed.revision, type: "number" }, randomUUID())).rejects.toMatchObject({ code: "validation_error", message: "Clear its values to change the type." });
+    expect(await createWorkReader(database.db).get(owner, "properties", property.id)).toMatchObject({ type: "text", hasValues: true, icon: null });
+  });
   it("replays actor-bound retries without duplicate state/activity and rejects changed input", async () => {
     const key = randomUUID();
     const input = { projectId: fixture.projects[0].id, title: "Retry exactly once" };

@@ -1,0 +1,1 @@
+export const propertyIcons = ["AlignLeft", "Hash", "Calendar", "SquareCheck", "CircleChevronDown", "List", "Link", "Star", "Heart", "Flag", "Tag", "Bookmark", "Briefcase", "Circle", "Clock", "Cloud", "File", "Folder", "Globe", "Lightbulb", "MapPin", "User", "Zap", "Target"] as const;

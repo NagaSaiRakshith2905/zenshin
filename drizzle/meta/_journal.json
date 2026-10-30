@@ -22,6 +22,34 @@
       "when": 1793218659649,
       "tag": "0002_auth_rate_limits",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793269981069,
+      "tag": "0003_rare_lightspeed",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793270083585,
+      "tag": "0004_board_default_view",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793294515546,
+      "tag": "0005_common_mister_fear",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793295136034,
+      "tag": "0006_gifted_smasher",
+      "breakpoints": true
     }
   ]
 }

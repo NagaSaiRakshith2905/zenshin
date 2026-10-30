@@ -1,3 +1,4 @@
+import type { propertyIcons } from "@/lib/contracts/property-icons";
 import type { categories, priorities, propertyTypes } from "@/lib/contracts/work";
 export type Category = typeof categories[number];
 export type Base = { id: string; revision: number; createdAt: string; updatedAt: string; archivedAt: string | null };
@@ -8,7 +9,7 @@ export type Task = Base & { projectId: string; sectionId: string | null; parentT
 export type Status = Base & { projectId: string; name: string; category: Category; position: string; isDefault: boolean };
 export type Label = Base & { projectId: string; name: string; color: string };
 export type Option = Base & { name: string; definitionId: string; position: string };
-export type Property = Base & { projectId: string; name: string; type: typeof propertyTypes[number]; position: string; options: Option[] };
+export type Property = Base & { projectId: string; name: string; type: typeof propertyTypes[number]; position: string; icon: typeof propertyIcons[number] | null; hasValues: boolean; options: Option[] };
 export type Activity = { id: string; taskId: string | null; actorKind: string; actorCredentialId: string | null; action: string; createdAt: string; changedFields: { fields?: string[]; reason?: string } };
 export type Page<T> = { items: T[]; nextCursor: string | null; hasMore: boolean; groupCounts?: Record<string, number>; statusCounts?: Record<string, number>; total?: number };
 export type Entity = Project | Section | Task;

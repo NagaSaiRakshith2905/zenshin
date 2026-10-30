@@ -57,6 +57,9 @@ export class NoteSession {
     try { content = noteDocument.parse(content); }
     catch (e) { clearTimeout(this.timer); this.emit({ content, status: "failed", error: e instanceof Error ? e.message : "Invalid note.", localSaved: false }); return; }
     const blocked = ["conflict", "failed", "recovery"].includes(this.snapshot.status);
+    if (!blocked && !this.inflight && !this.attempt && JSON.stringify(content) === this.saved) {
+      clearTimeout(this.timer); this.removeDrafts(); this.emit({ content, status: "saved", error: "", localSaved: false }); return;
+    }
     this.emit({ content, ...(blocked ? {} : { status: "unsaved", error: "" }) });
     this.persist(); clearTimeout(this.timer);
     if (!blocked && !this.paused) this.timer = setTimeout(() => void this.flush(), 800);
@@ -64,6 +67,8 @@ export class NoteSession {
   flush = (): Promise<void> => {
     clearTimeout(this.timer);
     if (this.inflight) return this.inflight;
+    // An edit that lands mid-save can leave "unsaved" with nothing left to send.
+    if (!this.paused && !this.dirty && !this.attempt && this.snapshot.status === "unsaved") { this.removeDrafts(); this.emit({ status: "saved", localSaved: false }); return Promise.resolve(); }
     if (this.paused || (!this.dirty && !this.attempt) || ["conflict", "recovery", "failed"].includes(this.snapshot.status)) return Promise.resolve();
     this.inflight = this.perform().finally(() => { this.inflight = undefined; if (this.dirty && this.snapshot.status === "unsaved" && !this.paused) this.timer = setTimeout(() => void this.flush(), 0); });
     return this.inflight;

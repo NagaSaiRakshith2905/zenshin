@@ -102,7 +102,7 @@ export const taskDependencies = pgTable("task_dependencies", {
 
 export const propertyDefinitions = pgTable("property_definitions", {
   ...mutableColumns(), ownerId: owner(), projectId: uuid("project_id").notNull(), name: text("name").notNull(),
-  normalizedName: text("normalized_name").notNull(), type: propertyType("type").notNull(), position: position(),
+  normalizedName: text("normalized_name").notNull(), type: propertyType("type").notNull(), icon: text("icon"), position: position(),
 }, (t) => [
   unique("property_definitions_scope_id").on(t.ownerId, t.projectId, t.id),
   unique("property_definitions_project_name").on(t.projectId, t.normalizedName),

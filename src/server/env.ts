@@ -34,7 +34,10 @@ const authEnvSchema = z.object({
   GITHUB_OAUTH_CLIENT_ID: z.string().trim().min(1),
   GITHUB_OAUTH_CLIENT_SECRET: z.string().trim().min(1),
   OWNER_GITHUB_ID: z.string().regex(/^[1-9]\d*$/),
-});
+  // Optional: without them, sessions and rate limits stay in Postgres (tests, offline dev).
+  UPSTASH_REDIS_REST_URL: z.url().startsWith("https://").optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().trim().min(1).optional(),
+}).refine((env) => !env.UPSTASH_REDIS_REST_URL === !env.UPSTASH_REDIS_REST_TOKEN, { path: ["UPSTASH_REDIS_REST_TOKEN"] });
 
 export function parseAuthEnv(input: Record<string, string | undefined>) {
   const app = parseServerEnv(input);

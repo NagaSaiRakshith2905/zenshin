@@ -16,6 +16,7 @@ Copy `.env.example` to `.env.local` for local development. Keep real values in i
 | `BETTER_AUTH_URL` | Phase 3 | Canonical auth origin; must agree with `APP_ORIGIN` and registered OAuth callbacks. |
 | `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET` | Phase 3 | Separate GitHub OAuth application for human sign-in. |
 | `OWNER_GITHUB_ID` | Phase 3 | Immutable positive decimal GitHub account ID, not login name/email. No sign, spaces, decimal point or leading zeroes. Supply securely. |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Phase 3 runtime | Upstash Redis REST endpoint and token for auth sessions and rate-limit counters. Use a separate database per environment. |
 | `JOBS_BATCH_LIMIT`, `JOBS_TIME_BUDGET_MS` | Phase 10 | Optional per-request batch limits: defaults 3 jobs and 3000 ms; maximum 10 jobs and 5000 ms. The 30-second lease exceeds the batch budget. Vercel Hobby defaults to 300 seconds with fluid compute (10 seconds without it); keep a margin for the request itself and lower these limits if the deployment config is tighter. |
 | `R2_ENDPOINT` | Phase 11 | Account-scoped S3-compatible R2 HTTPS endpoint. |
 | `R2_BUCKET` | Phase 11 | Private bucket for this environment. |

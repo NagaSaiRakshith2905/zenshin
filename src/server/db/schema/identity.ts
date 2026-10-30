@@ -7,12 +7,12 @@ import { projects } from "./work";
 export const userPreferences = pgTable("user_preferences", {
   userId: text("user_id").primaryKey().references(() => user.id, { onDelete: "cascade" }),
   timezone: text("timezone").default("Asia/Kolkata").notNull(), theme: text("theme").default("system").notNull(),
-  defaultTaskView: text("default_task_view").default("list").notNull(),
+  defaultTaskView: text("default_task_view").default("board").notNull(),
   createdAt: eventTime("created_at").defaultNow().notNull(), updatedAt: eventTime("updated_at").defaultNow().notNull(),
   revision: mutableColumns().revision,
 }, (t) => [
   check("user_preferences_theme", sql`${t.theme} IN ('system', 'light', 'dark')`),
-  check("user_preferences_view", sql`${t.defaultTaskView} IN ('list', 'board')`), positiveRevision("user_preferences", t.revision),
+  check("user_preferences_view", sql`${t.defaultTaskView} IN ('list', 'board', 'calendar')`), positiveRevision("user_preferences", t.revision),
 ]);
 
 export const agentCredentials = pgTable("agent_credentials", {

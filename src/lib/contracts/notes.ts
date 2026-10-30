@@ -1,5 +1,5 @@
 import { z } from "zod";
-export type NoteMark = { type: "bold" | "italic" | "strike" | "code" | "link"; attrs?: { href: string; target?: string | null; rel?: string | null; class?: null } };
+export type NoteMark = { type: "bold" | "italic" | "strike" | "code" | "link"; attrs?: { href: string; target?: string | null; rel?: string | null; class?: null; title?: null } };
 export type NoteNode = { type: string; text?: string; attrs?: Record<string, unknown>; marks?: NoteMark[]; content?: NoteNode[] };
 export type NoteDocument = NoteNode & { type: "doc"; content: NoteNode[] };
 export const emptyNote = (): NoteDocument => ({ type: "doc", content: [{ type: "paragraph" }] });
@@ -8,7 +8,7 @@ export function safeNoteLink(value: string) {
   try { const url = new URL(value); return ["https:", "http:", "mailto:"].includes(url.protocol) && !url.username && !url.password; } catch { return false; }
 }
 const mark = z.discriminatedUnion("type", [
-  z.strictObject({ type: z.literal("link"), attrs: z.strictObject({ href: z.string().max(2048).refine(safeNoteLink, "Use an absolute http, https or mailto link."), target: z.enum(["_blank", "_self"]).nullable().optional(), rel: z.string().max(100).nullable().optional(), class: z.null().optional() }) }),
+  z.strictObject({ type: z.literal("link"), attrs: z.strictObject({ href: z.string().max(2048).refine(safeNoteLink, "Use an absolute http, https or mailto link."), target: z.enum(["_blank", "_self"]).nullable().optional(), rel: z.string().max(100).nullable().optional(), class: z.null().optional(), title: z.null().optional() }) }),
   ...["bold", "italic", "strike", "code"].map((type) => z.strictObject({ type: z.literal(type) })),
 ]);
 const inline = new Set(["text", "hardBreak"]);

@@ -1,5 +1,7 @@
 All AI agents are restricted to view the content from `.env.local`.
 
+Do not add Redis (Upstash) to unit or integration tests: no real connection, no fake or mocked Redis client, and no `UPSTASH_*` variables in test environments. Tests run without Redis, so auth sessions and rate limits use the Postgres path.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 ## This is NOT the Next.js you know

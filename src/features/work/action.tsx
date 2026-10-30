@@ -1,5 +1,6 @@
 "use client";
-import { useRef, useState } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
+import { Logo } from "@/components/brand/logo";
 import { useQueryClient } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertDialog, AlertDialogContent, AlertDialogTitle, AlertDialogDescription, AlertDialogHeader, AlertDialogFooter } from "@/components/ui/alert-dialog";
@@ -7,7 +8,17 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { NativeSelect } from "@/components/ui/native-select";
 import { workRequest, WorkError } from "./api";
+import { optimisticChange } from "./model";
 
+// Saves in flight across every useAction, for the one header indicator.
+let saving = 0; const listeners = new Set<() => void>();
+const setSaving = (delta: number) => { saving += delta; listeners.forEach((l) => l()); };
+const subscribe = (l: () => void) => { listeners.add(l); return () => { listeners.delete(l); }; };
+export function SavingIndicator() {
+  const busy = useSyncExternalStore(subscribe, () => saving > 0, () => false);
+  return <span role="status" className="saving-indicator" data-active={busy ? "" : undefined}>{busy && <><Logo className="saving-logo" /><span className="sr-only">Saving changes…</span></>}</span>;
+}
+const definitionResources = new Set(["statuses", "labels", "properties", "attachments"]);
 type Attempt = { path: string; input: Record<string, unknown>; key: string; success?: (value: unknown) => void };
 export function useAction() {
   const client = useQueryClient();
@@ -18,17 +29,36 @@ export function useAction() {
   const busy = useRef(false);
   async function send(next: Attempt) {
     if (busy.current) return;
-    busy.current = true; setPending(true); setError(null); setNotice(""); attempt.current = next;
+    busy.current = true; setPending(true); setSaving(1); setError(null); setNotice(""); attempt.current = next;
+    // Edits to one row show at once; the refetch below reconciles them, or rolls them back on failure.
+    const [resource, id, sub] = next.path.split("/");
+    const { expectedRevision, ...fields } = next.input;
+    const findStatus = (statusId: string) => client.getQueriesData<{ pages: { items: Record<string, unknown>[] }[] }>({ queryKey: ["work", "statuses"] }).flatMap(([, d]) => d?.pages.flatMap((p) => p.items) ?? []).find((s) => s.id === statusId);
+    const change = expectedRevision !== undefined && id && ["tasks", "sections", "projects"].includes(resource) ? optimisticChange(sub, fields, findStatus) : null;
+    const patchCache = (update: (row: Record<string, unknown>) => Record<string, unknown>) => {
+      const merge = (row: unknown) => row && typeof row === "object" && (row as { id?: string }).id === id ? { ...row, ...update(row as Record<string, unknown>) } : row;
+      client.setQueriesData({ queryKey: ["work", resource] }, (data: unknown) => data && typeof data === "object" && "pages" in data
+        ? { ...data, pages: (data as { pages: { items: unknown[] }[] }).pages.map((page) => ({ ...page, items: page.items.map(merge) })) } : merge(data));
+    };
+    if (change) { await client.cancelQueries({ queryKey: ["work", resource] }); patchCache(change); }
     try {
       const result = await workRequest(next.path, next.input.expectedRevision === undefined && !next.path.includes("/delete") ? "POST" : next.path.split("/").length === 2 ? "PATCH" : "POST", next.input, next.key);
-      await client.invalidateQueries({ queryKey: ["work"] });
-      await client.invalidateQueries({ queryKey: ["credentials"] });
+      // Adopt the new revision now so a quick follow-up edit isn't a false conflict.
+      // Only trust a revision that belongs to this row; some actions return a different record.
+      if (change && result && typeof result === "object" && "revision" in result && (result as { id?: string }).id === id) patchCache(() => ({ revision: (result as { revision: number }).revision }));
+      // Refresh in the background; the save is confirmed by the response itself.
+      // Item edits can't change workflow definitions or files, so those only go stale and reload when next used.
+      const itemEdit = ["tasks", "sections", "projects"].includes(next.path.split("/")[0]) && !(resource === "tasks" && sub === "properties");
+      void client.invalidateQueries({ queryKey: ["work"], predicate: (q) => !itemEdit || !definitionResources.has(q.queryKey[1] as string) });
+      if (itemEdit) void client.invalidateQueries({ queryKey: ["work"], predicate: (q) => definitionResources.has(q.queryKey[1] as string), refetchType: "none" });
+      void client.invalidateQueries({ queryKey: ["credentials"], refetchType: "none" });
       const ancestors = result && typeof result === "object" && "archivedAncestors" in result ? result.archivedAncestors : undefined;
       setNotice(Array.isArray(ancestors) && ancestors.length ? "Restored. Restore its archived ancestors too to make this work visible." : "Changes saved.");
       next.success?.(result);
       return result;
-    } catch (e) { setError(e instanceof WorkError ? e : new WorkError("The response could not be confirmed. Retry the same request before making another change.", "transport_error")); }
-    finally { busy.current = false; setPending(false); }
+    } catch (e) {
+      if (change) void client.invalidateQueries({ queryKey: ["work", resource] }); setError(e instanceof WorkError ? e : new WorkError("The response could not be confirmed. Retry the same request before making another change.", "transport_error")); }
+    finally { busy.current = false; setPending(false); setSaving(-1); }
   }
   return { pending, error, notice, dismiss: () => setError(null), run(path: string, input: Record<string, unknown>, success?: (value: unknown) => void) {
     const same = attempt.current?.path === path && JSON.stringify(attempt.current.input) === JSON.stringify(input);
@@ -39,10 +69,10 @@ export function useAction() {
   } };
 }
 export type Action = ReturnType<typeof useAction>;
-export function ActionFeedback({ action }: { action: Action }) {
+export function ActionFeedback({ action, quiet = false }: { action: Action; quiet?: boolean }) {
   const [replacement, setReplacement] = useState("");
   const error = action.error;
-  if (!error) return action.pending || action.notice ? <p role="status" className="text-xs text-muted-foreground">{action.pending ? "Saving changes…" : action.notice}</p> : null;
+  if (!error) return !quiet && (action.pending || action.notice) ? <p role="status" className="text-xs text-muted-foreground">{action.pending ? "Saving changes…" : action.notice}</p> : null;
   const details = error.details;
   const affected = (details.affected ?? []) as { id: string; name?: string; title?: string }[];
   const options = (details.options ?? []) as (string | { id: string; name: string })[];

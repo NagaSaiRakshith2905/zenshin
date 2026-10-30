@@ -1,6 +1,6 @@
 "use client";
-import { useId, type ComponentProps, type ReactNode } from "react";
-import { ChevronDown, RefreshCw } from "lucide-react";
+import { useId, useSyncExternalStore, type ComponentProps, type ReactNode } from "react";
+import { ChevronDown, RefreshCw, WifiOff } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
@@ -21,8 +21,16 @@ export function SelectField({ label, children, ...props }: ComponentProps<typeof
 }
 export function CheckField({ label, ...props }: ComponentProps<"input"> & { label: string }) { const id = useId(); return <Field orientation="horizontal"><input className="size-4 accent-current" id={id} type="checkbox" {...props} /><FieldLabel htmlFor={id}>{label}</FieldLabel></Field>; }
 export function LoadingRows() { return <div aria-label="Loading work" className="flex flex-col gap-3 p-4">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-10 w-full" />)}</div>; }
+const subscribeOnline = (notify: () => void) => { addEventListener("online", notify); addEventListener("offline", notify); return () => { removeEventListener("online", notify); removeEventListener("offline", notify); }; };
+export function useOnline() { return useSyncExternalStore(subscribeOnline, () => navigator.onLine, () => true); }
+// One toast for the whole workspace instead of a QueryError per query while offline.
+export function OfflineToast() {
+  if (useOnline()) return null;
+  return <div role="status" className="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-md border bg-popover px-4 py-2 text-sm text-popover-foreground shadow-lg"><WifiOff aria-hidden="true" className="size-4" />You're offline. Showing the last loaded data.</div>;
+}
 export function QueryError({ error, retry, retained = false }: { error: Error | null; retry: () => unknown; retained?: boolean }) {
-  if (!error) return null;
+  const online = useOnline();
+  if (!error || !online) return null;
   return <Alert><AlertDescription>{retained ? "Could not refresh. Showing the last loaded data. " : ""}{error.message}<Button size="sm" variant="outline" onClick={() => void retry()}><RefreshCw data-icon="inline-start" />Retry</Button></AlertDescription></Alert>;
 }
 export function EmptyWork({ title, description, children }: { title: string; description: string; children?: ReactNode }) { return <Empty className="min-h-52"><EmptyHeader><EmptyTitle>{title}</EmptyTitle><EmptyDescription>{description}</EmptyDescription></EmptyHeader>{children}</Empty>; }

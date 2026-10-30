@@ -1,0 +1,1 @@
+ALTER TABLE "user_preferences" ALTER COLUMN "default_task_view" SET DEFAULT 'board';

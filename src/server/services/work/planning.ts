@@ -96,11 +96,16 @@ export const configuration: Pick<Handlers, "create_status" | "update_status" | "
   async create_property({ db, actor, graph: g }, input) {
     ownerOnly(actor); const definitions = await rows(db, "property_definitions", sql`project_id = ${g.project.id}`);
     if (definitions.length >= 30) invalid("A project supports at most 30 custom properties.");
-    return insert(db, "property_definitions", { ownerId: actor.ownerId, projectId: g.project.id, name: input.name, normalizedName: normalizeName(input.name), type: input.type, position: definitions.reduce((n, d) => BigInt(d.position) > n ? BigInt(d.position) : n, 0n) + 1024n });
+    return insert(db, "property_definitions", { ownerId: actor.ownerId, projectId: g.project.id, name: input.name, normalizedName: normalizeName(input.name), type: input.type, icon: input.icon, position: definitions.reduce((n, d) => BigInt(d.position) > n ? BigInt(d.position) : n, 0n) + 1024n });
   },
-  async update_property({ db, actor }, input) {
+  async update_property(context, input) {
+    const { db, actor } = context;
     ownerOnly(actor); const row = await owned(db, actor, "property_definitions", input.id); checkRevision(row, input.expectedRevision);
-    return patch(db, "property_definitions", row, { name: input.name, normalizedName: input.name === undefined ? undefined : normalizeName(input.name), position: input.position === undefined ? undefined : BigInt(input.position) });
+    if (input.type && input.type !== row.type) {
+      if (await affectedCount(context, row.id)) invalid("Clear its values to change the type.");
+      if (["select", "multi_select"].includes(row.type)) await db.execute(sql`delete from property_options where definition_id = ${row.id}`);
+    }
+    return patch(db, "property_definitions", row, { name: input.name, normalizedName: input.name === undefined ? undefined : normalizeName(input.name), type: input.type, icon: input.icon, position: input.position === undefined ? undefined : BigInt(input.position) });
   },
   async delete_property(context, input) {
     const { db, actor } = context; ownerOnly(actor);

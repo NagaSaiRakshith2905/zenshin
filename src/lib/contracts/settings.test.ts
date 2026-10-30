@@ -20,6 +20,7 @@ describe("settings contracts", () => {
   it("validates timezone/theme/view rather than accepting arbitrary values", () => {
     const defaults = { timezone: "Asia/Kolkata", theme: "system", defaultTaskView: "list" };
     expect(preferenceValuesSchema.safeParse(defaults).success).toBe(true);
+    expect(preferenceValuesSchema.safeParse({ ...defaults, defaultTaskView: "calendar" }).success).toBe(true);
     for (const values of [{ timezone: "unknown" }, { timezone: "+05:30" }, { theme: "auto" }, { defaultTaskView: "table" }]) {
       expect(preferenceValuesSchema.safeParse({ ...defaults, ...values }).success).toBe(false);
     }

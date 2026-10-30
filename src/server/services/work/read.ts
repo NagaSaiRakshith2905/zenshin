@@ -85,7 +85,8 @@ export function createWorkReader(db: Database) {
       const result = page(sorted, input.cursor, input.limit);
       if (resource === "properties") {
         const options = await rows(tx, "property_options", sql`project_id = ${project.id} and owner_id = ${actor.ownerId}`);
-        return wireValue({ ...result, items: result.items.map((definition) => ({ ...definition, options: options.filter((o) => o.definitionId === definition.id).sort(byPosition) })) });
+        const used = await query<{ definitionId: string }>(tx, sql`select definition_id from task_property_values where project_id = ${project.id} union select definition_id from task_property_option_values where project_id = ${project.id}`);
+        return wireValue({ ...result, items: result.items.map((definition) => ({ ...definition, hasValues: used.some((v) => v.definitionId === definition.id), options: options.filter((o) => o.definitionId === definition.id).sort(byPosition) })) });
       }
       return wireValue(result);
     }, { isolationLevel: "repeatable read", accessMode: "read only" });
@@ -106,7 +107,7 @@ export function createWorkReader(db: Database) {
         if (table === "tasks") return wireValue((await taskModels(tx, g, [target as Rows["tasks"]]))[0]);
         if (table === "projects") return wireValue({ ...target, effectiveArchived, progress: g.progress(g.tasks), sectionCount: g.sections.length, taskCount: g.tasks.length });
         if (table === "sections") return wireValue({ ...target, effectiveArchived, breadcrumbs: g.ancestors((target as Rows["sections"]).parentSectionId).reverse().map(({ id, name }) => ({ id, name })), progress: g.progress(g.tasks.filter((t) => t.sectionId && g.sectionIds(target.id).includes(t.sectionId))) });
-        if (table === "property_definitions") return wireValue({ ...target, options: (await rows(tx, "property_options", sql`definition_id = ${target.id}`)).sort(byPosition) });
+        if (table === "property_definitions") { const used = await query<{ definitionId: string }>(tx, sql`select definition_id from task_property_values where definition_id = ${target.id} union select definition_id from task_property_option_values where definition_id = ${target.id}`); return wireValue({ ...target, hasValues: used.length > 0, options: (await rows(tx, "property_options", sql`definition_id = ${target.id}`)).sort(byPosition) }); }
         return wireValue(target);
       }, { isolationLevel: "repeatable read", accessMode: "read only" });
     },

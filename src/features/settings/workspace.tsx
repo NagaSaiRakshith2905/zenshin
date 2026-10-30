@@ -15,7 +15,7 @@ import { EditorProvider } from "@/features/work/editors";
 import { WorkShell } from "@/features/work/shell";
 import { ArchivedWork, ProjectSettings, type ProjectSettingsSection } from "@/features/work/project-settings";
 import { useCollection, useEntity } from "@/features/work/api";
-import { SelectField, LoadMore, QueryError } from "@/features/work/primitives";
+import { SelectField, LoadMore, QueryError, OfflineToast } from "@/features/work/primitives";
 import type { Project, Task } from "@/features/work/types";
 import { settingsRequest } from "./api";
 import { authClient } from "./auth-client";
@@ -62,5 +62,5 @@ function WorkspaceContent({ children, initialPreferences }: { children: ReactNod
 }
 export function WorkspaceAccess({ children, preferences, ownerId }: { children: ReactNode; preferences: Preferences; ownerId: string }) {
   const [client] = useState(() => new QueryClient({ defaultOptions: { queries: { staleTime: 30_000, retry: false, refetchOnWindowFocus: false }, mutations: { retry: false } } }));
-  return <QueryClientProvider client={client}><NoteEnvironment ownerId={ownerId}><EditorProvider><WorkspaceContent initialPreferences={preferences}>{children}</WorkspaceContent></EditorProvider></NoteEnvironment></QueryClientProvider>;
+  return <QueryClientProvider client={client}><NoteEnvironment ownerId={ownerId}><EditorProvider><WorkspaceContent initialPreferences={preferences}>{children}</WorkspaceContent><OfflineToast /></EditorProvider></NoteEnvironment></QueryClientProvider>;
 }

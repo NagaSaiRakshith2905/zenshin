@@ -5,7 +5,7 @@ export const preferenceValuesSchema = z.strictObject({
     try { new Intl.DateTimeFormat("en", { timeZone: zone }); return !/^[+-]/.test(zone); } catch { return false; }
   }, "Choose a valid IANA timezone."),
   theme: z.enum(["system", "light", "dark"]),
-  defaultTaskView: z.enum(["list", "board"]),
+  defaultTaskView: z.enum(["list", "board", "calendar"]),
 });
 export const updatePreferencesSchema = preferenceValuesSchema.extend({ expectedRevision: z.number().int().positive() });
 const credentialPolicySchema = z.strictObject({

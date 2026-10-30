@@ -1,0 +1,2 @@
+ALTER TABLE "user_preferences" DROP CONSTRAINT "user_preferences_view";--> statement-breakpoint
+ALTER TABLE "user_preferences" ADD CONSTRAINT "user_preferences_view" CHECK ("user_preferences"."default_task_view" IN ('list', 'board', 'calendar'));

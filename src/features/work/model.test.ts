@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { taskHref, withoutTask, workGroup } from "./model";
+import { optimisticChange, taskHref, withoutTask, workGroup } from "./model";
 
 describe("workspace navigation and grouping", () => {
   it("puts overdue first without counting the same task twice", () => {
@@ -16,4 +16,16 @@ describe("workspace navigation and grouping", () => {
     expect(withoutTask("/projects/example/tasks", href.split("?")[1])).toBe("/projects/example/tasks?sort=due_date&descendants=true&archived=true");
     expect(withoutTask("/", "task=task-id")).toBe("/");
   });
+});
+
+describe("optimisticChange", () => {
+  const row = { properties: { a: "x", b: 2 }, prerequisiteTaskIds: ["p1"] };
+  it("patches plain fields as given", () => { expect(optimisticChange(undefined, { priority: "high" }, () => undefined)!(row)).toEqual({ priority: "high" }); });
+  it("carries the status category for transitions", () => { expect(optimisticChange("transition", { statusId: "s" }, () => ({ category: "done", name: "Done" }))!(row)).toEqual({ statusId: "s", category: "done", statusName: "Done" }); });
+  it("merges property values and drops cleared ones", () => { expect(optimisticChange("properties", { values: { a: null, c: true } }, () => undefined)!(row)).toEqual({ properties: { b: 2, c: true } }); });
+  it("adds and removes prerequisites", () => {
+    expect(optimisticChange("add-dependency", { prerequisiteTaskId: "p2" }, () => undefined)!(row)).toEqual({ prerequisiteTaskIds: ["p1", "p2"] });
+    expect(optimisticChange("remove-dependency", { prerequisiteTaskId: "p1" }, () => undefined)!(row)).toEqual({ prerequisiteTaskIds: [] });
+  });
+  it("leaves unknown actions to the server", () => { expect(optimisticChange("move", {}, () => undefined)).toBeNull(); });
 });

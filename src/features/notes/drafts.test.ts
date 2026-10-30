@@ -10,6 +10,17 @@ const initial: NoteState = { id: null, ownerId: "owner", kind: "task", targetId:
 const content = (text: string): NoteDocument => ({ type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text }] }] });
 afterEach(() => vi.useRealTimers());
 describe("note recovery", () => {
+  it("settles to saved when an unchanged edit lands during a save", async () => {
+    let complete!: (note: NoteState) => void;
+    const session = new NoteSession(initial, () => new Promise((resolve) => { complete = resolve; }), storage());
+    session.edit(content("a")); const flushing = session.flush(); session.edit(content("a"));
+    complete({ ...initial, revision: 2, content: content("a") }); await flushing; await session.flush();
+    expect(session.getSnapshot().status).toBe("saved");
+  });
+  it("does not mark unchanged empty content as unsaved", () => {
+    const store = storage(); const save = vi.fn(); const session = new NoteSession(initial, save, store);
+    session.edit(emptyNote()); expect(session.getSnapshot().status).toBe("saved"); expect(store.length).toBe(0); expect(save).not.toHaveBeenCalled();
+  });
   it("keeps newer edits during a save and uses the returned revision", async () => {
     vi.useFakeTimers(); const store = storage();
     let complete!: (note: NoteState) => void;
