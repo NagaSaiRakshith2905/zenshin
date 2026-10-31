@@ -1,0 +1,33 @@
+name: Independent backup age monitor
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '47 * * * *'
+permissions:
+  contents: read
+jobs:
+  monitor:
+    if: github.event.repository.private == true && vars.BACKUPS_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: backup-monitor
+    env:
+      BACKUP_S3_BUCKET: ${{ secrets.BACKUP_S3_BUCKET }}
+      BACKUP_S3_REGION: ${{ secrets.BACKUP_S3_REGION }}
+      BACKUP_S3_ACCESS_KEY_ID: ${{ secrets.BACKUP_S3_ACCESS_KEY_ID }}
+      BACKUP_S3_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_S3_SECRET_ACCESS_KEY }}
+      BACKUP_S3_KMS_KEY_ID: ${{ secrets.BACKUP_S3_KMS_KEY_ID }}
+      BACKUP_ALERT_EMAIL: ${{ secrets.BACKUP_ALERT_EMAIL }}
+      BACKUP_ALERT_FROM_EMAIL: ${{ secrets.BACKUP_ALERT_FROM_EMAIL }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: aws --version
+      - run: pnpm backup:monitor

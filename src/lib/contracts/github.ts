@@ -3,6 +3,7 @@ import { id, revision } from "./work";
 export const githubPage = z.coerce.number().int().min(1).max(10000).default(1);
 export const githubProject = z.strictObject({ projectId: id });
 export const githubRepository = githubProject.extend({ repositoryId: id });
+export const githubRepositoryList = githubProject.extend({ cursor: id.optional(), limit: z.coerce.number().int().min(1).max(100).default(50) });
 export const githubItemInput = githubRepository.extend({ number: z.coerce.number().int().positive().max(2147483647), type: z.enum(["issue", "pr"]) });
 export const githubLinkInput = githubItemInput.extend({ taskId: id, expectedRevision: revision });
 export const githubImportInput = githubItemInput.omit({ type: true }).extend({ sectionId: id.nullable().default(null), statusId: id.optional(), reopenCompletedAncestors: z.boolean().default(false) });

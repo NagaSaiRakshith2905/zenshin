@@ -1,7 +1,7 @@
 import "server-only";
 import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
-import { githubImportInput, githubLinkInput, githubPage, githubProject, githubRepository, githubRuleInput } from "@/lib/contracts/github";
+import { githubImportInput, githubLinkInput, githubPage, githubProject, githubRepository, githubRepositoryList, githubRuleInput } from "@/lib/contracts/github";
 import { commands, wireValue } from "@/lib/contracts/work";
 import { notePlainText } from "@/lib/contracts/notes";
 import { assertHumanOwner, assertProjectScope, type Actor } from "@/server/auth/access";
@@ -54,9 +54,10 @@ export function createGithubService(db: Database, provider?: GithubProvider) {
       return wireValue({ items: ids.length ? await db.select().from(githubRepositories).where(and(eq(githubRepositories.ownerId, actor.ownerId), sql`${githubRepositories.githubRepositoryId} in (${sql.join(ids.map((id) => sql`${id}`), sql`, `)})`)) : [], nextPage: input.page * 100 < result.total_count ? input.page + 1 : null });
     },
     async repositories(actor: Actor, raw: unknown) {
-      const { projectId } = githubProject.parse(raw); const project = await owned(db, actor, "projects", projectId); assertProjectScope(actor, actor.ownerId, projectId, "read");
+      const { projectId, cursor, limit } = githubRepositoryList.parse(raw); const project = await owned(db, actor, "projects", projectId); assertProjectScope(actor, actor.ownerId, projectId, "read");
       void project;
-      return wireValue({ items: await db.select({ id: githubRepositories.id, name: githubRepositories.name, ownerName: githubRepositories.ownerName, availability: githubRepositories.availability, installationStatus: githubInstallations.status }).from(projectRepositories).innerJoin(githubRepositories, eq(githubRepositories.id, projectRepositories.repositoryId)).innerJoin(githubInstallations, eq(githubInstallations.id, githubRepositories.installationId)).where(and(eq(projectRepositories.ownerId, actor.ownerId), eq(projectRepositories.projectId, projectId))).orderBy(githubRepositories.ownerName, githubRepositories.name) });
+      const items = await db.select({ id: githubRepositories.id, name: githubRepositories.name, ownerName: githubRepositories.ownerName, availability: githubRepositories.availability, installationStatus: githubInstallations.status }).from(projectRepositories).innerJoin(githubRepositories, eq(githubRepositories.id, projectRepositories.repositoryId)).innerJoin(githubInstallations, eq(githubInstallations.id, githubRepositories.installationId)).where(and(eq(projectRepositories.ownerId, actor.ownerId), eq(projectRepositories.projectId, projectId), cursor ? sql`${githubRepositories.id} > ${cursor}::uuid` : undefined)).orderBy(githubRepositories.id).limit(limit + 1);
+      return wireValue({ items: items.slice(0, limit), nextCursor: items.length > limit ? items[limit - 1].id : null, hasMore: items.length > limit });
     },
     async connect(actor: Actor, raw: unknown, requestId: string, key?: string) {
       assertHumanOwner(actor); const input = githubRepository.extend({ connected: z.boolean() }).parse(raw);
@@ -94,7 +95,11 @@ export function createGithubService(db: Database, provider?: GithubProvider) {
         await repositoryFor(tx, actor, input.projectId, input.repositoryId, "write");
         const item = await cacheItem(tx, actor.ownerId, input.repositoryId, "issue", remote);
         const [previous] = await tx.select().from(githubIssueImports).where(and(eq(githubIssueImports.projectId, input.projectId), eq(githubIssueImports.githubItemId, item.id)));
-        if (previous) throw new DomainError("conflict", "This issue was already imported. Open or restore the existing task.", { taskId: previous.taskId });
+        if (previous) {
+          const existing = await owned(tx, actor, "tasks", previous.taskId);
+          const project = await owned(tx, actor, "projects", input.projectId);
+          throw new DomainError("duplicate_import", "This issue was already imported. Open or restore the existing task.", { taskId: existing.id, reference: `${project.prefix}-${existing.number}` });
+        }
         const graph = await loadGraph(tx, await owned(tx, actor, "projects", input.projectId));
         const context = { db: tx, actor, graph, requestId };
         const task = await taskHandlers.create_task(context, commands.create_task.parse({ projectId: input.projectId, sectionId: input.sectionId, statusId: input.statusId, title: remote.title, reopenCompletedAncestors: input.reopenCompletedAncestors })) as { id: string; revision: number };

@@ -97,7 +97,7 @@ export async function workRoute(request: Request, path: string[]) {
     return Response.json(result, { status: operation.startsWith("create_") ? 201 : 200, headers });
   } catch (error) {
     if (error instanceof DomainError || error instanceof AccessError) {
-      const statuses: Record<string, number> = { unauthenticated: 401, forbidden: 403, not_found: 404, conflict: 409, decision_required: 409, idempotency_conflict: 409, validation_error: 422, dependency_cycle: 422, hierarchy_limit: 422, rate_limited: 429, upload_rejected: 422, integration_unavailable: 503 };
+      const statuses: Record<string, number> = { unauthenticated: 401, forbidden: 403, not_found: 404, conflict: 409, duplicate_import: 409, decision_required: 409, idempotency_conflict: 409, validation_error: 422, dependency_cycle: 422, hierarchy_limit: 422, rate_limited: 429, upload_rejected: 422, integration_unavailable: 503 };
       if (noteDownload && error.code === "unauthenticated") return new Response(null, { status: 302, headers: { ...headers, Location: "/sign-in", "Referrer-Policy": "no-referrer" } });
       if (noteDownload && ["conflict", "not_found", "forbidden"].includes(error.code)) return new Response('<!doctype html><html lang="en"><title>Attachment unavailable</title><body><p>This attachment is unavailable.</p><a href="/">Back to Zenshin</a></body></html>', { status: statuses[error.code], headers: { ...headers, "Content-Type": "text/html; charset=utf-8", "Referrer-Policy": "no-referrer" } });
       return Response.json({ error: { code: error.code, message: error.message, ...(error instanceof DomainError ? { details: error.details } : {}), requestId: context.requestId } }, { status: statuses[error.code] ?? 500, headers });

@@ -1,6 +1,6 @@
 # Zenshin
 
-Status: The application foundation, data model, authentication, planning UI, and initial notes and work discovery features are implemented. Database-backed and live sign-in verification remain pending. Source-control work is handled by the orchestrator; see [implementation notes](IMPLEMENTATION-NOTES.md).
+Status (2026-10-31): Phases 0–9 have recorded local verification. Application code through Phase 15 (including MCP and owner exports) and independent backup/recovery tooling are implemented on main; outstanding migration application, database/browser checks, provider setup, live-client acceptance and a full restore drill remain open. Phase 16 release hardening is next. See the [phase status list](implementation-plan.md#2-execution-sequence-and-dependencies), [MCP setup](docs/MCP.md), [Recovery runbook](docs/RECOVERY.md) and [implementation notes](IMPLEMENTATION-NOTES.md).
 
 Start with [the product specification](docs/SPECIFICATION.md). It connects the accepted decisions to implementation and acceptance criteria.
 
@@ -36,4 +36,4 @@ See [selected versions](docs/TOOLING.md), [environment reference](docs/ENVIRONME
 
 `pnpm typecheck`, `pnpm lint` and `pnpm build` catch implementation mistakes. The database-free unit suite runs locally; isolated database and provider checks require their respective test environments. Auth/Drizzle generation works offline; the migration runner requires an explicit `DATABASE_MIGRATION_URL` and never runs at startup.
 
-Phases 4–6 domain services and HTTP adapters are implemented. See [domain service usage and routes](docs/DOMAIN-SERVICES.md). Phase 7 adds the core planning/task website UI, project settings and responsive navigation; see [workspace UI notes](docs/WORKSPACE-UI.md). The unit suite, typecheck, lint and `pnpm build` pass. The build uses Webpack because Turbopack cannot bind its worker port in this environment. Database and real sign-in verification remain deferred.
+Domain services, HTTP adapters and the planning/task UI are implemented; see [domain service usage](docs/DOMAIN-SERVICES.md) and [workspace UI notes](docs/WORKSPACE-UI.md). Provider setup and acceptance are tracked in [R2 setup](docs/R2.md) and [GitHub setup](docs/GITHUB.md). The latest 141 unit tests, typecheck and lint pass; the Webpack production build passes from a temporary source copy. The new GitHub PostgreSQL scenarios and browser checks remain pending because local access was blocked; real sign-in and live provider acceptance are also pending.

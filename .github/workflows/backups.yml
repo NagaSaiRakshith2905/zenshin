@@ -1,0 +1,50 @@
+name: Independent database and attachment backup
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 0,12 * * *'
+permissions:
+  contents: read
+concurrency:
+  group: independent-backup
+  cancel-in-progress: false
+jobs:
+  backup:
+    if: github.event.repository.private == true && vars.BACKUPS_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: backup
+    env:
+      BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+      BACKUP_R2_ENDPOINT: ${{ secrets.BACKUP_R2_ENDPOINT }}
+      BACKUP_R2_BUCKET: ${{ secrets.BACKUP_R2_BUCKET }}
+      BACKUP_R2_ACCESS_KEY_ID: ${{ secrets.BACKUP_R2_ACCESS_KEY_ID }}
+      BACKUP_R2_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_R2_SECRET_ACCESS_KEY }}
+      BACKUP_S3_BUCKET: ${{ secrets.BACKUP_S3_BUCKET }}
+      BACKUP_S3_REGION: ${{ secrets.BACKUP_S3_REGION }}
+      BACKUP_S3_ACCESS_KEY_ID: ${{ secrets.BACKUP_S3_ACCESS_KEY_ID }}
+      BACKUP_S3_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_S3_SECRET_ACCESS_KEY }}
+      BACKUP_S3_KMS_KEY_ID: ${{ secrets.BACKUP_S3_KMS_KEY_ID }}
+      BACKUP_ALERT_EMAIL: ${{ secrets.BACKUP_ALERT_EMAIL }}
+      BACKUP_ALERT_FROM_EMAIL: ${{ secrets.BACKUP_ALERT_FROM_EMAIL }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Install compatible PostgreSQL client
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          curl --fail --silent --show-error https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo tee /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc >/dev/null
+          . /etc/os-release
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-18
+          echo /usr/lib/postgresql/18/bin >> "$GITHUB_PATH"
+          aws --version
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm backup

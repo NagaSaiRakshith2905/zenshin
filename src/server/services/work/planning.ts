@@ -3,7 +3,7 @@ import { sql } from "drizzle-orm";
 import { normalizeName } from "@/lib/contracts/work";
 import { assertProjectScope } from "@/server/auth/access";
 import { activity, checkRevision, decision, DomainError, invalid, owned, ownerOnly } from "./foundation";
-import { rank, reopen, validateSectionMove } from "./graph";
+import { assertArchiveChange, rank, reopen, validateSectionMove } from "./graph";
 import { insert, patch, query, rows } from "./store";
 import type { Handlers, Context } from "./types";
 
@@ -14,6 +14,7 @@ export const planning: Pick<Handlers, "update_project" | "create_section" | "upd
   },
   async create_section({ db, actor, graph: g, requestId }, input) {
     if (g.ancestors(input.parentSectionId).length >= 3) throw new DomainError("hierarchy_limit", "Sections support at most three levels.");
+    assertArchiveChange(actor, g, false, g.sectionArchived(input.parentSectionId));
     if (input.lifecycle === "completed") assertProjectScope(actor, g.project.ownerId, g.project.id, "complete");
     else await reopen(db, actor, g, [input.parentSectionId], input.reopenCompletedAncestors, requestId);
     return insert(db, "sections", { ownerId: actor.ownerId, projectId: g.project.id, name: input.name, description: input.description, parentSectionId: input.parentSectionId, targetDate: input.targetDate, lifecycle: input.lifecycle, position: await rank(db, "sections", g.sections.filter((s) => s.parentSectionId === input.parentSectionId), null) });
@@ -28,6 +29,8 @@ export const planning: Pick<Handlers, "update_project" | "create_section" | "upd
     const row = g.section(input.id); checkRevision(row, input.expectedRevision);
     validateSectionMove(g, row.id, input.parentSectionId);
     const subtree = g.sectionIds(row.id);
+    const tasks = g.tasks.filter((t) => t.sectionId && subtree.includes(t.sectionId));
+    assertArchiveChange(actor, g, Boolean(row.archivedAt || g.sectionArchived(row.parentSectionId)), Boolean(row.archivedAt || g.sectionArchived(input.parentSectionId)), tasks.map((t) => t.id), input.acknowledgeDependentIds);
     const unfinished = g.sections.some((s) => subtree.includes(s.id) && s.lifecycle !== "completed") || g.tasks.some((t) => t.sectionId && subtree.includes(t.sectionId) && !g.terminal(t));
     if (unfinished) await reopen(db, actor, g, [input.parentSectionId], input.reopenCompletedAncestors, requestId);
     return patch(db, "sections", row, { parentSectionId: input.parentSectionId, position: await rank(db, "sections", g.sections.filter((s) => s.id !== row.id && s.parentSectionId === input.parentSectionId), input.beforeId) });

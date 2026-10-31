@@ -9,7 +9,7 @@ import { activities, idempotencyRecords } from "@/server/db/schema";
 import { query, rows, type Rows, type Table } from "./store";
 
 export class DomainError extends Error {
-  constructor(public code: "not_found" | "validation_error" | "conflict" | "decision_required" | "dependency_cycle" | "hierarchy_limit" | "idempotency_conflict" | "upload_rejected" | "integration_unavailable", message: string, public details: Record<string, unknown> = {}) { super(message); }
+  constructor(public code: "not_found" | "validation_error" | "conflict" | "decision_required" | "dependency_cycle" | "hierarchy_limit" | "idempotency_conflict" | "upload_rejected" | "integration_unavailable" | "duplicate_import", message: string, public details: Record<string, unknown> = {}) { super(message); }
 }
 export function invalid(message: string, details: Record<string, unknown> = {}): never { throw new DomainError("validation_error", message, details); }
 export function decision(message: string, details: Record<string, unknown>): never { throw new DomainError("decision_required", message, details); }

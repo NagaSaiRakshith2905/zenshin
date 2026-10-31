@@ -1,6 +1,6 @@
 import "server-only";
 import { sql } from "drizzle-orm";
-import type { Actor } from "@/server/auth/access";
+import { assertProjectScope, type Actor } from "@/server/auth/access";
 import type { DatabaseExecutor } from "@/server/db";
 import { activity, decision, DomainError, invalid } from "./foundation";
 import { patch, query, rows, type Rows } from "./store";
@@ -36,6 +36,15 @@ export async function loadGraph(db: DatabaseExecutor, project: Rows["projects"])
   return { project, sections, tasks, statuses, edges, section, task, status, ancestors, sectionIds, sectionArchived, archived, terminal, blockers, progress };
 }
 export type Graph = Awaited<ReturnType<typeof loadGraph>>;
+export function assertArchiveDependents(g: Graph, taskIds: string[], acknowledgeDependentIds: string[]) {
+  const dependentIds = [...new Set(g.edges.filter((e) => taskIds.includes(e.prerequisiteTaskId) && !taskIds.includes(e.taskId)).map((e) => e.taskId))].filter((id) => { const t = g.task(id); return !g.archived(t) && !g.terminal(t); });
+  if (dependentIds.some((id) => !acknowledgeDependentIds.includes(id))) decision("Archiving this work will affect active dependents.", { options: ["acknowledge_dependents"], affected: dependentIds.map((id) => ({ id, title: g.task(id).title })) });
+}
+export function assertArchiveChange(actor: Actor, g: Graph, before: boolean, after: boolean, taskIds: string[] = [], acknowledgements: string[] = []) {
+  if (before === after) return;
+  assertProjectScope(actor, g.project.ownerId, g.project.id, "archive");
+  if (after) assertArchiveDependents(g, taskIds, acknowledgements);
+}
 export function validateSectionMove(g: Graph, id: string, parent: string | null) {
   const descendants = g.sectionIds(id);
   if (parent && descendants.includes(parent)) throw new DomainError("hierarchy_limit", "A section cannot be moved into its own subtree.");

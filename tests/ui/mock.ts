@@ -27,12 +27,16 @@ export function installPreviewApi() {
     const [, , , resource, id, action] = url.pathname.split("/");
     if (url.pathname === "/api/v1/settings/preferences") { if (init?.method === "PATCH") preferences = { ...preferences, ...JSON.parse(String(init.body)), revision: preferences.revision + 1 }; return Response.json(preferences); }
     if (url.pathname === "/api/v1/settings/credentials") return Response.json({ credentials: [], projects: projects.map((p) => ({ id: p.id, name: p.name, archived: false })) });
+    if (url.pathname === "/api/v1/settings/exports") {
+      if (init?.method === "POST") return Response.json({ id: JSON.parse(String(init.body)).idempotencyKey, status: "pending" }, { status: 202 });
+      return Response.json({ items: [], nextCursor: null, hasMore: false });
+    }
     const fail = (message: string, code = "validation_error", details = {}) => Response.json({ error: { message, code, details, requestId: "preview" } }, { status: 409 });
     if (resource === "github") {
       const repository = { id: fixtureId(110), name: "zenshin", ownerName: "owner", availability: "available", installationStatus: "active" };
       if (init?.method === "POST") return Response.json({ changed: true });
       if (id === "installations") return Response.json({ items: [{ id: fixtureId(111), accountName: "owner", status: "active" }], nextPage: null, installUrl: null });
-      if (id === "repositories" || id === "discover-repositories") return Response.json({ items: [repository], nextPage: null });
+      if (id === "repositories" || id === "discover-repositories") return Response.json({ items: [repository], nextPage: null, nextCursor: null, hasMore: false });
       if (id === "rules") return Response.json({ items: [] });
       if (id === "issues") return Response.json({ items: [{ number: 42, title: "Preserve keyboard focus after closing task details", state: "open", url: "https://github.com/owner/zenshin/issues/42" }], nextPage: null });
       if (id === "links") return Response.json({ items: url.searchParams.get("taskId") === fixtureId(30) ? [{ id: fixtureId(112), linkId: fixtureId(113), number: 51, type: "pr", title: "Keep the task panel context while navigating", url: "https://github.com/owner/zenshin/pull/51", repository: "owner/zenshin", state: "open", isDraft: false, isMerged: false, availability: "available", headSha: "a".repeat(40), syncedAt: new Date().toISOString(), freshness: "Last refreshed", error: null, checks: { state: "success", complete: true, checks: [{ name: "Typecheck and tests", status: "completed", conclusion: "success" }], statuses: [] } }] : [] });

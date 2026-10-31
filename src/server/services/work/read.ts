@@ -111,7 +111,7 @@ export function createWorkReader(db: Database) {
         return wireValue(target);
       }, { isolationLevel: "repeatable read", accessMode: "read only" });
     },
-    async resolveTask(actor: Actor, reference: string) {
+    async resolveTask(actor: Actor, reference: string, includeArchived = false) {
       const match = /^([A-Z][A-Z0-9]{1,9})-([1-9]\d*)$/.exec(reference);
       if (!match) invalid("Use a task reference such as TRACK-42.");
       const [project] = await rows(db, "projects", sql`owner_id = ${actor.ownerId} and prefix = ${match[1]}`);
@@ -119,7 +119,7 @@ export function createWorkReader(db: Database) {
       assertProjectScope(actor, project.ownerId, project.id, "read");
       const [task] = await rows(db, "tasks", sql`project_id = ${project.id} and number = ${Number(match[2])}`);
       if (!task) throw new DomainError("not_found", "Task was not found.");
-      return this.get(actor, "tasks", task.id);
+      return this.get(actor, "tasks", task.id, includeArchived);
     },
   };
 }

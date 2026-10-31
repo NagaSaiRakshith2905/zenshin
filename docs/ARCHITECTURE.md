@@ -58,7 +58,7 @@ drizzle/                    reviewed SQL migrations
 
 ## Agent access
 
-- `/api/mcp`: stateless Streamable HTTP through Vercel's compatible MCP handler and official SDK. No legacy SSE/Redis design.
+- `/api/mcp`: stateless Streamable HTTP through the official SDK's built-in Web `createMcpHandler`, mounted in a Next.js Node route compatible with Vercel. The native handler avoids a redundant wrapper dependency. No legacy SSE/Redis design. See [MCP setup](MCP.md).
 - Require `Authorization: Bearer <key>`. Verification produces a stable credential actor, action scopes, and allowed project IDs.
 - Owner-only settings issue/revoke keys and alter grants. Show a new secret once; store only the plugin's protected representation.
 - Default expiry 90 days. Revocation/grant changes take effect on subsequent authenticated requests; avoid long-lived permission caches.
@@ -106,6 +106,8 @@ Use Neon-backed job records for GitHub reconciliation, exports, cleanup, and ext
 If future needs require work while the app is unused, replace its execution adapter with a managed queue without moving domain logic out of services. This is not a V1 requirement.
 
 ## Exports and recovery
+
+Phase 15 implements the export application and independent backup/monitor/restore commands described in [the recovery runbook](RECOVERY.md). Provisioning, actual Neon history, live-provider verification and the full restore drill remain open. Owner exports use a bounded staged JSON snapshot and gzip artifact; complete operational backups pair one exported PostgreSQL snapshot with verified versioned attachment copies.
 
 - Owner export is asynchronous: JSON domain records with schema version, Markdown notes plus canonical note JSON, task references, relationship IDs, and an attachment manifest. No sessions, API keys, OAuth tokens, app secrets, or backup secrets.
 - Store export artifacts privately, issue authorized short-lived download links, and expire artifacts after 24 hours by default. Manifest-only exports do not replace file backups. Import UI is deferred; test a documented recovery script against the export format.

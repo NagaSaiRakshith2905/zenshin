@@ -5,13 +5,14 @@ import { calendarDate } from "@/lib/contracts/work";
 import { assertProjectScope } from "@/server/auth/access";
 import { taskLabels, taskPropertyValues, taskPropertyOptionValues } from "@/server/db/schema";
 import { activity, checkRevision, decision, invalid, owned } from "./foundation";
-import { rank, reopen, validateDependency, validateTaskLocation } from "./graph";
+import { assertArchiveChange, rank, reopen, validateDependency, validateTaskLocation } from "./graph";
 import { insert, patch, rows } from "./store";
 import type { Handlers } from "./types";
 
 export const taskHandlers: Pick<Handlers, "create_task" | "update_task" | "transition_task" | "move_task" | "add_dependency" | "remove_dependency" | "set_task_labels" | "set_task_properties"> = {
   async create_task({ db, actor, graph: g, requestId }, input) {
     validateTaskLocation(g, input);
+    assertArchiveChange(actor, g, false, Boolean(g.sectionArchived(input.sectionId) || (input.parentTaskId && g.task(input.parentTaskId).archivedAt)));
     const status = input.statusId ? g.status(input.statusId) : g.statuses.find((s) => s.isDefault)!;
     if (!status) invalid("The project needs a default Backlog status.");
     if (status.category === "done") assertProjectScope(actor, actor.ownerId, g.project.id, "complete");
@@ -45,6 +46,8 @@ export const taskHandlers: Pick<Handlers, "create_task" | "update_task" | "trans
   async move_task({ db, actor, graph: g, requestId }, input) {
     const row = g.task(input.id); checkRevision(row, input.expectedRevision); validateTaskLocation(g, input);
     const children = g.tasks.filter((t) => t.parentTaskId === row.id);
+    const archived = Boolean(row.archivedAt || g.sectionArchived(input.sectionId) || (input.parentTaskId && g.task(input.parentTaskId).archivedAt));
+    assertArchiveChange(actor, g, g.archived(row), archived, [row.id, ...children.map((t) => t.id)], input.acknowledgeDependentIds);
     if (!g.terminal(row) || children.some((t) => !g.terminal(t))) await reopen(db, actor, g, [input.sectionId], input.reopenCompletedAncestors, requestId);
     for (const child of children) {
       await patch(db, "tasks", child, { sectionId: input.sectionId });

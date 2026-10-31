@@ -75,7 +75,7 @@ describe("GitHub connections, snapshot imports and replay-safe automation", () =
   it("imports once, replays offline, keeps its snapshot/provenance after refresh/unlink/archive, and frees it on deletion", async () => {
     const t = await task(); const { item, number } = await link(t.id, "issue");
     const key = randomUUID(); const input = { projectId, repositoryId, number };
-    const imported = await service().importIssue(owner, input, "import", key) as { id: string; title: string; revision: number };
+    const imported = await service().importIssue(owner, input, "import", key) as { id: string; title: string; revision: number; reference: string };
     vi.mocked(api.item).mockRejectedValueOnce(new GithubError(503));
     expect(await service().importIssue(owner, input, "replay", key)).toMatchObject({ id: imported.id });
     vi.mocked(api.item).mockReset().mockImplementation(async (_id, _o, _r, _t, n) => ({ data: structuredClone(remote.get(n)!), etag: null, lastModified: null }));
@@ -85,7 +85,7 @@ describe("GitHub connections, snapshot imports and replay-safe automation", () =
     const [association] = await database.db.select().from(taskGithubLinks).where(eq(taskGithubLinks.taskId, imported.id));
     await service().unlink(owner, { taskId: imported.id, linkId: association.id, expectedRevision: imported.revision }, "unlink");
     await work().execute(owner, "archive_item", { kind: "task", id: imported.id, expectedRevision: (await fetchTask(imported.id)).revision }, "archive");
-    await expect(service().importIssue(owner, input, "duplicate")).rejects.toMatchObject({ code: "conflict", details: { taskId: imported.id } });
+    await expect(service().importIssue(owner, input, "duplicate")).rejects.toMatchObject({ code: "duplicate_import", details: { taskId: imported.id, reference: imported.reference } });
     await work().execute(owner, "delete_item", { kind: "task", id: imported.id, expectedRevision: (await fetchTask(imported.id)).revision, confirmation: { name: imported.title, sectionCount: 0, taskCount: 1, fileCount: 0 } }, "delete");
     expect(await database.db.select().from(githubIssueImports).where(eq(githubIssueImports.taskId, imported.id))).toHaveLength(0);
     const fresh = await service().importIssue(owner, input, "fresh") as { id: string }; expect(fresh.id).not.toBe(imported.id);

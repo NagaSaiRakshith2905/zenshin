@@ -26,6 +26,7 @@ export const exports = pgTable("exports", {
   status: exportState("status").default("pending").notNull(), outputObjectKey: text("output_object_key").unique(),
   requestedAt: eventTime("requested_at").defaultNow().notNull(), completedAt: eventTime("completed_at"),
   expiresAt: eventTime("expires_at").notNull().default(sql`now() + interval '24 hours'`), failureSummary: text("failure_summary"),
+  snapshot: jsonb("snapshot").$type<Record<string, unknown>>(),
 }, (t) => [
   check("exports_ready_output", sql`${t.status} <> 'ready' OR (${t.outputObjectKey} IS NOT NULL AND ${t.completedAt} IS NOT NULL)`),
   positiveRevision("exports", t.revision), index("exports_owner_requested").on(t.ownerId, t.requestedAt), index("exports_expiry").on(t.expiresAt),

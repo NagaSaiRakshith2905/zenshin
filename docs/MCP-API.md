@@ -1,6 +1,6 @@
 # MCP and API contract
 
-Status: proposed contract implementing accepted scope. Names below are canonical targets for implementation, not claims that endpoints already exist.
+Status: Phase 14 tools and `/api/mcp` are implemented. PostgreSQL verification and real Codex/Claude Code staging acceptance remain open. See [MCP setup, actual field conventions and acceptance](MCP.md). Tool names below are implemented; arguments/results use the shared services' camelCase fields.
 
 ## Actors and permission presets
 
@@ -29,12 +29,12 @@ Default key expiry is 90 days, owner configurable; project grants are explicit. 
 
 ## Common data contracts
 
-- Entity IDs: UUIDs. Display task_reference separately, such as TRACK-42. APIs accept UUIDs for writes; a resolve/read helper can accept a task reference.
-- Mutation input: target ID, expected_revision when editing existing mutable content, fields or explicit transition parameters, optional idempotency_key. Create operations also accept an idempotency key.
-- Responses include IDs, references, current revision, updated_at, and relevant computed fields. Request full note/relationships explicitly rather than embedding every note in list results.
-- Lists: cursor + limit (50 default, max 100), filters, sort. Response: items, next_cursor, has_more. Filter and sorting semantics match the browser.
+- Entity IDs: UUIDs. Display reference separately, such as TRACK-42. APIs accept UUIDs for writes; get_task also accepts a task reference.
+- Mutation input: target ID, expectedRevision when editing existing mutable content, fields or explicit transition parameters, optional idempotencyKey. Create operations also accept an idempotency key.
+- Responses include IDs, references, current revision, updatedAt, and relevant computed fields inside the tool result's data field. Request full note/relationships explicitly rather than embedding every note in list results.
+- Lists: cursor + limit (50 default, max 100), filters, sort. Response: items, nextCursor, hasMore. GitHub issue browsing uses page/nextPage. Filter and sorting semantics match the browser.
 - Dates: ISO calendar date strings, e.g. 2026-11-15. Event timestamps: ISO UTC instants. Timezone comes from owner preferences.
-- Archived items require include_archived=true and normal authorization. Effective archive is reflected explicitly.
+- Archived work reads/lists require includeArchived=true and normal authorization. Effective archive is reflected explicitly.
 - Tool input cannot set owner_id, actor identity, arbitrary permission metadata, raw SQL, R2 object keys, or trusted GitHub state.
 
 ## Tool surface
@@ -49,6 +49,7 @@ Default key expiry is 90 days, owner configurable; project grants are explicit. 
 | move_task, convert_task | write; same-project location moves; parent/subtask invariants. |
 | transition_task | write; target status, expected_revision, optional completion/reopen choices; Done requires complete. |
 | list_labels, set_task_labels | read / write; choose existing labels only, replace with revision checks. |
+| list_statuses | read; discover project-specific status UUIDs/categories for task filters and transitions. |
 | list_properties, set_task_properties | read / write; list a project's definitions with types and options. Set or clear values by definition ID with expected_revision. The values must match the type: an option ID for Select, option IDs for Multi-select, an ISO date for Date, and so on. Unknown definitions or options return validation_error with the valid choices. get_task and list_tasks return values keyed by definition ID; list_tasks accepts the property filters and sorts from SPECIFICATION.md. |
 | add_dependency, remove_dependency | write; validate same-project DAG and reject parent/descendant relationships. |
 | get_note, update_note, append_note | read / write; bounded validated document JSON. Append is an atomic append operation; never replace the entire document with a stale copy. |
@@ -85,17 +86,17 @@ Example parent transition:
 
 ```json
 {
-  "task_id": "<uuid>",
-  "expected_revision": 7,
-  "target_status_id": "<done-status-uuid>",
-  "completion_action": "complete_all",
-  "idempotency_key": "<unique-request-id>"
+  "id": "<uuid>",
+  "expectedRevision": 7,
+  "statusId": "<done-status-uuid>",
+  "completionAction": "complete_all",
+  "idempotencyKey": "<unique-request-id>"
 }
 ```
 
-Without completion_action when unfinished subtasks exist, return decision_required with keep_open and complete_all. Do not transition the parent first. A key without complete cannot choose complete_all. A write-only key may choose In review instead.
+Without completionAction when unfinished subtasks exist, return decision_required with keep_open and complete_all. Do not transition the parent first. A key without complete cannot choose complete_all. A write-only key may choose In review instead.
 
-Adding/reopening work beneath completed sections similarly returns affected completed ancestor IDs and requires reopen_completed_ancestors=true. The whole change commits atomically. Dependency-bearing archives require explicit acknowledgement of the listed active dependents.
+Adding/reopening work beneath completed sections similarly returns affected completed ancestor IDs and requires reopenCompletedAncestors=true. The whole change commits atomically. Dependency-bearing archives require explicit acknowledgement of the listed active dependents.
 
 External calls and uploads are not wrapped in an open database transaction. Use pending states and retryable jobs. On timeout, callers retry with the original idempotency key, not a new one.
 

@@ -81,7 +81,7 @@ export function createAttachmentService(db: Database, storage: () => AttachmentS
       }
       const rows = await db.select().from(attachments).where(and(eq(attachments.ownerId, actor.ownerId), eq(column(input.kind), input.id), cursor ? or(lt(attachments.createdAt, cursor.createdAt), and(eq(attachments.createdAt, cursor.createdAt), lt(attachments.id, cursor.id))) : undefined))
         .orderBy(desc(attachments.createdAt), desc(attachments.id)).limit(input.limit + 1);
-      return { items: rows.slice(0, input.limit).map(publicAttachment), nextCursor: rows.length > input.limit ? rows[input.limit - 1].id : null };
+      return { items: rows.slice(0, input.limit).map(publicAttachment), nextCursor: rows.length > input.limit ? rows[input.limit - 1].id : null, hasMore: rows.length > input.limit };
     },
     async finalize(actor: Actor, raw: unknown, requestId: string): Promise<Attachment> {
       const { id } = attachmentId.parse(raw);

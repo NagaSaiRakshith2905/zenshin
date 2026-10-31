@@ -100,7 +100,7 @@ Important constraints:
 | Table | Main fields and purpose |
 | --- | --- |
 | background_jobs | kind, unique deduplication key, minimal payload, state, attempts, available_at, lease expiry, last error. For bounded GitHub refresh, exports, cleanup, and retryable external work if required. |
-| exports | owner_id, status, output object key, requested_at, completed_at, expires_at, failure summary. |
+| exports | owner_id, status, output object key, requested_at, completed_at, expires_at, failure summary; Phase 15 adds a bounded secret-free JSONB snapshot for stable durable generation retries, cleared on publication/expiry. See migration 0008_export_snapshot.sql. |
 
 Keep operational tables proportional to actual asynchronous needs; use the existing database rather than adding a second queue datastore by default.
 

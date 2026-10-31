@@ -1,6 +1,6 @@
 # Detailed implementation plan
 
-Status: implementation in progress. Phases 0–9 are complete and verified against disposable local PostgreSQL. Phase 10 job infrastructure and Phase 11 application code are implemented; Phase 11 provisioning and real R2 acceptance remain open. Phases 12–13 application code is implemented; PostgreSQL verification, GitHub App provisioning and staging acceptance remain open. Phases 14–16 remain. No provider infrastructure has been provisioned by this plan.
+Status: implementation in progress. Phases 0–9 are complete and verified against disposable local PostgreSQL. Phase 10 job infrastructure and Phase 11 application code are implemented; Phase 11 provisioning and real R2 acceptance remain open. Phases 12–13 application code is implemented; PostgreSQL verification, GitHub App provisioning and staging acceptance remain open. Phase 14 MCP application code is implemented; PostgreSQL, browser setup QA and real-client staging acceptance remain open. Phase 15 export application code and backup/recovery tooling are implemented locally; database/provider verification, provisioning, real alerts and a full restore drill remain open. Phase 16 remains. No provider infrastructure has been provisioned by this plan.
 
 ## 1. Purpose and governing documents
 
@@ -32,25 +32,27 @@ This plan adds execution detail without changing agreed scope. A conflict must b
 
 ## 2. Execution sequence and dependencies
 
-| Phase | Deliverable | Prerequisites |
-| --- | --- | --- |
-| 0 | Repository baseline and configuration inventory | Specification confirmation |
-| 1 | Application foundation and CI | 0 |
-| 2 | Database schema and migration foundation | 1 |
-| 3 | Owner authentication, actors, and scoped credentials | 2 |
-| 4 | Shared contracts, transaction helpers, activity, idempotency | 3 |
-| 5 | Projects, workflows, and nested sections | 4 |
-| 6 | Tasks, subtasks, dependencies, archive/delete rules | 5 |
-| 7 | Application shell, core views, and task editing | 6 |
-| 8 | Notes, autosave, revisions, and draft recovery | 7 |
-| 9 | Search, filters, ordering, and board behavior | 8 |
-| 10 | Durable jobs and integration health | 4; complete before 11–15 |
-| 11 | Private R2 attachments | 7, 10 |
-| 12 | GitHub installation, linking, import, and reconciliation | 6, 8, 10 |
-| 13 | Opt-in GitHub workflow automation | 12 |
-| 14 | MCP tools and real-client compatibility | 9, 11, 13 |
-| 15 | Exports, independent backups, and tested restore | 10–14 |
-| 16 | Accessibility, performance, production release | All preceding phases |
+| Phase | Deliverable | Prerequisites | Status |
+| --- | --- | --- | --- |
+| 0 | Repository baseline and configuration inventory | Specification confirmation | Complete |
+| 1 | Application foundation and CI | 0 | Complete; CI execution pending |
+| 2 | Database schema and migration foundation | 1 | Complete |
+| 3 | Owner authentication, actors, and scoped credentials | 2 | Implemented; mocked OAuth and export denials verified locally; live sign-in pending |
+| 4 | Shared contracts, transaction helpers, activity, idempotency | 3 | Complete |
+| 5 | Projects, workflows, and nested sections | 4 | Complete |
+| 6 | Tasks, subtasks, dependencies, archive/delete rules | 5 | Complete |
+| 7 | Application shell, core views, and task editing | 6 | Complete |
+| 8 | Notes, autosave, revisions, and draft recovery | 7 | Complete |
+| 9 | Search, filters, ordering, and board behavior | 8 | Complete |
+| 10 | Durable jobs and integration health | 4; complete before 11–15 | Infrastructure implemented; latest GitHub deferral verification pending |
+| 11 | Private R2 attachments | 7, 10 | Implemented; provisioning and real R2 acceptance pending |
+| 12 | GitHub installation, linking, import, and reconciliation | 6, 8, 10 | Implemented; migration, PostgreSQL/browser verification, App setup and staging acceptance pending |
+| 13 | Opt-in GitHub workflow automation | 12 | Implemented; PostgreSQL/browser verification and staging acceptance pending |
+| 14 | MCP tools and real-client compatibility | 9, 11, 13 | Code implemented on main; PostgreSQL, browser setup QA and real-client staging acceptance pending |
+| 15 | Exports, independent backups, and tested restore | 10–14 | Code and recovery tooling implemented on main; migration application, database/provider checks, provisioning and full restore drill pending |
+| 16 | Accessibility, performance, production release | All preceding phases | Next implementation phase; not started |
+
+Updated 2026-10-31. Phases 14–15 implementation and this status update are included on `main`, following phases 12–13 in `6163954`. Latest recorded local checks: 174 unit tests, the recovery CLI self-check, typecheck, lint and a production build from an environment-free temporary source copy pass. No staging environment is available. Database/browser/provider checks, migration application and the full restore drill remain open. Implementation status does not close provider, client, recovery or release acceptance gates.
 
 Recommended working order follows the table, introducing Phase 10's minimal job primitives earlier when a feature needs them. Auth boundaries and domain invariants must exist before exposing mutation routes or agent tools. Parallel work is optional after shared contracts stabilize; this plan does not require delegation.
 
@@ -132,7 +134,7 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 
 ## 6. Phase 3 — Authentication, ownership, and agent credentials
 
-**Status: ✅ Tasks complete (2026-10-29).** Verification passes with mocked GitHub OAuth; two items wait on files (Phase 11) and export (Phase 15). Real GitHub sign-in needs the owner ID and OAuth app.
+**Status: ✅ Tasks complete (2026-10-29).** Mocked GitHub OAuth, Phase 11 file isolation and Phase 15 export-denial checks have recorded coverage. Real GitHub sign-in still needs the owner ID and OAuth app; live acceptance remains open.
 
 ### Tasks
 
@@ -152,7 +154,7 @@ Recommended working order follows the table, introducing Phase 10's minimal job 
 - [x] Owner sign-in works and a different GitHub identity cannot provision/access the dashboard.
 - [x] Expired/revoked keys fail on the next authenticated request.
 - [x] Credential grants isolate projects on reads, counts, search, files, and mutations. (Including Phase 11 file list/upload/finalize/download denial tests against disposable PostgreSQL with mocked storage.)
-- [ ] Agent credentials cannot reach owner-only configuration/export/delete operations. (Configuration/delete covered; export arrives in Phase 15.)
+- [x] Agent credentials cannot reach owner-only configuration/export/delete operations. (Configuration/delete covered previously; Phase 15 verifies service and transport export denial in unit tests. PostgreSQL export integration and real-client staging checks remain pending.)
 
 **Exit gate:** browser ownership and agent permissions are enforced at the server, with tested denial paths and no credential leakage.
 
@@ -367,18 +369,22 @@ The conditional-write strategy is implemented and tests assert that `content-typ
 
 ## 17. Phase 14 — MCP implementation and client setup
 
+**Status: Application code implemented (2026-10-30); acceptance pending.** See [MCP setup and acceptance](docs/MCP.md). Both current per-request MCP and legacy stateless Streamable HTTP are covered by local protocol tests. The official SDK 2.4.0 includes the Web handler directly, avoiding an additional wrapper dependency.
+
 ### Tasks
 
-- [ ] Expose stateless Streamable HTTP at /api/mcp using compatible SDK/handler versions.
-- [ ] Authenticate explicit bearer keys and create the restricted actor on each request; do not accept an owner session as an agent shortcut.
-- [ ] Register every tool in MCP-API.md with bounded schemas, clear descriptions, stable result fields, pagination, and expected revisions.
-- [ ] Route tools directly to existing services; no duplicate authorization, graph, completion, upload, or automation rules.
-- [ ] Implement structured conflict/decision_required/rate-limit/integration errors, safe missing-target responses, and idempotency behavior.
-- [ ] Ensure all indirect mutations enforce scopes: Done through create/update/bulk/status paths requires complete; archive through subtree changes requires archive; owner-only actions remain unavailable.
-- [ ] Support attachment initiation/finalization/download instructions, note append, GitHub browsing/import/linking/refresh, search, and activity.
-- [ ] Add owner key settings copy/configuration examples for Codex and Claude Code with environment-backed secrets and the real deployment URL supplied only in user configuration.
+- [x] Expose stateless Streamable HTTP at /api/mcp using compatible SDK/handler versions.
+- [x] Authenticate explicit bearer keys and create the restricted actor on each request; do not accept an owner session as an agent shortcut.
+- [x] Register every tool in MCP-API.md with bounded schemas, clear descriptions, stable result fields, pagination, and expected revisions.
+- [x] Route tools directly to existing services; no duplicate authorization, graph, completion, upload, or automation rules.
+- [x] Implement structured conflict/decision_required/rate-limit/integration errors, safe missing-target responses, and idempotency behavior.
+- [x] Ensure all indirect mutations enforce scopes: Done through create/update/bulk/status paths requires complete; archive through subtree changes requires archive; owner-only actions remain unavailable.
+- [x] Support attachment initiation/finalization/download instructions, note append, GitHub browsing/import/linking/refresh, search, and activity.
+- [x] Add owner key settings copy/configuration examples for Codex and Claude Code with environment-backed secrets and the real deployment URL supplied only in user configuration.
 - [ ] Validate discovery and representative calls from both clients in staging; do not advertise OAuth metadata or legacy SSE that is not implemented.
-- [ ] Document key rotation, revocation, expiry, grant changes, tool limits, and retry guidance.
+- [x] Document key rotation, revocation, expiry, grant changes, tool limits, and retry guidance.
+
+**Local validation:** 158 unit tests across 31 files, typecheck and zero-warning lint pass. The Webpack production build passes from a temporary source copy excluding environment files (the workspace build cannot stat protected `.env.local` or remove existing `.next` artifacts). Five new MCP/PostgreSQL integration cases are written, but their execution failed before setup with `connect EPERM` to the isolated test endpoint; Docker access is also denied. Existing authentication/attachment/GitHub integration suites were not rerun. Available binaries: codex-cli 0.163.0 and Claude Code 2.1.304; real-client compatibility is not claimed. No staging URL/key or live-provider acceptance result was supplied. Checkboxes above record implementation, not closure of these verification gates.
 
 ### Real-client acceptance
 
@@ -393,20 +399,24 @@ The conditional-write strategy is implemented and tests assert that `content-typ
 
 ## 18. Phase 15 — Exports, backups, and restoration
 
+**Status: Local application code and recovery tooling implemented (2026-10-30); operational acceptance pending.** See [Recovery setup and runbook](docs/RECOVERY.md). No destination, Neon setting, SES identity or workflow secret has been provisioned or enabled by this work.
+
 ### Tasks
 
-- [ ] Implement owner-only asynchronous exports: versioned structured JSON (including property definitions, options and values), canonical note JSON, Markdown notes, relationship IDs/task references, and attachment manifest.
-- [ ] Exclude sessions, API keys, OAuth/provider tokens, private app keys, and operational secrets.
-- [ ] Generate exports as bounded durable work; store privately, provide authorized download, and expire after the proposed 24 hours.
+- [x] Implement owner-only asynchronous exports: versioned structured JSON (including property definitions, options and values), canonical note JSON, Markdown notes, relationship IDs/task references, and attachment manifest.
+- [x] Exclude sessions, API keys, OAuth/provider tokens, private app keys, and operational secrets.
+- [x] Generate exports as bounded durable work; store privately, provide authorized download, and expire after the proposed 24 hours.
 - [ ] Configure/verify Neon seven-day history on the actual paid environment.
 - [ ] Configure the separate-provider encrypted backup destination, independent credentials, nonpublic access, and 30-day retention.
-- [ ] Implement a twice-daily backup runner with compatible pg_dump tooling/unpooled access and incremental copying of ready R2 objects.
-- [ ] Build snapshot manifests and verify every referenced immutable attachment has a recoverable backup copy before marking a backup complete.
-- [ ] Retain source-deleted bytes for the recovery window and explain this in permanent-deletion UI.
-- [ ] Monitor the last fully recoverable backup age, backup failures, and approaching/breached 24-hour RPO. Test the owner alert path.
+- [x] Implement a twice-daily backup runner with compatible pg_dump tooling/unpooled access and incremental copying of ready R2 objects. (Workflow remains disabled until private-repository configuration and provider acceptance.)
+- [x] Build snapshot manifests and verify every referenced immutable attachment has a recoverable backup copy before marking a backup complete. (Version/checksum/retention code implemented; real-provider verification pending.)
+- [x] Retain source-deleted bytes for the recovery window and explain this in permanent-deletion UI. (Object Lock verification/extension implemented; existing deletion confirmation states 30-day retention. Actual bucket provisioning remains open.)
+- [x] Monitor the last fully recoverable backup age, backup failures, and approaching/breached 24-hour RPO. Test the owner alert path. (Local alert decisions/payload tested; live SES delivery and external monitor acceptance pending.)
 - [ ] Write and execute an isolated restore runbook: database, matching attachment bytes, configuration, object-key references, credential rotation, and post-restore checks.
-- [ ] Exercise a documented export recovery script; do not add a V1 import UI.
+- [x] Exercise a documented export recovery script; do not add a V1 import UI. (Actual gzip-to-JSON/Markdown CLI self-check passes; guarded database/file application remains unverified.)
 - [ ] Record measured recovery time, a launch restore result, and a quarterly restore-drill schedule in operations documentation.
+
+**Local validation:** 174 unit tests across 35 files, typecheck, zero-warning lint and the Webpack production build pass (build from an environment-free temporary source copy). `pnpm recovery:self-check` exercises the actual recovery CLI with synthetic data, approximately 0.36 seconds for extraction on this machine; this is not a measured database/R2 restore. Four new PostgreSQL integration cases cover durable snapshots/retries, owner/agent denials, lease fencing, expiry/cleanup and export-to-empty-database recovery. Their execution stopped before setup with `connect EPERM 127.0.0.1:55432`; no test database was created. Migration `0008_export_snapshot.sql` is generated/reviewed but not applied to an application database. No Redis was added to tests. The runbook records a before-launch full drill and quarterly targets, but no successful full restore, seven-day Neon history evidence, live alert, cloud retention/privacy evidence or workflow execution is claimed.
 
 **Exit gate:** a complete isolated restore demonstrably recovers projects, trees, dependencies, notes/revisions, task references, and private files. A scheduled backup alone is insufficient evidence.
 

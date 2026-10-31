@@ -57,6 +57,13 @@
       "when": 1793375773003,
       "tag": "0007_overjoyed_black_cat",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793383227841,
+      "tag": "0008_export_snapshot",
+      "breakpoints": true
     }
   ]
 }

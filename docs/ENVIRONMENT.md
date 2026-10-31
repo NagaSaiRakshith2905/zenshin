@@ -46,9 +46,11 @@ These variables belong only in the independent runner's secret store, never the 
 | `BACKUP_R2_ENDPOINT`, `BACKUP_R2_BUCKET`, `BACKUP_R2_ACCESS_KEY_ID`, `BACKUP_R2_SECRET_ACCESS_KEY` | Source attachment copy access; separate read credentials. |
 | `BACKUP_S3_BUCKET`, `BACKUP_S3_REGION` | Independent encrypted AWS S3 destination, proposed in the architecture. |
 | `BACKUP_S3_ACCESS_KEY_ID`, `BACKUP_S3_SECRET_ACCESS_KEY`, `BACKUP_S3_KMS_KEY_ID` | Independent, narrowly scoped backup/encryption access; restrict destructive privileges. |
-| `BACKUP_ALERT_EMAIL` | Failure and complete-backup age alerts. |
+| `BACKUP_ALERT_EMAIL`, `BACKUP_ALERT_FROM_EMAIL` | Owner destination and verified SES sender for failure/complete-backup age alerts. |
 
-Runner configuration must provide a compatible `pg_dump`, twice-daily scheduling, 30-day retention, encryption/public-access blocking, and age monitoring for the <=24-hour complete database-plus-files RPO. Schedule is best effort; a snapshot is not recoverable until all referenced attachment bytes exist. Seven-day Neon history and restore drills remain separate requirements. No backup runner is implemented in Phase 1.
+Phase 15 supplies `pnpm backup`, `backup:monitor`, `backup:restore`, `export:recover`, and `recovery:self-check`, plus disabled-until-configured backup/monitor workflows. Runner configuration must provide a compatible `pg_dump`, twice-daily scheduling, 30-day retention, encryption/public-access blocking, and age monitoring for the <=24-hour complete database-plus-files RPO. Schedule is best effort; a snapshot is not recoverable until all referenced attachment bytes exist. Seven-day Neon history and restore drills remain separate requirements. See [Recovery setup/runbook](RECOVERY.md) for IAM, SES, retention, activation and isolated restore variables.
+
+`RESTORE_DATABASE_URL` is restricted to a local empty `zenshin_restore_*` database without connection overrides. `RESTORE_R2_ENDPOINT`, `RESTORE_R2_BUCKET`, `RESTORE_R2_ACCESS_KEY_ID`, `RESTORE_R2_SECRET_ACCESS_KEY` belong only to the isolated restore process; bucket names must start `zenshin-restore-` and differ from the source. `RECOVERY_ATTACHMENT_DIR` identifies a checked backup download when applying a portable export with ready files. These are never browser/application configuration or ordinary test environment inputs.
 
 ## Browser-safe configuration
 

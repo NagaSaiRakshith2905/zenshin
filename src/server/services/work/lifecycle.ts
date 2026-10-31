@@ -4,7 +4,7 @@ import { assertProjectScope } from "@/server/auth/access";
 import { attachments, backgroundJobs } from "@/server/db/schema";
 import { and, eq, inArray, or } from "drizzle-orm";
 import { checkRevision, decision, invalid, ownerOnly } from "./foundation";
-import type { Graph } from "./graph";
+import { assertArchiveDependents, type Graph } from "./graph";
 import { patch, type Rows } from "./store";
 import type { Handlers } from "./types";
 import { cleanupMarginMs } from "@/lib/contracts/attachments";
@@ -20,8 +20,7 @@ export const lifecycle: Pick<Handlers, "archive_item" | "restore_item" | "delete
     if (input.kind === "project") ownerOnly(actor);
     else assertProjectScope(actor, actor.ownerId, g.project.id, "archive");
     const { target, taskIds } = subtree(g, input.kind, input.id); checkRevision(target, input.expectedRevision);
-    const dependentIds = [...new Set(g.edges.filter((e) => taskIds.includes(e.prerequisiteTaskId) && !taskIds.includes(e.taskId)).map((e) => e.taskId))].filter((id) => { const t = g.task(id); return !g.archived(t) && !g.terminal(t); });
-    if (!target.archivedAt && dependentIds.some((id) => !input.acknowledgeDependentIds.includes(id))) decision("Archiving this work will affect active dependents.", { options: ["acknowledge_dependents"], affected: dependentIds.map((id) => ({ id, title: g.task(id).title })) });
+    if (!target.archivedAt) assertArchiveDependents(g, taskIds, input.acknowledgeDependentIds);
     const table = input.kind === "project" ? "projects" : input.kind === "section" ? "sections" : "tasks";
     return patch(db, table, target, { archivedAt: new Date() });
   },

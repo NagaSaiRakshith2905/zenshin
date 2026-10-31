@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { CredentialSettings, CredentialSummary } from "@/lib/contracts/settings";
 import { settingsRequest } from "./api";
 import { CredentialForm } from "./credential-form";
+import { McpSetup } from "./mcp-setup";
 
 function Secret({ created, onDismiss }: { created: { secret: string; displayName: string }; onDismiss: () => void }) {
   const [copyMessage, setCopyMessage] = useState("");
@@ -60,6 +61,7 @@ export function CredentialsPanel({ timezone }: { timezone: string }) {
   return <div className="flex flex-col gap-4">
     <div className="flex items-center justify-between gap-3"><p className="text-sm text-muted-foreground">Scoped access for your local agents.</p><Button onClick={() => setForm("create")} disabled={Boolean(created)}><Plus data-icon="inline-start" />Create key</Button></div>
     {created && <Secret created={created} onDismiss={() => setCreated(null)} />}
+    <McpSetup />
     {error && <Alert><AlertDescription>{error} <Button variant="ghost" onClick={() => void refresh()}>Reload credentials</Button></AlertDescription></Alert>}
     <section className="overflow-hidden rounded-[14px] border bg-muted p-1"><h3 className="flex gap-2 px-3 py-2 text-[13px] font-medium">Active keys <span className="text-muted-foreground">{active.length}</span></h3><ul className="rounded-[10px] bg-background">{active.map(row)}</ul>
       {active.length === 0 && <Empty><EmptyHeader><EmptyTitle>No active credentials</EmptyTitle><EmptyDescription>Select projects and permissions to give an agent access.</EmptyDescription></EmptyHeader></Empty>}

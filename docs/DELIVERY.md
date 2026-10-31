@@ -1,6 +1,6 @@
 # Delivery plan and verification
 
-Status: build plan only. Implementation begins after shared-understanding confirmation.
+Status (2026-10-31): implementation through phase 15 is included on main. Phase 14 MCP and Phase 15 exports/backup/recovery code are implemented; migration application, database/browser verification, provider provisioning, real-client staging acceptance, live alerts and a full restore drill remain pending. Phase 16 release hardening is next. See the phase status list, [MCP acceptance](MCP.md) and [Recovery runbook](RECOVERY.md) for detailed completion evidence.
 
 For the detailed execution checklist, phase dependencies, target artifacts, and completion gates, use [implementation-plan.md](../implementation-plan.md).
 
@@ -12,7 +12,7 @@ For the detailed execution checklist, phase dependencies, target artifacts, and 
 4. Working UI: My work, project/section views, list/board/detail routing, filtering/search, ordering, responsive navigation, keyboard controls, light/dark themes.
 5. Written context: structured notes, autosave/conflicts/local drafts, 20 revisions, owner restore, safe rendering and search extraction.
 6. Files: private R2 upload/finalize/download, format/size checks, pending cleanup, retryable deletion, mobile and agent transfer path.
-7. GitHub: selected-repository App installation, links/import/deduplication, cached check state, signed webhooks, minute reconciliation/manual refresh, opt-in safe transitions, unavailable/error states.
+7. GitHub: selected-repository App installation, links/import/deduplication, cached check state, signed webhooks, reconciliation on reads older than 60 seconds/manual refresh, opt-in safe transitions, unavailable/error states.
 8. MCP: expose existing shared services through bounded tools, presets/expiry/revocation UI, client setup examples, Codex and Claude Code compatibility tests. Do not implement business rules a second time here.
 9. Recovery and release: exports, seven-day Neon recovery configuration, independent database/files backup, age monitoring, full restore drill, production smoke test and rollback procedure.
 

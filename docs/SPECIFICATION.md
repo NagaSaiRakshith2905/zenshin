@@ -97,6 +97,7 @@ Filters: project, section/subtree, workflow category/status, label, priority, du
 
 - Archive is reversible and does not alter statuses, dependencies, or note content. Effective archive includes archived project/section/parent ancestors.
 - Restore clears only the selected item's own archive marker; independently archived descendants remain archived. If an ancestor is archived, explain that restoring it is also necessary for visibility.
+- Creating under an archived ancestor or moving/converting work across an effective archive boundary requires archive permission in addition to write. Moves into archived locations use the same active-dependent acknowledgment as explicit archive.
 - Warn about active dependent tasks before archive and allow explicit continuation, including when archiving a Done prerequisite would make them blocked. Do not silently remove dependency links.
 - Owner-only permanent deletion requires an archived target and a confirmation that names the affected subtree and files. Block while tasks outside the deletion set depend on that set.
 - Remove cross-links owned exclusively by the deleted set. File deletion uses durable retries; hide deleted data immediately even if physical cleanup is pending.
