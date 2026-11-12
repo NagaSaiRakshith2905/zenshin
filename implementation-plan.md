@@ -1,6 +1,6 @@
 # Detailed implementation plan
 
-Status: implementation in progress. Phases 0–9 are complete and verified against disposable local PostgreSQL. Phase 10 job infrastructure and Phase 11 application code are implemented; Phase 11 provisioning and real R2 acceptance remain open. Phases 12–13 application code is implemented; PostgreSQL verification, GitHub App provisioning and staging acceptance remain open. Phase 14 MCP application code is implemented; PostgreSQL, browser setup QA and real-client staging acceptance remain open. Phase 15 export application code and backup/recovery tooling are implemented locally; database/provider verification, provisioning, real alerts and a full restore drill remain open. Phase 16 remains. No provider infrastructure has been provisioned by this plan.
+Status: implementation in progress. Phases 0–9 are complete and verified against disposable local PostgreSQL. Phase 10 job infrastructure and Phase 11 application code are implemented; Phase 11 provisioning and real R2 acceptance remain open. Phases 12–13 application code is implemented; PostgreSQL verification, GitHub App provisioning and staging acceptance remain open. Phase 14 MCP application code is implemented; PostgreSQL, browser setup QA and real-client staging acceptance remain open. Phase 15 export application code and backup/recovery tooling are implemented locally; database/provider verification, provisioning, real alerts and a full restore drill remain open. Phase 16 hardening is in progress: local interaction fixes, batched reads, bounded search headlines and verification tooling are implemented; database/browser verification, measured performance and release gates remain open. No provider infrastructure has been provisioned by this plan.
 
 ## 1. Purpose and governing documents
 
@@ -50,7 +50,7 @@ This plan adds execution detail without changing agreed scope. A conflict must b
 | 13 | Opt-in GitHub workflow automation | 12 | Implemented; PostgreSQL/browser verification and staging acceptance pending |
 | 14 | MCP tools and real-client compatibility | 9, 11, 13 | Code implemented on main; PostgreSQL, browser setup QA and real-client staging acceptance pending |
 | 15 | Exports, independent backups, and tested restore | 10–14 | Code and recovery tooling implemented on main; migration application, database/provider checks, provisioning and full restore drill pending |
-| 16 | Accessibility, performance, production release | All preceding phases | Next implementation phase; not started |
+| 16 | Accessibility, performance, production release | All preceding phases | In progress; local fixes/check tooling implemented, verification and release gates open |
 
 Updated 2026-10-31. Phases 14–15 implementation and this status update are included on `main`, following phases 12–13 in `6163954`. Latest recorded local checks: 174 unit tests, the recovery CLI self-check, typecheck, lint and a production build from an environment-free temporary source copy pass. No staging environment is available. Database/browser/provider checks, migration application and the full restore drill remain open. Implementation status does not close provider, client, recovery or release acceptance gates.
 
@@ -421,6 +421,8 @@ The conditional-write strategy is implemented and tests assert that `content-typ
 **Exit gate:** a complete isolated restore demonstrably recovers projects, trees, dependencies, notes/revisions, task references, and private files. A scheduled backup alone is insufficient evidence.
 
 ## 19. Phase 16 — Hardening and release
+
+**Status (2026-10-31): In progress.** Implemented editor-safe shortcuts, native inline-edit keyboard controls/focus, search close/status/Back fixes, touch targets, lazy activity reads, batched task-page context and page-bounded search snippets. Added regression scenarios, a disposable performance/query-plan runner and a release/rollback runbook in [Release](docs/RELEASE.md). Checks below remain open until actual verification/acceptance; no staging exists.
 
 ### Accessibility and interaction
 

@@ -10,3 +10,17 @@ export function applyFilters(search: URLSearchParams, values: Record<string, str
   return next;
 }
 export function splitValues(value?: string) { return value?.split(",").filter(Boolean) ?? []; }
+
+export function clearTaskFilters(search: URLSearchParams, keepQuery = false) {
+  const next = applyFilters(search, keepQuery && search.get("q") ? { q: search.get("q")! } : {});
+  for (const key of ["descendants", "archived", "subtasks"]) next.delete(key);
+  return next;
+}
+const filterNames: Record<string, string> = { projectId: "Project", projectIds: "Projects", sectionIds: "Sections", categories: "Workflow categories", statusIds: "Statuses", labelIds: "Labels", priorities: "Priorities", dueFrom: "Due from", dueTo: "Due through", overdue: "Overdue", blocked: "Blocked", readyOnly: "Ready to work", taskType: "Task type", linkedGithub: "GitHub links", propertyFilters: "Custom properties", archiveState: "Archive state", entityTypes: "Result types", descendants: "Child sections", archived: "Archived work", subtasks: "Subtasks" };
+export function activeFilterLabels(search: URLSearchParams) {
+  return Object.entries(filterNames).filter(([key]) => {
+    const value = search.get(key);
+    if (!value || value === "[]" || (key === "archiveState" && value === "active") || (key === "taskType" && value === "all")) return false;
+    return !["readyOnly", "descendants", "archived", "subtasks"].includes(key) || value === "true";
+  }).map(([, label]) => label);
+}

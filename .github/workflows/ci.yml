@@ -4,6 +4,12 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+    inputs:
+      performance:
+        description: Run disposable representative-data benchmark and query plans
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -70,3 +76,14 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm test:integration
+      - name: Representative-data performance check
+        if: github.event_name == 'workflow_dispatch' && inputs.performance
+        run: pnpm perf:check
+      - name: Record performance report and query plans
+        if: always() && github.event_name == 'workflow_dispatch' && inputs.performance
+        run: |
+          node --input-type=module -e '
+            import { existsSync, readFileSync } from "node:fs";
+            const path = "test-results/performance.json";
+            console.log(existsSync(path) ? readFileSync(path, "utf8") : "No completed performance report; see setup/check failure.");
+          '

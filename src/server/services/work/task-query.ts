@@ -13,8 +13,9 @@ export function allowedProjects(actor: Actor) {
   if (actor.kind !== "human" && !actor.scopes.includes("read")) assertProjectScope(actor, actor.ownerId, "", "read");
   return sql`p.owner_id = ${actor.ownerId} and ${actor.kind === "human" ? sql`true` : actor.projectIds.length ? sql`p.id::text in (${listSql(actor.projectIds)})` : sql`false`}`;
 }
-export function taskBase(actor: Actor) {
-  return sql`with recursive permitted_projects as (select p.* from projects p where ${allowedProjects(actor)}), section_tree as (
+export function taskBase(actor: Actor, projectIds: readonly string[] = []) {
+  const projectScope = projectIds.length ? sql`and p.id in (${sql.join(projectIds.map((id) => sql`${id}::uuid`), sql`, `)})` : sql``;
+  return sql`with recursive permitted_projects as (select p.* from projects p where ${allowedProjects(actor)} ${projectScope}), section_tree as (
     select s.*, s.archived_at is not null as effective_archived, array[s.id] as ancestor_ids from sections s join permitted_projects p on p.id=s.project_id where s.parent_section_id is null
     union all select s.*, (s.archived_at is not null or parent.effective_archived), parent.ancestor_ids || s.id from sections s join section_tree parent on parent.id=s.parent_section_id
   ), base as (
@@ -112,7 +113,7 @@ export async function taskPage(db: DatabaseExecutor, actor: Actor, input: TaskQu
     if (!permitted.length) throw new DomainError("not_found", "Project was not found.");
   }
   const { condition, order } = await taskConditions(db, input, myWork);
-  const cte = sql`${taskBase(actor)}, matching as (select * from visible t where ${condition}), ranked as (select t.*, row_number() over(order by ${order}) as ordinal from matching t)`;
+  const cte = sql`${taskBase(actor, input.projectId ? [input.projectId] : input.projectIds)}, matching as (select * from visible t where ${condition}), ranked as (select t.*, row_number() over(order by ${order}) as ordinal from matching t)`;
   if (input.cursor) { const [cursor] = await query<{ id: string }>(db, sql`${cte} select id from ranked where id=${input.cursor}`); if (!cursor) invalid("This cursor is no longer available. Restart the list."); }
   const items = await query<{ id: string; projectId: string }>(db, sql`${cte} select * from ranked where ordinal > ${input.cursor ? sql`(select ordinal from ranked where id=${input.cursor})` : sql`0`} order by ordinal limit ${input.limit + 1}`);
   const [count] = await query<{ total: number }>(db, sql`${cte} select count(*)::int as total from matching`);

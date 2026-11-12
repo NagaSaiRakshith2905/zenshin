@@ -26,7 +26,9 @@
     "backup:monitor": "node --import tsx scripts/backup-monitor.ts",
     "backup:restore": "node --import tsx scripts/restore-backup.ts",
     "export:recover": "node --import tsx scripts/recover-export.ts",
-    "recovery:self-check": "node --import tsx scripts/recovery/self-check.ts"
+    "recovery:self-check": "node --import tsx scripts/recovery/self-check.ts",
+    "perf:check": "NODE_ENV=test node --conditions=react-server --import tsx scripts/check-performance.ts",
+    "ui:preview": "vite --config tests/ui/vite.config.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1158.0",

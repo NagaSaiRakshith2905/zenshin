@@ -12,7 +12,7 @@ import { StatusGlyph } from "./primitives";
 import type { Task } from "./types";
 export function TaskLink({ task, context = false }: { task: Task; context?: boolean }) {
   const pathname = usePathname(); const search = useSearchParams();
-  return <Link data-task-link={task.id} className={cn("work-task-title", context && "text-muted-foreground")} href={taskHref(pathname, search.toString(), task.id)} scroll={false}><span className="work-reference">{task.reference}</span><span className="min-w-0 break-words">{task.parentReference && <span className="text-muted-foreground">{task.parentReference} › </span>}{task.title}</span></Link>;
+  return <Link data-task-link={task.id} className={cn("work-task-title", context && "text-muted-foreground")} href={taskHref(pathname, search.toString(), task.id)} scroll={false}><span className="work-reference">{task.reference}</span>{" "}<span className="min-w-0 break-words">{task.parentReference && <span className="text-muted-foreground">{task.parentReference} › </span>}{task.title}</span></Link>;
 }
 export function TaskRow({ task, standalone = false, context = false, subtasks = [] }: { task: Task; standalone?: boolean; context?: boolean; subtasks?: Task[] }) {
   const [expanded, setExpanded] = useState(true);

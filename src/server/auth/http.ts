@@ -53,7 +53,7 @@ export async function ownerSettingsRoute(request: Request,
       return Response.json({ error: { code: error.code, message: error.message, requestId: context.requestId } }, { status: statuses[error.code], headers });
     }
     if (error instanceof z.ZodError) {
-      return Response.json({ error: { code: "validation_error", message: "Check the settings fields and try again.", requestId: context.requestId } }, { status: 400, headers });
+      return Response.json({ error: { code: "validation_error", message: "Check the settings fields and try again.", fields: error.issues.map(({ path, message }) => ({ path, message })), requestId: context.requestId } }, { status: 400, headers });
     }
     context.logError("internal_error");
     return Response.json({ error: { code: "internal_error", message: "Could not save or load settings. Try again.", requestId: context.requestId } }, { status: 500, headers });

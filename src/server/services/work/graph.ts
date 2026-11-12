@@ -11,6 +11,13 @@ export async function loadGraph(db: DatabaseExecutor, project: Rows["projects"])
   const tasks = await rows(db, "tasks", sql`project_id = ${project.id} and owner_id = ${project.ownerId}`);
   const statuses = await rows(db, "task_statuses", sql`project_id = ${project.id} and owner_id = ${project.ownerId}`);
   const edges = await query<{ taskId: string; prerequisiteTaskId: string }>(db, sql`select task_id, prerequisite_task_id from task_dependencies where project_id = ${project.id} and owner_id = ${project.ownerId}`);
+  return buildGraph(project, { sections, tasks, statuses, edges });
+}
+/** Pure graph rules shared by complete write graphs and scoped read projections. */
+export function buildGraph(project: Rows["projects"], { sections, tasks, statuses, edges }: {
+  sections: Rows["sections"][]; tasks: Rows["tasks"][]; statuses: Rows["task_statuses"][];
+  edges: { taskId: string; prerequisiteTaskId: string }[];
+}) {
   const section = (id: string) => sections.find((r) => r.id === id) ?? invalid("Choose a section in this project.");
   const task = (id: string) => tasks.find((r) => r.id === id) ?? invalid("Choose a task in this project.");
   const status = (id: string) => statuses.find((r) => r.id === id) ?? invalid("Choose a status in this project.");

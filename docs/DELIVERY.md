@@ -1,6 +1,6 @@
 # Delivery plan and verification
 
-Status (2026-10-31): implementation through phase 15 is included on main. Phase 14 MCP and Phase 15 exports/backup/recovery code are implemented; migration application, database/browser verification, provider provisioning, real-client staging acceptance, live alerts and a full restore drill remain pending. Phase 16 release hardening is next. See the phase status list, [MCP acceptance](MCP.md) and [Recovery runbook](RECOVERY.md) for detailed completion evidence.
+Status (2026-10-31): implementation through phase 15 is included on main. Phase 14 MCP and Phase 15 exports/backup/recovery code are implemented; migration application, database/browser verification, provider provisioning, real-client staging acceptance, live alerts and a full restore drill remain pending. Phase 16 is in progress with local hardening changes and repeatable checks; database/browser verification, measured performance and release acceptance remain open. See the [release runbook](RELEASE.md) for checks and rollback/forward-fix procedures. See the phase status list, [MCP acceptance](MCP.md) and [Recovery runbook](RECOVERY.md) for detailed completion evidence.
 
 For the detailed execution checklist, phase dependencies, target artifacts, and completion gates, use [implementation-plan.md](../implementation-plan.md).
 

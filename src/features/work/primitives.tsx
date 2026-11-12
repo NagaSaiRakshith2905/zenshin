@@ -4,23 +4,27 @@ import { ChevronDown, RefreshCw, WifiOff } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
-import { Field, FieldLabel } from "@/components/ui/field";
+import { Field, FieldLabel, FieldDescription, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useFieldValidation } from "./validation";
 import { cn } from "@/lib/utils";
 import type { Category, Progress } from "./types";
 import { categoryLabels } from "./model";
 export function StatusGlyph({ category }: { category: Category }) { return <span className={cn("status-glyph", `status-${category}`)} aria-label={categoryLabels[category]} role="img" />; }
-export function TextField({ label, multiline, ...props }: ComponentProps<typeof Input> & { label: string; multiline?: boolean }) {
-  const id = useId();
-  return <Field><FieldLabel htmlFor={id}>{label}</FieldLabel>{multiline ? <textarea id={id} className="work-textarea" {...props as ComponentProps<"textarea">} /> : <Input id={id} {...props} />}</Field>;
+export function TextField({ label, multiline, description, ...props }: ComponentProps<typeof Input> & { label: string; multiline?: boolean; description?: string }) {
+  const fallback = useId(); const validation = useFieldValidation(props.name); const id = props.id ?? validation.id ?? fallback;
+  const describedBy = [props["aria-describedby"], description && `${id}-help`, validation.error && `${id}-error`].filter(Boolean).join(" ") || undefined;
+  const control = { ...props, id, "aria-invalid": validation.error ? true : props["aria-invalid"], "aria-describedby": describedBy };
+  return <Field data-invalid={Boolean(validation.error)}><FieldLabel htmlFor={id}>{label}</FieldLabel>{multiline ? <textarea className="work-textarea" {...control as ComponentProps<"textarea">} /> : <Input {...control} />}{description && <FieldDescription id={`${id}-help`}>{description}</FieldDescription>}{validation.error && <FieldError id={`${id}-error`}>{validation.error}</FieldError>}</Field>;
 }
 export function SelectField({ label, children, ...props }: ComponentProps<typeof NativeSelect> & { label: string }) {
-  const id = useId(); return <Field><FieldLabel htmlFor={id}>{label}</FieldLabel><NativeSelect id={id} {...props}>{children}</NativeSelect></Field>;
+  const fallback = useId(); const validation = useFieldValidation(props.name); const id = props.id ?? validation.id ?? fallback;
+  return <Field data-invalid={Boolean(validation.error)}><FieldLabel htmlFor={id}>{label}</FieldLabel><NativeSelect {...props} id={id} aria-invalid={validation.error ? true : props["aria-invalid"]} aria-describedby={[props["aria-describedby"], validation.error && `${id}-error`].filter(Boolean).join(" ") || undefined}>{children}</NativeSelect>{validation.error && <FieldError id={`${id}-error`}>{validation.error}</FieldError>}</Field>;
 }
 export function CheckField({ label, ...props }: ComponentProps<"input"> & { label: string }) { const id = useId(); return <Field orientation="horizontal"><input className="size-4 accent-current" id={id} type="checkbox" {...props} /><FieldLabel htmlFor={id}>{label}</FieldLabel></Field>; }
-export function LoadingRows() { return <div aria-label="Loading work" className="flex flex-col gap-3 p-4">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-10 w-full" />)}</div>; }
+export function LoadingRows() { return <div role="status" aria-label="Loading work" aria-busy="true" className="flex flex-col gap-3 p-4">{[1, 2, 3].map((i) => <Skeleton aria-hidden="true" key={i} className="h-10 w-full" />)}</div>; }
 const subscribeOnline = (notify: () => void) => { addEventListener("online", notify); addEventListener("offline", notify); return () => { removeEventListener("online", notify); removeEventListener("offline", notify); }; };
 export function useOnline() { return useSyncExternalStore(subscribeOnline, () => navigator.onLine, () => true); }
 // One toast for the whole workspace instead of a QueryError per query while offline.

@@ -49,7 +49,7 @@ export function AttachmentPanel({ kind, id }: AttachmentTarget) {
     {status && <p role="status" aria-live="polite" className="text-sm text-muted-foreground">{status}</p>}
     {error && <Alert variant="destructive"><AlertDescription>{error}{retryable && <Button variant="outline" size="sm" className="max-md:min-h-11" disabled={busy} onClick={() => void transfer()}>Retry upload</Button>}</AlertDescription></Alert>}
     <QueryError error={files.error} retry={files.refetch} retained={Boolean(files.data)} />
-    {files.isPending ? <LoadingRows /> : files.items.length === 0 ? <p className="text-sm text-muted-foreground">No attachments yet.</p> : <ul>{files.items.map((file) => <li key={file.id} className="flex items-center gap-2 border-b py-1 last:border-0">
+    {files.isPending ? <LoadingRows /> : files.items.length === 0 ? <p className="text-sm text-muted-foreground">No attachments yet.</p> : <ul>{files.items.map((file) => <li key={file.id} className="attachment-row flex items-center gap-2 border-b py-1 last:border-0">
       <div className="min-w-0 flex-1"><p className="break-words text-sm font-medium">{file.originalName}</p>{file.failureSummary && <p className="text-xs text-muted-foreground">{file.failureSummary}</p>}</div>
       <span className="text-xs text-muted-foreground">{fileSize(file.actualSize ?? file.declaredSize)}</span>
       {file.state !== "ready" && <Badge variant="outline">{file.state === "failed" ? "Failed" : "Pending"}</Badge>}

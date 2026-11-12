@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { NativeSelect } from "@/components/ui/native-select";
 import { workRequest, WorkError } from "./api";
+import { ErrorSummary, useFormValidation, validationIssues } from "./validation";
 import { optimisticChange } from "./model";
 
 // Saves in flight across every useAction, for the one header indicator.
@@ -70,6 +71,7 @@ export function useAction() {
 }
 export type Action = ReturnType<typeof useAction>;
 export function ActionFeedback({ action, quiet = false }: { action: Action; quiet?: boolean }) {
+  const validation = useFormValidation();
   const [replacement, setReplacement] = useState("");
   const error = action.error;
   if (!error) return !quiet && (action.pending || action.notice) ? <p role="status" className="text-xs text-muted-foreground">{action.pending ? "Saving changes…" : action.notice}</p> : null;
@@ -79,6 +81,7 @@ export function ActionFeedback({ action, quiet = false }: { action: Action; quie
   const confirmation = details.confirmation as Record<string, unknown> | undefined;
   const decision = error.code === "decision_required";
   const conflict = error.code === "conflict" && typeof details.currentRevision === "number";
+  if (!decision && !conflict && validationIssues(error).length) return validation ? null : <ErrorSummary issues={validationIssues(error)} />;
   if (!decision && !conflict) return <Alert variant="destructive"><AlertDescription><span>{error.message}</span>{Array.isArray(details.fields) && <ul>{(details.fields as { path: (string | number)[]; message: string }[]).map((f, i) => <li key={i}>{f.path.join(".")}: {f.message}</li>)}</ul>}<Button variant="outline" size="sm" disabled={action.pending} onClick={() => void action.retry()}>Retry</Button></AlertDescription></Alert>;
   const confirm = () => {
     if (confirmation) return action.retry({ confirmation });

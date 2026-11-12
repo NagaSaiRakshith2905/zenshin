@@ -1,7 +1,7 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useId, useState } from "react";
 import { Check, ListFilter } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Popover } from "radix-ui";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { FieldGroup, FieldSet, FieldLegend } from "@/components/ui/field";
@@ -10,24 +10,17 @@ import { decodeTaskQuery, propertyFilter, type TaskQuery } from "@/lib/contracts
 import { useCollection } from "./api";
 import { categoryLabels } from "./model";
 import { CheckField, LoadMore, QueryError, SelectField, TextField } from "./primitives";
-import { applyFilters, filterValues, splitValues } from "./filter-state";
+import { applyFilters, clearTaskFilters, filterValues, splitValues } from "./filter-state";
 import type { Project, Property, Section, Status, Label } from "./types";
 export type FilterOption = { key: string; label: string };
 export function Filters({ projectId, options = [], align = "end" }: { projectId?: string; options?: FilterOption[]; align?: "start" | "end" }) {
   const [open, setOpen] = useState(false);
+  const popupId = useId();
   const search = useSearchParams();
   const active = Object.entries(filterValues(new URLSearchParams(search.toString()))).filter(([key, value]) => !["sort", "sortPropertyId", "sortDirection", "projectId"].includes(key) && value !== "" && value !== "[]" && !(key === "archiveState" && value === "active") && !(key === "taskType" && value === "all")).length + options.filter((o) => search.get(o.key) === "true").length;
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!open) return;
-    const onPointer = (e: PointerEvent) => { if (!ref.current?.contains(e.target as Node)) setOpen(false); };
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
-    document.addEventListener("pointerdown", onPointer); document.addEventListener("keydown", onKey);
-    return () => { document.removeEventListener("pointerdown", onPointer); document.removeEventListener("keydown", onKey); };
-  }, [open]);
-  return <div ref={ref} className="relative"><Button variant="outline" size="sm" aria-expanded={open} aria-haspopup="dialog" onClick={() => setOpen((o) => !o)}><ListFilter data-icon="inline-start" />Filters{active > 0 && <span className="ml-0.5 inline-flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[0.7rem] leading-4 font-semibold text-primary-foreground tabular-nums" aria-label={`${active} active`}>{active}</span>}</Button>{open && <FilterEditor projectId={projectId} options={options} align={align} active={active} close={() => setOpen(false)} />}</div>;
+  return <Popover.Root open={open} onOpenChange={setOpen} modal><Popover.Trigger asChild><Button type="button" variant="outline" size="sm"><ListFilter data-icon="inline-start" />Filters{active > 0 && <span className="ml-0.5 inline-flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[0.7rem] leading-4 font-semibold text-primary-foreground tabular-nums" aria-label={`${active} active`}>{active}</span>}</Button></Popover.Trigger><Popover.Portal>{open && <FilterEditor id={popupId} projectId={projectId} options={options} align={align} active={active} close={() => setOpen(false)} />}</Popover.Portal></Popover.Root>;
 }
-function FilterEditor({ projectId, options, align, active, close }: { projectId?: string; options: FilterOption[]; align: "start" | "end"; active: number; close: () => void }) {
+function FilterEditor({ id, projectId, options, align, active, close }: { id: string; projectId?: string; options: FilterOption[]; align: "start" | "end"; active: number; close: () => void }) {
   const search = useSearchParams(), router = useRouter(), path = usePathname();
   const [values, setValues] = useState(() => filterValues(new URLSearchParams(search.toString())));
   const [flags, setFlags] = useState(() => Object.fromEntries(options.map((o) => [o.key, search.get(o.key) === "true"])));
@@ -43,7 +36,7 @@ function FilterEditor({ projectId, options, align, active, close }: { projectId?
   let propertyFilters: TaskQuery["propertyFilters"] = [];
   try { propertyFilters = JSON.parse(values.propertyFilters ?? "[]"); } catch { /* Invalid URL data remains editable rather than crashing the dialog. */ }
   const setProperty = (definitionId: string, value: Record<string, unknown> | null) => set("propertyFilters", JSON.stringify([...propertyFilters.filter((f) => f.definitionId !== definitionId), ...(value ? [{ definitionId, ...value }] : [])]));
-  return <div role="dialog" aria-labelledby="filter-title" className={cn("filter-popover absolute top-full z-30 mt-2 flex max-h-[75dvh] w-[min(960px,calc(100vw-32px))] flex-col overflow-hidden rounded-2xl border text-popover-foreground md:w-[min(960px,calc(100vw-296px))]", align === "end" ? "right-0 origin-top-right" : "left-0 origin-top-left")}><form className="flex min-h-0 flex-col" onSubmit={(event) => { event.preventDefault(); try { decodeTaskQuery({ ...Object.fromEntries(Object.entries(values).filter(([, value]) => value !== "")), ...(projectId ? { projectId } : {}) }); const params = applyFilters(new URLSearchParams(search.toString()), values); for (const o of options) { if (flags[o.key]) params.set(o.key, "true"); else params.delete(o.key); } router.replace(`${path}?${params}`, { scroll: false }); close(); } catch (e) { setError(e instanceof Error ? e.message : "Check the filters."); } }}><div className="flex items-baseline justify-between gap-4 border-b px-5 pt-4 pb-3"><h2 id="filter-title" className="text-[0.95rem] font-semibold tracking-tight">Filter tasks</h2>{active > 0 && <span className="text-xs whitespace-nowrap text-muted-foreground tabular-nums">{active} active</span>}</div>
+  return <Popover.Content aria-labelledby={`${id}-title`} align={align} sideOffset={8} collisionPadding={16} className="filter-popover filter-panel"><form className="flex min-h-0 flex-1 flex-col" onSubmit={(event) => { event.preventDefault(); try { decodeTaskQuery({ ...Object.fromEntries(Object.entries(values).filter(([, value]) => value !== "")), ...(projectId ? { projectId } : {}) }); const params = applyFilters(new URLSearchParams(search.toString()), values); for (const o of options) { if (flags[o.key]) params.set(o.key, "true"); else params.delete(o.key); } router.replace(`${path}?${params}`, { scroll: false }); close(); } catch (e) { setError(e instanceof Error ? e.message : "Check the filters."); } }}><div className="flex items-baseline justify-between gap-4 border-b px-5 pt-4 pb-3"><h2 id={`${id}-title`} className="text-[0.95rem] font-semibold tracking-tight">Filter tasks</h2>{active > 0 && <span className="text-xs whitespace-nowrap text-muted-foreground tabular-nums">{active} active</span>}</div>
     <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4"><div className="flex flex-col gap-5">{options.length > 0 && <div className="flex flex-wrap items-center gap-2"><span className="mr-1 text-sm font-medium">Show</span>{options.map((o) => <button key={o.key} type="button" aria-pressed={flags[o.key]} onClick={() => setFlags((f) => ({ ...f, [o.key]: !f[o.key] }))} className="filter-chip"><Check aria-hidden="true" className="size-3.5" />{o.label}</button>)}</div>}<div className="grid gap-6 md:grid-cols-3 md:gap-0 md:divide-x [&>*]:md:px-5 [&>*:first-child]:md:pl-0 [&>*:last-child]:md:pr-0">
     <Column title="Scope">    <TextField label="Search text or task reference" value={values.q ?? ""} onChange={(e) => set("q", e.target.value)} />
     <SelectField label="Project" value={selectedProject} disabled={Boolean(projectId)} onChange={(e) => setValues((v) => ({ ...v, projectId: e.target.value, projectIds: "", sectionIds: "", statusIds: "", labelIds: "", propertyFilters: "[]", sort: v.sort === "property" ? "manual" : v.sort, sortPropertyId: "" }))}><option value="">All permitted projects</option>{projects.items.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</SelectField><LoadMore query={projects} />
@@ -60,10 +53,10 @@ function FilterEditor({ projectId, options, align, active, close }: { projectId?
     
     {selectedProject && <><SelectField label="Sort by property" value={values.sort === "property" ? values.sortPropertyId ?? "" : ""} onChange={(e) => setValues((v) => ({ ...v, sort: e.target.value ? "property" : "manual", sortPropertyId: e.target.value }))}><option value="">Use task sort</option>{properties.items.filter((p) => ["number", "date", "select"].includes(p.type)).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</SelectField>{values.sort === "property" && <SelectField label="Property sort direction" value={values.sortDirection ?? "asc"} onChange={(e) => set("sortDirection", e.target.value)}><option value="asc">Ascending</option><option value="desc">Descending</option></SelectField>}</>}</Column></div>
     {selectedProject && properties.items.length > 0 && <FilterGroup title="Custom properties">{properties.items.map((p) => <PropertyFilter key={p.id} property={p} filter={propertyFilters.find((f) => f.definitionId === p.id)} change={(value) => setProperty(p.id, value)} />)}<LoadMore query={properties} /></FilterGroup>}</div>
-<QueryError error={projects.error ?? sections.error ?? statuses.error ?? labels.error ?? properties.error} retry={() => { void projects.refetch(); if (selectedProject) { void sections.refetch(); void statuses.refetch(); void labels.refetch(); void properties.refetch(); } }} />{error && <p role="alert" className="whitespace-pre-wrap text-destructive">{error}</p>}</div><div className="filter-popover-footer flex items-center justify-between gap-2 border-t px-5 py-3"><p className="text-xs text-muted-foreground">Every group must match. Within a group, any choice can match.</p><div className="flex shrink-0 gap-2"><Button type="button" variant="ghost" size="sm" onClick={() => { setValues({}); setFlags(Object.fromEntries(options.map((o) => [o.key, false]))); setError(""); }}>Reset all</Button><Button type="button" variant="outline" size="sm" onClick={close}>Cancel</Button><Button size="sm">Apply filters</Button></div></div></form></div>;
+<QueryError error={projects.error ?? sections.error ?? statuses.error ?? labels.error ?? properties.error} retry={() => { void projects.refetch(); if (selectedProject) { void sections.refetch(); void statuses.refetch(); void labels.refetch(); void properties.refetch(); } }} />{error && <p role="alert" className="whitespace-pre-wrap text-destructive">{error}</p>}</div><div className="filter-popover-footer flex flex-col gap-3 border-t px-5 py-3 sm:flex-row sm:items-center sm:justify-between"><p className="text-xs text-muted-foreground">Every group must match. Within a group, any choice can match.</p><div className="flex flex-wrap gap-2"><Button type="button" variant="ghost" size="sm" onClick={() => { setValues({}); setFlags(Object.fromEntries(options.map((o) => [o.key, false]))); setError(""); }}>Reset all</Button><Button type="button" variant="outline" size="sm" onClick={close}>Cancel</Button><Button size="sm">Apply filters</Button></div></div></form></Popover.Content>;
 }
 function Column({ title, children }: { title: string; children: React.ReactNode }) { return <FieldGroup className="gap-4 [&_[data-slot=native-select-wrapper]]:w-full"><h3 className="text-sm font-semibold tracking-tight">{title}</h3>{children}</FieldGroup>; }
-function FilterGroup({ title, children }: { title: string; children: React.ReactNode }) { return <FieldSet><FieldLegend>{title}</FieldLegend><div className="grid grid-cols-2 gap-x-4 gap-y-2.5 [&_label]:whitespace-nowrap">{children}</div></FieldSet>; }
+function FilterGroup({ title, children }: { title: string; children: React.ReactNode }) { return <FieldSet><FieldLegend>{title}</FieldLegend><div className="grid min-w-0 gap-x-4 gap-y-2.5 sm:grid-cols-2 [&_label]:min-w-0 [&_label]:break-words">{children}</div></FieldSet>; }
 function PropertyFilter({ property, filter, change }: { property: Property; filter?: TaskQuery["propertyFilters"][number]; change: (value: Record<string, unknown> | null) => void }) {
   const op = filter?.op ?? "";
   const specific = property.type === "checkbox" ? "checked" : ["select", "multi_select"].includes(property.type) ? "options" : property.type === "number" ? "number_range" : property.type === "date" ? "date_range" : "contains";
@@ -75,3 +68,8 @@ function PropertyFilter({ property, filter, change }: { property: Property; filt
   </div>;
 }
 export { propertyFilter };
+
+export function ClearTaskFilters({ keepQuery = false }: { keepQuery?: boolean }) {
+  const search = useSearchParams(); const router = useRouter(); const path = usePathname();
+  return <Button variant="outline" size="sm" onClick={() => { const next = clearTaskFilters(new URLSearchParams(search.toString()), keepQuery); router.replace(`${path}${next.size ? `?${next}` : ""}`, { scroll: false }); }}>Clear filters</Button>;
+}

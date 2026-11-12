@@ -1,6 +1,6 @@
 # Zenshin
 
-Status (2026-10-31): Phases 0–9 have recorded local verification. Application code through Phase 15 (including MCP and owner exports) and independent backup/recovery tooling are implemented on main; outstanding migration application, database/browser checks, provider setup, live-client acceptance and a full restore drill remain open. Phase 16 release hardening is next. See the [phase status list](implementation-plan.md#2-execution-sequence-and-dependencies), [MCP setup](docs/MCP.md), [Recovery runbook](docs/RECOVERY.md) and [implementation notes](IMPLEMENTATION-NOTES.md).
+Status (2026-10-31): Phases 0–9 have recorded local verification. Application code through Phase 15 (including MCP and owner exports) and independent backup/recovery tooling are implemented on main; outstanding migration application, database/browser checks, provider setup, live-client acceptance and a full restore drill remain open. Phase 16 is in progress with interaction/performance fixes and repeatable checks; measured performance and release acceptance remain open. See the [phase status list](implementation-plan.md#2-execution-sequence-and-dependencies), [MCP setup](docs/MCP.md), [Recovery runbook](docs/RECOVERY.md) and [implementation notes](IMPLEMENTATION-NOTES.md).
 
 Start with [the product specification](docs/SPECIFICATION.md). It connects the accepted decisions to implementation and acceptance criteria.
 
@@ -13,6 +13,7 @@ Start with [the product specification](docs/SPECIFICATION.md). It connects the a
 | [Architecture](docs/ARCHITECTURE.md) | Authentication, shared services, hosting, GitHub, R2, exports, recovery. |
 | [MCP and API contract](docs/MCP-API.md) | Agent tools, permissions, errors, retries, compatibility. |
 | [Design direction](docs/DESIGN.md) | Navigation, layouts, tokens, interaction, accessibility. |
+| [Release hardening and rollback](docs/RELEASE.md) | Local/performance checks, browser acceptance, release evidence and rollback/forward-fix procedure. |
 | [Delivery and verification](docs/DELIVERY.md) | Build order, acceptance gates, launch operations. |
 | [Detailed implementation plan](implementation-plan.md) | Phase-by-phase tasks, dependencies, target artifacts, verification, and completion gates. |
 

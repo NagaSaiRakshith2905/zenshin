@@ -1,6 +1,6 @@
 # Checks and test isolation
 
-The unit suite runs 141 tests in 28 files. The integration suite previously passed 55 tests in 5 files against disposable PostgreSQL; two audit cases were added, but their run requires an available test database. Both suites are configured for local and CI runs. Real provider acceptance remains separate. See [IMPLEMENTATION-NOTES.md](../IMPLEMENTATION-NOTES.md) for current results.
+The latest local unit run passes 175 tests in 35 files. The integration suite previously passed 55 tests in 5 files against disposable PostgreSQL; two audit cases were added, but their run requires an available test database. Both suites are configured for local and CI runs. Real provider acceptance remains separate. See [IMPLEMENTATION-NOTES.md](../IMPLEMENTATION-NOTES.md) for current results.
 
 | Command | Status |
 | --- | --- |
@@ -35,3 +35,7 @@ Generate isolated owner/project graphs per test and clean them between cases. Tr
 ## GitHub phases 12–13
 
 `src/server/integrations/github/github.test.ts` verifies App JWTs, exact webhook signatures, conditional responses, rate limits and safe Markdown snapshots. `src/server/services/github/automation.test.ts` verifies new-event eligibility, historical/draft/closed/unavailable/stale suppression and merged-set fingerprints. `tests/integration/github.test.ts` adds PostgreSQL-backed connections, scope denials, snapshot/provenance/deletion, event baselines/no-ops/replay, custom targets, task/cache races, current-head summaries, request coalescing, rate-limit deferral and durable webhook delivery tests. The integration suite remains pending in this session because local socket/network access was denied. No Redis or Upstash client/configuration is added to tests. See [GitHub staging acceptance](GITHUB.md).
+
+## Phase 16 hardening
+
+`tests/integration/read-hardening.test.ts` compares paginated task projections with full detail reads, bounds cross-project hydration queries, checks metadata/activity reads avoid task graphs, and verifies granted search totals/cursors/snippets. The integration suite remains on real disposable PostgreSQL; it adds no external cache dependency. `pnpm perf:check` seeds the agreed 50/10,000/50,000 dataset in a separate random migrated database, records warm p95 and actual query plans, and fails at >=500 ms. Use an isolated local `TEST_DATABASE_URL`; the command does not load environment files. A manual Application checks dispatch with `performance=true` runs it in CI and prints its report. Browser checks and measured-deployment/release gates are documented in [Release](RELEASE.md).

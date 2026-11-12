@@ -2,43 +2,44 @@
 import { useState, type FormEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { FieldGroup } from "@/components/ui/field";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TextField, SelectField } from "@/features/work/primitives";
+import { ValidationForm, validationIssues, type FieldIssue } from "@/features/work/validation";
+import { useDraftState, useClearFormDraft } from "@/features/work/form-drafts";
 import { updatePreferencesSchema, type Preferences } from "@/lib/contracts/settings";
 import { settingsRequest } from "./api";
 
 function PreferencesForm({ preferences, message, setMessage }: { preferences: Preferences; message: string; setMessage: (value: string) => void }) {
-  const queryClient = useQueryClient();
+  const client = useQueryClient(); const clearDraft = useClearFormDraft("preferences");
+  const [timezone, setTimezone] = useDraftState("preferences:timezone", preferences.timezone);
+  const [theme, setTheme] = useDraftState("preferences:theme", preferences.theme);
+  const [view, setView] = useDraftState("preferences:view", preferences.defaultTaskView);
+  const [revision] = useDraftState("preferences:revision", preferences.revision);
   const [pending, setPending] = useState(false);
-  const [invalidTimezone, setInvalidTimezone] = useState(false);
+  const [issues, setIssues] = useState<FieldIssue[]>([]); const [error, setError] = useState<Error | null>(null);
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const parsed = updatePreferencesSchema.safeParse({ timezone: form.get("timezone"), theme: form.get("theme"), defaultTaskView: form.get("defaultTaskView"), expectedRevision: preferences.revision });
-    if (!parsed.success) { setInvalidTimezone(true); setMessage("Choose a valid IANA timezone and preference values."); return; }
-    setInvalidTimezone(false);
-    setPending(true);
-    setMessage("");
+    const parsed = updatePreferencesSchema.safeParse({ timezone, theme, defaultTaskView: view, expectedRevision: revision });
+    if (!parsed.success) { setIssues(parsed.error.issues); return; }
+    setIssues([]); setError(null); setPending(true); setMessage("");
     try {
       const saved = await settingsRequest<Preferences>("preferences", "PATCH", parsed.data);
-      queryClient.setQueryData(["preferences"], saved);
-      setMessage("Preferences saved.");
-    } catch (error) { setMessage((error as Error).message); }
+      clearDraft(); client.setQueryData(["preferences"], saved); setMessage("Preferences saved.");
+    } catch (e) { setError(e as Error); }
     finally { setPending(false); }
   }
-  return <form onSubmit={save} className="flex max-w-md flex-col gap-6">
+  return <ValidationForm error={error} issues={issues.length ? issues : validationIssues(error)} onSubmit={save} className="flex max-w-md flex-col gap-6" aria-busy={pending}>
     <FieldGroup>
-      <Field data-invalid={invalidTimezone}><FieldLabel htmlFor="timezone">Timezone</FieldLabel><Input id="timezone" name="timezone" defaultValue={preferences.timezone} required maxLength={100} aria-invalid={invalidTimezone} aria-describedby="timezone-help" /><FieldDescription id="timezone-help">Use an IANA timezone, such as Asia/Kolkata. Due dates become overdue in this timezone.</FieldDescription></Field>
-      <Field><FieldLabel htmlFor="theme">Theme</FieldLabel><NativeSelect id="theme" name="theme" defaultValue={preferences.theme} className="w-full"><NativeSelectOption value="system">System</NativeSelectOption><NativeSelectOption value="light">Light</NativeSelectOption><NativeSelectOption value="dark">Dark</NativeSelectOption></NativeSelect></Field>
-      <Field><FieldLabel htmlFor="default-view">Default view</FieldLabel><NativeSelect id="default-view" name="defaultTaskView" defaultValue={preferences.defaultTaskView} className="w-full"><NativeSelectOption value="list">List</NativeSelectOption><NativeSelectOption value="board">Board</NativeSelectOption><NativeSelectOption value="calendar">Calendar</NativeSelectOption></NativeSelect><FieldDescription>Used when a task view has no selection in its URL.</FieldDescription></Field>
+      <TextField label="Timezone" name="timezone" value={timezone} onChange={(e) => setTimezone(e.target.value)} required maxLength={100} description="Use an IANA timezone, such as Asia/Kolkata. Dates and timestamps use this timezone." />
+      <SelectField label="Theme" name="theme" value={theme} onChange={(e) => setTheme(e.target.value as Preferences["theme"])}><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></SelectField>
+      <SelectField label="Default view" name="defaultTaskView" value={view} onChange={(e) => setView(e.target.value as Preferences["defaultTaskView"])}><option value="list">List</option><option value="board">Board</option><option value="calendar">Calendar</option></SelectField>
     </FieldGroup>
+    {error && !validationIssues(error).length && <p role="alert" className="text-sm text-destructive">{error.message}</p>}
     <div className="flex flex-wrap items-center gap-3"><Button disabled={pending}>{pending ? "Saving…" : "Save preferences"}</Button><p role="status" className="text-sm text-muted-foreground">{message}</p></div>
-    <Button type="button" variant="ghost" className="self-start" onClick={() => void queryClient.invalidateQueries({ queryKey: ["preferences"] })}>Reload saved preferences</Button>
-  </form>;
+    <Button type="button" variant="ghost" className="self-start" disabled={pending} onClick={() => { setTimezone(preferences.timezone); setTheme(preferences.theme); setView(preferences.defaultTaskView); clearDraft(); setIssues([]); setError(null); void client.invalidateQueries({ queryKey: ["preferences"] }); }}>Discard draft and reload preferences</Button>
+  </ValidationForm>;
 }
-
 export function PreferencesPanel() {
   const [message, setMessage] = useState("");
   const query = useQuery({ queryKey: ["preferences"], queryFn: () => settingsRequest<Preferences>("preferences") });

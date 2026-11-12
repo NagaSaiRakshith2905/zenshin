@@ -36,7 +36,7 @@ export function WorkShell({ children, settings, signOut, signingOut }: { childre
     return () => { document.removeEventListener("click", closeMenus); document.removeEventListener("keydown", escapeMenu, true); };
   }, []);
   useEffect(() => {
-    const listener = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setSearching((open) => !open); return; } if (e.key.toLowerCase() === "c" && !e.metaKey && !e.ctrlKey && !e.altKey && !isEditing(e.target)) { e.preventDefault(); edit({ kind: "task", projectId: projectId ?? task.data?.projectId, sectionId }); } };
+    const listener = (e: KeyboardEvent) => { if (e.defaultPrevented || e.repeat || e.isComposing || isEditing(e.target)) return; if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setSearching((open) => !open); return; } if (e.code === "KeyN" && e.altKey && e.shiftKey && !e.metaKey && !e.ctrlKey && !isEditing(e.target)) { e.preventDefault(); edit({ kind: "task", projectId: projectId ?? task.data?.projectId, sectionId }); } };
     document.addEventListener("keydown", listener); return () => document.removeEventListener("keydown", listener);
   }, [edit, projectId, sectionId, task.data?.projectId]);
   const navigation = <Navigation search={() => { setMobile(false); setSearching(true); }} settings={() => { setMobile(false); settings(); }} signOut={signOut} signingOut={signingOut} navigate={() => setMobile(false)} />;

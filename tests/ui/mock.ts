@@ -21,12 +21,20 @@ const collections: Record<string, Item[]> = { projects, sections, tasks, statuse
 const createCommands = { projects: "create_project", sections: "create_section", tasks: "create_task", statuses: "create_status", labels: "create_label", properties: "create_property", options: "create_option" } as const;
 const updateCommands = { projects: "update_project", sections: "update_section", tasks: "update_task", statuses: "update_status", labels: "update_label", properties: "update_property", options: "update_option" } as const;
 export function installPreviewApi() {
+  const credentials: import("../../src/lib/contracts/settings").CredentialSummary[] = [];
   let preferences = { timezone: "Asia/Kolkata", theme: "system", defaultTaskView: "list", revision: 1 };
   window.fetch = async (input, init) => {
     const url = new URL(String(input), location.origin);
     const [, , , resource, id, action] = url.pathname.split("/");
     if (url.pathname === "/api/v1/settings/preferences") { if (init?.method === "PATCH") preferences = { ...preferences, ...JSON.parse(String(init.body)), revision: preferences.revision + 1 }; return Response.json(preferences); }
-    if (url.pathname === "/api/v1/settings/credentials") return Response.json({ credentials: [], projects: projects.map((p) => ({ id: p.id, name: p.name, archived: false })) });
+    if (url.pathname === "/api/v1/settings/credentials") {
+      if (init?.method === "POST") {
+        const input = JSON.parse(String(init.body)); const id = crypto.randomUUID();
+        credentials.push({ id, displayName: input.displayName, scopes: ["read"], projectIds: input.projectIds, revision: 1, createdAt: now, expiresAt: null, lastUsedAt: null, status: "active" });
+        return Response.json({ id, secret: "preview-only-not-a-real-credential" });
+      }
+      return Response.json({ credentials, projects: projects.map((p) => ({ id: p.id, name: p.name, archived: false })) });
+    }
     if (url.pathname === "/api/v1/settings/exports") {
       if (init?.method === "POST") return Response.json({ id: JSON.parse(String(init.body)).idempotencyKey, status: "pending" }, { status: 202 });
       return Response.json({ items: [], nextCursor: null, hasMore: false });
@@ -91,7 +99,7 @@ export function installPreviewApi() {
     if (resource === "search") { const q = (url.searchParams.get("q") ?? "").toLowerCase(); const hits = [...tasks.map((t) => ({ id: t.id, kind: "task", projectId: t.projectId, title: t.title, reference: t.reference, snippet: t.description ?? "" })), ...sections.map((s) => ({ id: s.id, kind: "section", projectId: s.projectId, title: s.name, reference: null, snippet: s.description ?? "" })), ...projects.map((p) => ({ id: p.id, kind: "project", projectId: p.id, title: p.name, reference: null, snippet: "" }))].filter((h) => `${h.reference} ${h.title} ${h.snippet}`.toLowerCase().includes(q)).map((h) => ({ ...h, effectiveArchived: false, snippet: h.snippet.replace(new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"), (m) => `⟦${m}⟧`) })); return Response.json({ items: hits, nextCursor: null }); }
     if (resource === "my-work") { const matching = tasks.filter((t) => workGroup(t)); return Response.json({ items: matching, nextCursor: null, hasMore: false, groupCounts: Object.fromEntries(["overdue", "in_progress", "in_review", "ready"].map((g) => [g, matching.filter((t) => workGroup(t) === g).length])) }); }
     if (id) { const value = collections[resource]?.find((r) => r.id === id); return value ? Response.json(value) : fail("Item was not found.", "not_found"); }
-    const items = (collections[resource] ?? []).filter((item) => (!url.searchParams.get("projectId") || item.projectId === url.searchParams.get("projectId") || resource === "projects" || resource === "activity") && (!url.searchParams.get("parentTaskId") || (item as Task).parentTaskId === url.searchParams.get("parentTaskId")) && (!url.searchParams.get("taskId") || (item as Activity).taskId === url.searchParams.get("taskId")) && (!url.searchParams.get("sectionId") || (item as Task).sectionId === url.searchParams.get("sectionId")) && (url.searchParams.get("includeArchived") === "true" || !(item as Task).effectiveArchived));
+    const items = (collections[resource] ?? []).filter((item) => (!url.searchParams.get("projectId") || item.projectId === url.searchParams.get("projectId") || resource === "projects" || resource === "activity") && (!url.searchParams.get("parentTaskId") || (item as Task).parentTaskId === url.searchParams.get("parentTaskId")) && (!url.searchParams.get("taskId") || (item as Activity).taskId === url.searchParams.get("taskId")) && (!url.searchParams.get("sectionId") || (item as Task).sectionId === url.searchParams.get("sectionId")) && (url.searchParams.get("archiveState") === "archived" ? Boolean((item as Task).effectiveArchived) : url.searchParams.get("includeArchived") === "true" || !(item as Task).effectiveArchived));
     return Response.json({ items, nextCursor: null, hasMore: false });
   };
 }

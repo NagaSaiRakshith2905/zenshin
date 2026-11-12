@@ -44,11 +44,11 @@ function CredentialRow({ credential, projects, timezone, onEdit, onRevoke }: {
   </li>;
 }
 
-export function CredentialsPanel({ timezone }: { timezone: string }) {
+export type CreatedCredential = { id: string; secret: string; displayName: string };
+export function CredentialsPanel({ timezone, created, setCreated }: { timezone: string; created: CreatedCredential | null; setCreated: (value: CreatedCredential | null) => void }) {
   const client = useQueryClient();
   const query = useQuery({ queryKey: ["credentials"], queryFn: () => settingsRequest<CredentialSettings>("credentials") });
   const [form, setForm] = useState<"create" | CredentialSummary | null>(null);
-  const [created, setCreated] = useState<{ id: string; secret: string; displayName: string } | null>(null);
   const [revoke, setRevoke] = useState<CredentialSummary | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");

@@ -14,7 +14,7 @@ export function withoutTask(pathname: string, search: string) {
   return `${pathname}${params.size ? `?${params}` : ""}`;
 }
 export function isEditing(target: EventTarget | null) {
-  return target instanceof HTMLElement && Boolean(target.closest("input,textarea,select,[contenteditable=true],[role=dialog],[role=alertdialog]"));
+  return target instanceof HTMLElement && Boolean(target.closest("input,textarea,select,[contenteditable]:not([contenteditable=false]),[role=textbox],[role=combobox],[role=dialog],[role=alertdialog]"));
 }
 type Row = Record<string, unknown>;
 /** The instant cache change for a mutation, or null when only the server can work it out. */

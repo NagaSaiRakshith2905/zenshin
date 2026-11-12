@@ -1,8 +1,9 @@
 "use client";
 import { GithubSettings } from "@/features/github/panels";
+import { WorkspaceTimezone } from "./timezone";
 import { DefaultTaskView } from "@/features/work/view-preference";
 import { useEffect, useState, type ReactNode } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
 import { KeyRound, UserRound, Archive, Folder, List, Tags, SlidersHorizontal } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -12,33 +13,40 @@ import { cn } from "@/lib/utils";
 import { NoteEnvironment, useNoteOwner } from "@/features/notes/environment";
 import { activeNotes, hasOwnerDrafts, discardOwnerDrafts } from "@/features/notes/drafts";
 import { Button } from "@/components/ui/button";
+import { FormDraftProvider } from "@/features/work/form-drafts";
 import { EditorProvider } from "@/features/work/editors";
 import { WorkShell } from "@/features/work/shell";
-import { ArchivedWork, ProjectSettings, type ProjectSettingsSection } from "@/features/work/project-settings";
+import { ArchivedWork, ProjectSettings } from "@/features/work/project-settings";
 import { useCollection, useEntity } from "@/features/work/api";
 import { SelectField, LoadMore, QueryError, OfflineToast } from "@/features/work/primitives";
 import type { Project, Task } from "@/features/work/types";
 import { settingsRequest } from "./api";
 import { authClient } from "./auth-client";
-import { CredentialsPanel } from "./credentials";
+import { CredentialsPanel, type CreatedCredential } from "./credentials";
 import { IntegrationHealth } from "./integration-health";
 import { PreferencesPanel } from "./preferences";
 import { ExportsPanel } from "./exports";
-type SettingsSection = "preferences" | "credentials" | "archived" | "exports" | "health" | "github" | ProjectSettingsSection;
+import { readSettingsLocation, settingsHref, type SettingsSection } from "./location";
 const sectionNames = { preferences: "Preferences", credentials: "Agent credentials", archived: "Archived work", exports: "Exports", health: "Integration health", general: "General", statuses: "Workflow", labels: "Labels", properties: "Properties", github: "GitHub" };
 function WorkspaceContent({ children, initialPreferences }: { children: ReactNode; initialPreferences: Preferences }) {
   const client = useQueryClient();
   const ownerId = useNoteOwner();
+  const [createdCredential, setCreatedCredential] = useState<CreatedCredential | null>(null);
   const [signOutChoice, setSignOutChoice] = useState(false);
   const { data: preferences } = useQuery({ queryKey: ["preferences"], queryFn: () => settingsRequest<Preferences>("preferences"), initialData: initialPreferences });
-  const path = usePathname(); const search = useSearchParams();
-  const [open, setOpen] = useState(() => search.get("github") === "setup"); const [section, setSection] = useState<SettingsSection>(() => search.get("github") === "setup" ? "github" : "preferences");
+  const path = usePathname(); const search = useSearchParams(); const router = useRouter();
+  const location = readSettingsLocation(new URLSearchParams(search.toString()));
+  const open = location.section !== null; const section = location.section ?? "preferences";
   const [signingOut, setSigningOut] = useState(false); const [error, setError] = useState("");
-  const [selectedProject, setSelectedProject] = useState("");
+
   const activeTaskId = /^\/tasks\/([^/]+)/.exec(path)?.[1] ?? search.get("task") ?? undefined;
   const activeTask = useEntity<Task>("tasks", activeTaskId);
   const projects = useCollection<Project>("projects", { includeArchived: true }, open);
-  const projectId = selectedProject || /^\/projects\/([^/]+)/.exec(path)?.[1] || activeTask.data?.projectId || projects.items[0]?.id || "";
+  const projectId = location.projectId || /^\/projects\/([^/]+)/.exec(path)?.[1] || activeTask.data?.projectId || projects.items[0]?.id || "";
+  const navigateSettings = (next: SettingsSection | null, project = projectId) => router.push(settingsHref(path, new URLSearchParams(search.toString()), next, project), { scroll: false });
+  const setOpen = (next: boolean) => navigateSettings(next ? section : null);
+  const setSection = (next: SettingsSection) => navigateSettings(next);
+  const setSelectedProject = (next: string) => navigateSettings(section, next);
   useEffect(() => {
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     const apply = () => document.documentElement.classList.toggle("dark", preferences.theme === "dark" || (preferences.theme === "system" && media.matches));
@@ -52,18 +60,18 @@ function WorkspaceContent({ children, initialPreferences }: { children: ReactNod
   }
   const draftRecoveryUnavailable = activeNotes(ownerId).some((session) => session.dirty && !session.getSnapshot().localSaved);
   const navButton = (id: SettingsSection, Icon: typeof Folder) => <button key={id} type="button" aria-current={section === id ? "page" : undefined} className={cn("settings-nav", section === id && "bg-accent font-medium")} onClick={() => setSection(id)}><Icon aria-hidden="true" />{sectionNames[id]}</button>;
-  return <>
+  return <WorkspaceTimezone.Provider value={preferences.timezone}>
 
     {error && <Alert><AlertDescription>{error}</AlertDescription></Alert>}
-    <DefaultTaskView.Provider value={preferences.defaultTaskView}><WorkShell settings={() => { setSelectedProject(""); setOpen(true); }} signOut={() => { if (hasOwnerDrafts(ownerId)) setSignOutChoice(true); else void signOut(); }} signingOut={signingOut}>{children}</WorkShell></DefaultTaskView.Provider>
+    <DefaultTaskView.Provider value={preferences.defaultTaskView}><WorkShell settings={() => navigateSettings("preferences")} signOut={() => { if (hasOwnerDrafts(ownerId)) setSignOutChoice(true); else void signOut(); }} signingOut={signingOut}>{children}</WorkShell></DefaultTaskView.Provider>
     <Dialog open={signOutChoice} onOpenChange={(next) => { if (!signingOut) setSignOutChoice(next); }}><DialogContent><DialogHeader><DialogTitle>Sign out with local note drafts?</DialogTitle><DialogDescription>{draftRecoveryUnavailable ? "Some edits could not be stored locally. Cancel and copy or save them before signing out, or discard them explicitly." : "Local drafts belong to this browser. Keep them for your next sign-in, or explicitly discard them."}</DialogDescription></DialogHeader>{error && <p role="alert">{error}</p>}<DialogFooter><Button variant="outline" disabled={signingOut} onClick={() => setSignOutChoice(false)}>Cancel</Button><Button variant="outline" disabled={signingOut || draftRecoveryUnavailable} onClick={() => void signOut(false)}>Keep drafts and sign out</Button><Button disabled={signingOut} onClick={() => void signOut(true)}>Discard drafts and sign out</Button></DialogFooter></DialogContent></Dialog>
-    <Dialog open={open} onOpenChange={setOpen}><DialogContent className="settings-dialog flex h-[min(720px,92dvh)] flex-col gap-0 overflow-hidden p-0 sm:max-w-[960px] sm:flex-row">
+    <Dialog open={open} onOpenChange={setOpen}><DialogContent className="settings-dialog flex h-[min(720px,92dvh)] flex-col gap-0 overflow-hidden p-0 sm:max-w-[960px] md:flex-row">
       <nav aria-label="Settings sections" className="settings-sidebar"><p className="px-3 py-2 text-xs font-medium text-muted-foreground">Workspace</p><div className="settings-section-links">{navButton("preferences", UserRound)}{navButton("credentials", KeyRound)}{navButton("archived", Archive)}{navButton("exports", Archive)}{navButton("health", SlidersHorizontal)}</div><div className="mt-3 p-2"><SelectField label="Project settings" value={projectId} onChange={(e) => setSelectedProject(e.target.value)}><option disabled value="">Select project</option>{projects.items.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</SelectField><LoadMore query={projects} /><QueryError error={projects.error} retry={projects.refetch} /></div>{projectId && <div className="settings-section-links">{navButton("general", Folder)}{navButton("statuses", List)}{navButton("labels", Tags)}{navButton("properties", SlidersHorizontal)}{navButton("github", SlidersHorizontal)}</div>}</nav>
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col"><DialogHeader className="min-h-[56px] justify-center border-b px-6 py-4 pr-12"><DialogTitle>{sectionNames[section]}</DialogTitle><DialogDescription className="sr-only">Manage workspace preferences, scoped access and project configuration.</DialogDescription></DialogHeader><div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">{section === "preferences" ? <PreferencesPanel /> : section === "credentials" ? <CredentialsPanel timezone={preferences.timezone} /> : section === "exports" ? <ExportsPanel /> : section === "health" ? <IntegrationHealth /> : section === "archived" ? <ArchivedWork onNavigate={() => setOpen(false)} /> : section === "github" && projectId ? <GithubSettings key={projectId} projectId={projectId} /> : projectId && section !== "github" ? <ProjectSettings key={`${projectId}-${section}`} projectId={projectId} section={section} /> : <p>Create a project to configure its workflow.</p>}</div></div>
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col"><DialogHeader className="min-h-[56px] justify-center border-b px-6 py-4 pr-12"><DialogTitle>{sectionNames[section]}</DialogTitle><DialogDescription className="sr-only">Manage workspace preferences, scoped access and project configuration.</DialogDescription></DialogHeader><div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">{section === "preferences" ? <PreferencesPanel /> : section === "credentials" ? <CredentialsPanel timezone={preferences.timezone} created={createdCredential} setCreated={setCreatedCredential} /> : section === "exports" ? <ExportsPanel /> : section === "health" ? <IntegrationHealth /> : section === "archived" ? <ArchivedWork /> : section === "github" && projectId ? <GithubSettings key={projectId} projectId={projectId} /> : projectId && section !== "github" ? <ProjectSettings key={`${projectId}-${section}`} projectId={projectId} section={section} /> : <p>Create a project to configure its workflow.</p>}</div></div>
     </DialogContent></Dialog>
-  </>;
+  </WorkspaceTimezone.Provider>;
 }
 export function WorkspaceAccess({ children, preferences, ownerId }: { children: ReactNode; preferences: Preferences; ownerId: string }) {
   const [client] = useState(() => new QueryClient({ defaultOptions: { queries: { staleTime: 30_000, retry: false, refetchOnWindowFocus: false }, mutations: { retry: false } } }));
-  return <QueryClientProvider client={client}><NoteEnvironment ownerId={ownerId}><EditorProvider><WorkspaceContent initialPreferences={preferences}>{children}</WorkspaceContent><OfflineToast /></EditorProvider></NoteEnvironment></QueryClientProvider>;
+  return <QueryClientProvider client={client}><FormDraftProvider key={ownerId}><NoteEnvironment ownerId={ownerId}><EditorProvider><WorkspaceContent initialPreferences={preferences}>{children}</WorkspaceContent><OfflineToast /></EditorProvider></NoteEnvironment></FormDraftProvider></QueryClientProvider>;
 }

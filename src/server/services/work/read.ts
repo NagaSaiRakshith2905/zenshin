@@ -9,6 +9,7 @@ import type { Database, DatabaseExecutor } from "@/server/db";
 import { DomainError, invalid, owned } from "./foundation";
 import { loadGraph, type Graph } from "./graph";
 import { query, rows, type Rows } from "./store";
+import { loadTaskPageGraphs } from "./task-page-graphs";
 
 export type Resource = "projects" | "sections" | "tasks" | "statuses" | "labels" | "properties" | "options" | "activity" | "my-work" | "notes" | "search";
 export const resources: Resource[] = ["projects", "sections", "tasks", "statuses", "labels", "properties", "options", "activity", "my-work", "notes", "search"];
@@ -20,20 +21,24 @@ function page<T extends { id: string }>(items: T[], cursor: string | undefined, 
   return { items: selected, nextCursor: hasMore ? selected.at(-1)!.id : null, hasMore };
 }
 const byPosition = (a: { position: bigint; id: string }, b: { position: bigint; id: string }) => BigInt(a.position) < BigInt(b.position) ? -1 : BigInt(a.position) > BigInt(b.position) ? 1 : a.id.localeCompare(b.id);
-async function relations(db: DatabaseExecutor, projectId: string, taskIds: string[]) {
+async function relations(db: DatabaseExecutor, projectIds: string[], taskIds: string[]) {
   if (!taskIds.length) return { labels: [], values: [], multiple: [] };
   const ids = sql.join(taskIds.map((id) => sql`${id}::uuid`), sql`, `);
+  const projects = sql.join(projectIds.map((id) => sql`${id}::uuid`), sql`, `);
   return {
-    labels: await query<{ taskId: string; labelId: string }>(db, sql`select task_id, label_id from task_labels where project_id = ${projectId} and task_id in (${ids})`),
-    values: await query<{ taskId: string; definitionId: string; valueText: string | null; valueNumber: string | null; valueDate: string | null; valueBool: boolean | null; optionId: string | null }>(db, sql`select * from task_property_values where project_id = ${projectId} and task_id in (${ids})`),
-    multiple: await query<{ taskId: string; definitionId: string; optionId: string }>(db, sql`select task_id, definition_id, option_id from task_property_option_values where project_id = ${projectId} and task_id in (${ids})`),
+    labels: await query<{ taskId: string; labelId: string }>(db, sql`select task_id, label_id from task_labels where project_id in (${projects}) and task_id in (${ids})`),
+    values: await query<{ taskId: string; definitionId: string; valueText: string | null; valueNumber: string | null; valueDate: string | null; valueBool: boolean | null; optionId: string | null }>(db, sql`select * from task_property_values where project_id in (${projects}) and task_id in (${ids})`),
+    multiple: await query<{ taskId: string; definitionId: string; optionId: string }>(db, sql`select task_id, definition_id, option_id from task_property_option_values where project_id in (${projects}) and task_id in (${ids})`),
   };
 }
-async function taskModels(db: DatabaseExecutor, g: Graph, tasks: Rows["tasks"][]) {
-  const [preferences] = await query<{ timezone: string }>(db, sql`select timezone from user_preferences where user_id = ${g.project.ownerId}`);
+async function taskModelContext(db: DatabaseExecutor, ownerId: string, projectIds: string[], taskIds: string[]) {
+  const [preferences] = await query<{ timezone: string }>(db, sql`select timezone from user_preferences where user_id = ${ownerId}`);
   const parts = new Intl.DateTimeFormat("en-CA", { timeZone: preferences?.timezone ?? "Asia/Kolkata", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date());
   const today = ["year", "month", "day"].map((type) => parts.find((p) => p.type === type)!.value).join("-");
-  const related = await relations(db, g.project.id, tasks.map((t) => t.id));
+  return { today, related: await relations(db, projectIds, taskIds) };
+}
+async function taskModels(db: DatabaseExecutor, g: Graph, tasks: Rows["tasks"][], context?: Awaited<ReturnType<typeof taskModelContext>>) {
+  const { today, related } = context ?? await taskModelContext(db, g.project.ownerId, [g.project.id], tasks.map((t) => t.id));
   return tasks.map((t) => {
     const dependencyBlockers = g.blockers(t);
     const properties: Record<string, unknown> = {};
@@ -49,14 +54,15 @@ export function createWorkReader(db: Database) {
       return db.transaction(async (tx) => {
         if (resource === "search") return wireValue(await searchPage(tx, actor, input));
         const result = await taskPage(tx, actor, input, resource === "my-work");
-        const models: Awaited<ReturnType<typeof taskModels>> = [];
-        for (const projectId of [...new Set(result.items.map((t) => t.projectId))]) {
-          const project = await owned(tx, actor, "projects", projectId);
-          const graph = await loadGraph(tx, project);
-          const selected = result.items.filter((t) => t.projectId === projectId).map((t) => graph.task(t.id));
-          models.push(...(await taskModels(tx, graph, selected)).map((t) => ({ ...t, projectName: project.name })));
+        if (!result.items.length) return wireValue(result);
+        const graphs = await loadTaskPageGraphs(tx, actor.ownerId, result.items);
+        const context = await taskModelContext(tx, actor.ownerId, graphs.map((g) => g.project.id), result.items.map((t) => t.id));
+        const models = new Map<string, Awaited<ReturnType<typeof taskModels>>[number] & { projectName: string }>();
+        for (const graph of graphs) {
+          const selected = result.items.filter((t) => t.projectId === graph.project.id).map((t) => graph.task(t.id));
+          for (const model of await taskModels(tx, graph, selected, context)) models.set(model.id, { ...model, projectName: graph.project.name });
         }
-        return wireValue({ ...result, items: result.items.map((t) => models.find((m) => m.id === t.id)!) });
+        return wireValue({ ...result, items: result.items.map((t) => models.get(t.id)!) });
       }, { isolationLevel: "repeatable read", accessMode: "read only" });
     }
     const input = listInput.parse(raw);
@@ -71,9 +77,11 @@ export function createWorkReader(db: Database) {
       if (!input.projectId) invalid("Select a project for this list.");
       const project = await owned(tx, actor, "projects", input.projectId);
       assertProjectScope(actor, project.ownerId, project.id, "read");
-      const g = await loadGraph(tx, project);
-      if (resource === "sections") return wireValue(page(g.sections.filter((s) => input.includeArchived || !(s.archivedAt || g.sectionArchived(s.parentSectionId))).sort(byPosition).map((s) => ({ ...s, effectiveArchived: Boolean(s.archivedAt || g.sectionArchived(s.parentSectionId)), breadcrumbs: g.ancestors(s.parentSectionId).reverse().map(({ id, name }) => ({ id, name })), progress: g.progress(g.tasks.filter((t) => t.sectionId && g.sectionIds(s.id).includes(t.sectionId))) })), input.cursor, input.limit));
-      if (resource === "statuses") return wireValue(page(g.statuses.sort(byPosition), input.cursor, input.limit));
+      if (resource === "sections") {
+        const g = await loadGraph(tx, project);
+        return wireValue(page(g.sections.filter((s) => input.includeArchived || !(s.archivedAt || g.sectionArchived(s.parentSectionId))).sort(byPosition).map((s) => ({ ...s, effectiveArchived: Boolean(s.archivedAt || g.sectionArchived(s.parentSectionId)), breadcrumbs: g.ancestors(s.parentSectionId).reverse().map(({ id, name }) => ({ id, name })), progress: g.progress(g.tasks.filter((t) => t.sectionId && g.sectionIds(s.id).includes(t.sectionId))) })), input.cursor, input.limit));
+      }
+      if (resource === "statuses") return wireValue(page((await rows(tx, "task_statuses", sql`owner_id = ${actor.ownerId} and project_id = ${project.id}`)).sort(byPosition), input.cursor, input.limit));
       if (resource === "activity") {
         const result = await query<{ id: string }>(tx, sql`select * from activities where owner_id = ${actor.ownerId} and project_id = ${project.id} ${input.taskId ? sql`and task_id = ${input.taskId}` : sql``} ${input.cursor ? sql`and (created_at, id) < (select created_at, id from activities where id = ${input.cursor} and owner_id = ${actor.ownerId} and project_id = ${project.id})` : sql``} order by created_at desc, id desc limit ${input.limit + 1}`);
         const items = result.slice(0, input.limit);
