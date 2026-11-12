@@ -51,7 +51,7 @@ describe("owner authentication and credential lifecycle", () => {
     expect(implicit.response.headers.get("location")).toContain("error=");
     expect(await database.db.select().from(user)).toEqual([]);
     const { service } = await provision();
-    expect(await service.preferences(owner)).toEqual({ timezone: "Asia/Kolkata", theme: "system", defaultTaskView: "list", revision: 1 });
+    expect(await service.preferences(owner)).toEqual({ timezone: "Asia/Kolkata", theme: "system", defaultTaskView: "board", revision: 1 });
     mockGithub({ id: 42, email: "renamed@example.invalid", login: "renamed-owner" });
     const again = await githubCallback(auth, false);
     expect((await auth.api.getSession({ headers: again.headers }))?.user.id).toBe(owner.ownerId);
